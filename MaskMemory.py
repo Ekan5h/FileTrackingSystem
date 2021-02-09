@@ -1,4 +1,6 @@
 import numpy as np
+import cv2 
+from imagehash import phash
 
 class MaskMemory:
     def __init__(self, height, width):
@@ -6,9 +8,11 @@ class MaskMemory:
         self.WIDTH =  width
         self.frame = [[set() for _ in range(width)] for _ in range(height)]
         self.total = {}
+        self.hashes = {}
     
-    def remember(self, id, mask):
+    def remember(self, id, img, mask):
         count = 0
+        self.hashes[id] = phash(img)
         for i in range(self.WIDTH):
             for j in range(self.HEIGHT):
                 if mask[j][i]: 
@@ -38,5 +42,14 @@ class MaskMemory:
                     max_iou = inter/union
                     max_iou_id = id
             return max_iou_id
+        elif algo == "PHASH":
+            h = phash(mask)
+            min_diff_id = -1
+            min_diff = float("inf")
+            for id in self.hashes.keys():
+                if self.hashes[id]-h < min_diff:
+                    min_diff = self.hashes[id]-h
+                    min_diff_id = id
+            return min_diff_id
         else:
             raise Exception("Unknown algorithm")

@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+import imutils
 
 HEIGHT = 75
 WIDTH = 175
@@ -21,7 +22,7 @@ tie_points = np.array([
 tie_points = np.linalg.inv(tie_points)
 
 def preprocessImage(img):
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    img = imutils.resize(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY), width=720)
     # Detecting markers and identifying the projecting transform
     corners, ids, _ = cv2.aruco.detectMarkers(img, arucoDict, parameters=arucoParams)
     if len(ids)<4: raise Exception("Could not identify the field")
@@ -32,8 +33,8 @@ def preprocessImage(img):
         for p in corners[i][0]:
             x += p[0]
             y += p[1]
-        x = int(round(x/4))
-        y = int(round(y/4))
+        x = x/4
+        y = y/4
         final.extend([[x],[y]])
         # img = cv2.circle(img, (x,y), 10, (255,255,255), -1)
     final = np.array(final)
@@ -51,10 +52,11 @@ def preprocessImage(img):
     cropped = cv2.blur(cropped[MARGIN:-MARGIN,WIDTH//7+MARGIN:WIDTH-WIDTH//7-MARGIN],(3,3))
 
     # Adaptive thresholding and dilation
-    mask = cv2.adaptiveThreshold(cropped, 255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV,3,5)
+    mask = cv2.adaptiveThreshold(cropped, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV,3,5)
     #cropped = cv2.erode(cropped, np.ones((3,3),np.uint8), iterations=1)
     mask = cv2.dilate(mask, np.ones((2,2),np.uint8), iterations=1)
     #cropped = cv2.erode(cropped, np.ones((3,3),np.uint8), iterations=1)
-    return cropped, mask
-    #cv2.imshow('Cropped',cropped)
+    #cv2.imshow('Cropped',mask)
     #cv2.waitKey(0)
+    return cropped, mask
+    

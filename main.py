@@ -1,23 +1,32 @@
+import glob
 import cv2
 from utils import preprocessImage
 from MaskMemory import MaskMemory
-from time import time
+from PIL import Image
 
 mem = MaskMemory(69, 119)
 
-_, mask = preprocessImage(cv2.imread("test.png"))
-mem.remember("test", mask)
-#cv2.imshow("",mask)
-#cv2.waitKey(0)
+imgs = glob.glob("test-data/*.jpg")
+imgs1 = [f for f in imgs if len(f.split('.'))==2]
+imgs2 = [f for f in imgs if len(f.split('.'))==3]
 
-_, mask = preprocessImage(cv2.imread("test_scans/scan-1.1.png"))
-mem.remember("scan 1", mask)
+for img in imgs1:
+    try:
+        cropped, mask = preprocessImage(cv2.imread(img))
+        mem.remember(img, Image.fromarray(cropped), mask)
+        print("Scanned: "+img)
+    except:
+        print("Could not detect markers in "+img)
 
-_, mask = preprocessImage(cv2.imread("test_scans/scan-2.1.png"))
-mem.remember("scan 2", mask)
+print("\nRecognition start!\n")
 
-_, mask = preprocessImage(cv2.imread("test_scans/scan-1.2.png"))
-print(mem.identify(mask))   # Complexity O( n*HEIGHT*WIDTH )
-
-_, mask = preprocessImage(cv2.imread("test_scans/scan-2.2.png"))
-print(mem.identify(mask))
+for img in imgs2:
+    try:
+        cropped, mask = preprocessImage(cv2.imread(img))
+        id = mem.identify(Image.fromarray(cropped), algo="PHASH")
+        if id.split('.')[0]!=img.split('.')[0]:
+            print("Matched incorrectly! "+img+" : "+id)
+        else:
+            print("Matched Correctly "+img)
+    except:
+        print("Could not detect markers in "+img)
