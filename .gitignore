@@ -1,1 +1,14 @@
 __pycache__/
+
+file-tracker/node_modules/**/*
+file-tracker/.expo/*
+file-tracker/npm-debug.*
+file-tracker/*.jks
+file-tracker/*.p8
+file-tracker/*.p12
+file-tracker/*.key
+file-tracker/*.mobileprovision
+file-tracker/*.orig.*
+file-tracker/web-build/
+file-tracker/.vscode/
+file-tracker/.DS_Store
