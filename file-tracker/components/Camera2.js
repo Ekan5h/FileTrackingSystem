@@ -53,9 +53,35 @@ const CaptureScreen = (props) => {
                 }}
                 color="white"
                 onPress={() => {
-                  success = true;
-                  if (success) props.setToken("123456");
-                  else props.updateAttempt();
+                  var name = image.uri.split("/").pop();
+                  let formData = new FormData();
+                  formData.append("image", {
+                    uri: image.uri,
+                    name: name,
+                    type: "image/jpg",
+                  });
+                  formData.append("algorithm", "PHASH");
+                  fetch("http://ec6d5281343e.ngrok.io/dehashImage", {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                      "content-type": "multipart/form-data",
+                    },
+                  })
+                    .then((ret) => {
+                      ret
+                        .json()
+                        .then((data) => {
+                          props.setToken(String(data.id));
+                        })
+                        .catch((err) => {
+                          props.updateAttempt();
+                          alert("Try again!");
+                        });
+                    })
+                    .catch((ret) => {
+                      alert("Network Error!");
+                    });
                 }}
               >
                 Submit
@@ -84,9 +110,9 @@ const CaptureScreen = (props) => {
             <TouchableOpacity
               onPress={async () => {
                 if (cameraRef) {
-                  let image = await cameraRef.takePictureAsync();
+                  let image = await cameraRef.takePictureAsync({ quality: 0 });
                   setImage(image);
-                  console.log("clicked!");
+                  // console.log("clicked!");
                 }
               }}
             >
