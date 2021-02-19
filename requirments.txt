@@ -1,4 +1,6 @@
 flask
+flask-login
+ConfigParser
 numpy
 opencv-python
 opencv-contrib-python
