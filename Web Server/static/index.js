@@ -19,7 +19,7 @@ window.onload = () => {
 				},
 				success: function(data){
 					// alert("hello"); // if it's failing on actual server check your server FIREWALL + SET UP CORS
-					bytestring = data['status']
+					bytestring = data['id']
 					image = bytestring.split('\'')[1]
 					imagebox.attr('src' , 'data:image/jpeg;base64,'+image)
 				}
@@ -49,7 +49,7 @@ window.onload = () => {
 				},
 				success: function(data){
 					// alert("hello"); // if it's failing on actual server check your server FIREWALL + SET UP CORS
-					id = data['status'];
+					id = data['id'];
 					element = document.getElementById("identification");
 					element.innerHTML = "";
 				    tag = document.createElement("p");
