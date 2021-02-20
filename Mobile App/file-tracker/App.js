@@ -1,10 +1,10 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import CameraScreen from "./components/Camera";
-import Camera2 from "./components/Camera2";
+// import Camera2 from "./components/Camera2";
+import Landing from "./components/Landing";
 export default class App extends React.Component {
   render() {
-    return <Camera2 />;
+    return <Landing />;
   }
 }
 const styles = StyleSheet.create({
