@@ -21,8 +21,8 @@ class OTP(db.Model):
         return f"{self.email}:{self.otp}"
 
 class Institutions(db.Model):
-    login_email = db.Column(db.String, primary_key=True)
-    name = db.Column(db.String)
+    login_email = db.Column(db.String, unique=True)
+    name = db.Column(db.String, primary_key=True)
 
     def __init__(self, login_email, name):
         self.login_email = login_email

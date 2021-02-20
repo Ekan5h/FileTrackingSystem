@@ -1,7 +1,5 @@
 from flask import Flask, render_template , request , jsonify, Blueprint, redirect, session
 from flask_login import current_user, logout_user, login_required
-from datetime import datetime, timedelta
-from random import random
 from models import *
 
 office_ops = Blueprint('office_ops', __name__, template_folder='templates')
@@ -62,3 +60,28 @@ def addEmail():
         return jsonify({'error':True, 'msg':str(e) + session['name']})
 
     return render_template("addEmail.jinja2")
+
+@office_ops.route('/getInstitutions' , methods=['GET'])
+@login_required
+def getInstitutions():
+    try:
+        insti = Institutions.query.all()
+        ret = []
+        for i in insti:
+            ret.append({'name':i.name, 'email':i.login_email})
+        return jsonify(ret)
+    except Exception as e:
+        return jsonify({'error':True, 'msg':str(e) + session['name']})
+
+@office_ops.route('/getOffices' , methods=['GET'])
+@login_required
+def getOffices():
+    try:
+        insti = request.args['institute']
+        offices = OficeEmails.query.filter_by(institution = insti)
+        ret = []
+        for office in offices:
+            ret.append({'name':office.name, 'email':office.email})
+        return jsonify(ret)
+    except Exception as e:
+        return jsonify({'error':True, 'msg':str(e) + session['name']})
