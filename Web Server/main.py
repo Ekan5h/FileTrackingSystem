@@ -5,12 +5,14 @@ from models import *
 from blueprints.auth import auth
 from blueprints.scan import scan
 from blueprints.user_ops import user_ops
+from blueprints.office_ops import office_ops
 
 
 app = Flask(__name__)
 app.register_blueprint(auth)
 app.register_blueprint(scan)
 app.register_blueprint(user_ops)
+app.register_blueprint(office_ops)
 
 app.secret_key = b'\n\x7f&J\xae\xce&\xea\x05e\xdb\x7f\xd3\xbc\x1a6'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sqlite3.db'
