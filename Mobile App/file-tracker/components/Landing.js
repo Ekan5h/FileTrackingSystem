@@ -14,8 +14,10 @@ import {
 } from "react-native";
 // import ScrollView from "expo-faded-scrollview";
 import { AntDesign } from "@expo/vector-icons";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const Landing = () => {
+
+const Landing = ({navigation}) => {
   const [refreshing, setRefreshing] = useState(false);
   const [files, setFiles] = useState([]);
 
@@ -61,7 +63,22 @@ const Landing = () => {
                 width: "65%",
               }}
               color="white"
-              onPress={() => {}}
+              onPress={()=>{
+                fetch('http://192.168.1.2:5000/logout').then(
+                  async () => {
+                    try{
+                      await AsyncStorage.removeItem('@email')
+                    }catch{
+                      alert("Could not logout. Clear data.")
+                    }
+                    navigation.navigate("LoginPage");
+                  }
+                ).catch(
+                  ()=>{
+                    alert("Network Issues");
+                  }
+                )
+              }}
             >
               <AntDesign name="search1" size={14} color="white" />
               {"   "}Track existing file
