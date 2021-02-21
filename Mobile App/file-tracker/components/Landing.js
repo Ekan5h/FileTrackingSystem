@@ -6,8 +6,8 @@ import {
   Paragraph,
   Caption,
 } from "react-native-paper";
-import { View, RefreshControl } from "react-native";
-import ScrollView from "expo-faded-scrollview";
+import { View, RefreshControl, ScrollView } from "react-native";
+// import ScrollView from "expo-faded-scrollview";
 import { AntDesign } from "@expo/vector-icons";
 
 const Landing = () => {
@@ -62,22 +62,9 @@ const Landing = () => {
           overflow: "hidden",
           flex: 1,
           alignItems: "center",
-          paddingTop: "4%",
+          paddingTop: "0%",
         }}
       >
-        <View
-          style={{
-            paddingBottom: "3%",
-            width: "100%",
-            height: "8%",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Subheading style={{ fontSize: 18 }}>
-            Your tracking history
-          </Subheading>
-        </View>
         <View style={{ flex: 1, width: "100%" }}>
           <ScrollView
             style={{
@@ -105,9 +92,12 @@ const Landing = () => {
                 }}
               />
             }
-            allowStartFade={true}
-            allowEndFade={false}
           >
+            <View style={{ marginTop: "4%" }}>
+              <Subheading style={{ fontSize: 18 }}>
+                Your tracking history
+              </Subheading>
+            </View>
             {files.map((file, idx) => {
               return (
                 <View
@@ -117,7 +107,7 @@ const Landing = () => {
                     borderColor: "black",
                     borderWidth: 1,
                     borderRadius: 10,
-                    marginTop: idx === 0 ? "2%" : "4%",
+                    marginTop: idx === 0 ? "3%" : "4%",
                     overflow: "hidden",
                   }}
                   key={file.trackingID}
