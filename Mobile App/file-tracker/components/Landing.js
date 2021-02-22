@@ -12,12 +12,11 @@ import {
   ScrollView,
   ImageBackground,
 } from "react-native";
-// import ScrollView from "expo-faded-scrollview";
+import { Ionicons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-
-const Landing = ({navigation}) => {
+const Landing = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [files, setFiles] = useState([]);
 
@@ -63,21 +62,19 @@ const Landing = ({navigation}) => {
                 width: "65%",
               }}
               color="white"
-              onPress={()=>{
-                fetch('http://192.168.1.2:5000/logout').then(
-                  async () => {
-                    try{
-                      await AsyncStorage.removeItem('@email')
-                    }catch{
-                      alert("Could not logout. Clear data.")
+              onPress={() => {
+                fetch("http://192.168.1.2:5000/logout")
+                  .then(async () => {
+                    try {
+                      await AsyncStorage.removeItem("@email");
+                    } catch {
+                      alert("Could not logout. Clear data.");
                     }
                     navigation.navigate("LoginPage");
-                  }
-                ).catch(
-                  ()=>{
+                  })
+                  .catch(() => {
                     alert("Network Issues");
-                  }
-                )
+                  });
               }}
             >
               <AntDesign name="search1" size={14} color="white" />
@@ -125,11 +122,35 @@ const Landing = ({navigation}) => {
                   />
                 }
               >
-                <View style={{ marginTop: "4%" }}>
-                  <Subheading style={{ fontSize: 18 }}>
-                    Your tracking history
-                  </Subheading>
+                <View
+                  style={{
+                    marginTop: "3%",
+                    alignItems: "center",
+                  }}
+                >
+                  <Button
+                    mode="outlined"
+                    style={{
+                      borderWidth: 0,
+                    }}
+                    // color="white"
+                    color="black"
+                    onPress={() => {}}
+                  >
+                    <Ionicons
+                      name="ios-filter-outline"
+                      size={18}
+                      color="black"
+                    />
+                    {"  "}Filter
+                  </Button>
                 </View>
+
+                {files.length === 0 ? (
+                  <Subheading>No files to show!</Subheading>
+                ) : (
+                  <></>
+                )}
 
                 {files.map((file, idx) => {
                   return (
@@ -140,7 +161,7 @@ const Landing = ({navigation}) => {
                         borderColor: "black",
                         borderWidth: 1,
                         borderRadius: 10,
-                        marginTop: idx === 0 ? "3%" : "4%",
+                        marginTop: idx === 0 ? "1.25%" : "4%",
                         overflow: "hidden",
                       }}
                       key={file.trackingID}
