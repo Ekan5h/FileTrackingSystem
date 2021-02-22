@@ -10,7 +10,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const Stack = createStackNavigator();
 
 export default function App() {
-  return <Landing></Landing>;
   const [email, setEmail] = useState(null);
   const [profile, setProfile] = useState(null);
 
