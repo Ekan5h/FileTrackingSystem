@@ -19,6 +19,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const Landing = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [files, setFiles] = useState([]);
+  const [isOfficeAccount, setIsOfficeAccount] = useState(false);
 
   return (
     <>
@@ -37,13 +38,30 @@ const Landing = ({ navigation }) => {
               justifyContent: "center",
             }}
           >
+            {isOfficeAccount && (
+              <Button
+                mode="outlined"
+                style={{
+                  justifyContent: "center",
+                  borderColor: "white",
+                  borderWidth: 0.5,
+                  marginTop: "10%",
+                  width: "65%",
+                }}
+                color="white"
+                onPress={() => {}}
+              >
+                <AntDesign name="scan1" size={14} color="white" />
+                {"   "}Scan a file
+              </Button>
+            )}
             <Button
               mode="outlined"
               style={{
                 justifyContent: "center",
                 borderColor: "white",
                 borderWidth: 0.5,
-                marginTop: "10%",
+                marginTop: isOfficeAccount ? "3%" : "10%",
                 width: "65%",
               }}
               color="white"
@@ -58,7 +76,7 @@ const Landing = ({ navigation }) => {
                 justifyContent: "center",
                 borderColor: "white",
                 borderWidth: 0.5,
-                marginTop: "5%",
+                marginTop: isOfficeAccount ? "3%" : "5%",
                 width: "65%",
               }}
               color="white"
@@ -146,10 +164,8 @@ const Landing = ({ navigation }) => {
                   </Button>
                 </View>
 
-                {files.length === 0 ? (
+                {files.length === 0 && (
                   <Subheading>No files to show!</Subheading>
-                ) : (
-                  <></>
                 )}
 
                 {files.map((file, idx) => {
