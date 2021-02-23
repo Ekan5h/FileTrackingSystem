@@ -99,6 +99,21 @@ const Landing = ({ navigation }) => {
               {"   "}Track existing file
             </Button>
           </View>
+          {/* <ImageBackground
+            style={{
+              flex: 1,
+              resizeMode: "cover",
+            }}
+            source={{
+              uri: "https://wallpaperaccess.com/full/3063516.png",
+            }}
+            imageStyle={{
+              opacity: 2.5,
+              borderTopLeftRadius: 25,
+              borderTopRightRadius: 25,
+            }}
+            resizeMode={"cover"} // cover or contain its upto you view look
+          > */}
           <View
             style={{
               backgroundColor: "white",
@@ -193,7 +208,10 @@ const Landing = ({ navigation }) => {
                       >
                         <View style={{ flexDirection: "row" }}>
                           <View
-                            style={{ paddingVertical: "2%", paddingLeft: "5%" }}
+                            style={{
+                              paddingVertical: "2%",
+                              paddingLeft: "5%",
+                            }}
                           >
                             <Subheading style={{ fontWeight: "bold" }}>
                               {file.name}
@@ -221,6 +239,7 @@ const Landing = ({ navigation }) => {
               </ScrollView>
             </View>
           </View>
+          {/* </ImageBackground> */}
         </View>
       </ImageBackground>
     </>
