@@ -49,12 +49,12 @@ const Landing = () => {
         imageStyle={{ opacity: 0.5 }}
         resizeMode={"cover"} // cover or contain its upto you view look
       >
-        <View
+        {/* <View
           style={{
             backgroundColor: "transparent",
             height: StatusBar.currentHeight,
           }}
-        ></View>
+        ></View> */}
         <TouchableWithoutFeedback
           style={{
             flex: 1,
@@ -67,26 +67,26 @@ const Landing = () => {
           accessible={false}
         >
           <View style={{ backgroundColor: "transparent", height: "100%" }}>
+            <IconButton
+              icon="arrow-left"
+              color="black"
+              size={30}
+              style={{
+                position: "absolute",
+                top: 1 * StatusBar.currentHeight,
+                left: 4,
+              }}
+              onPress={() => {}}
+            />
             <View
               style={{
                 flex: 1,
                 backgroundColor: "transparent",
                 justifyContent: "center",
                 paddingLeft: "8%",
-                marginTop: "-15%",
+                marginTop: "-5%",
               }}
             >
-              <IconButton
-                icon="arrow-left"
-                color="black"
-                size={30}
-                style={{
-                  position: "absolute",
-                  top: 1.9 * StatusBar.currentHeight,
-                  left: 4,
-                }}
-                onPress={() => {}}
-              />
               <Title style={{ fontSize: 30, flexWrap: "wrap" }}>
                 Create new file.
               </Title>
