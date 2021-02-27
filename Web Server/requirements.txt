@@ -8,3 +8,4 @@ opencv-contrib-python
 imagehash
 imutils
 azure-cognitiveservices-vision-computervision
+psycopg2

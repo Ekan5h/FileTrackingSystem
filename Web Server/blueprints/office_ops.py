@@ -50,7 +50,7 @@ def addEmail():
 
             if len(name) and len(email):
                 institution = session['name']
-                office_obj = OficeEmails(email, name, institution)
+                office_obj = OfficeEmails(email, name, institution)
                 db.session.add(office_obj)
                 db.session.commit()
                 return jsonify({'error':False})
@@ -78,7 +78,7 @@ def getInstitutions():
 def getOffices():
     try:
         insti = request.args['institute']
-        offices = OficeEmails.query.filter_by(institution = insti)
+        offices = OfficeEmails.query.filter_by(institution = insti)
         ret = []
         for office in offices:
             ret.append({'name':office.name, 'email':office.email})

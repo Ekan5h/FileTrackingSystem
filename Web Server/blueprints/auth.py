@@ -7,8 +7,6 @@ from models import *
 
 auth = Blueprint('auth', __name__, template_folder='templates')
 
-email.connect()
-
 @auth.route('/generateOTP' , methods=['POST'])
 def generateOTP():
 	try:

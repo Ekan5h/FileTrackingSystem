@@ -35,6 +35,7 @@ def disconnect():
     con.quit()
 
 def sendMail(sub, rec, msg):
+    connect()
     msg = MIMEText(msg)
     msg['Subject'] = sub
     msg['From'] = "File Tracker "+address
@@ -42,3 +43,4 @@ def sendMail(sub, rec, msg):
     con.sendmail(address, rec, msg.as_string())
     print("Mail sent successfully!")
     print(msg)
+    disconnect()

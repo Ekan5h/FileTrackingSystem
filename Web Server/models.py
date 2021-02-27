@@ -31,7 +31,7 @@ class Institutions(db.Model):
     def __repr__(self):
         return self.name
 
-class OficeEmails(db.Model):
+class OfficeEmails(db.Model):
     email = db.Column(db.String, primary_key=True)
     name = db.Column(db.String)
     institution = db.Column(db.String)
