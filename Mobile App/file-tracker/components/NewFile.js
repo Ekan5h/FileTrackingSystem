@@ -18,7 +18,7 @@ import {
   StatusBar,
 } from "react-native";
 
-const Landing = () => {
+const NewFile = () => {
   const [name, setName] = useState("");
   const [officeMenuVisible, setOfficeMenuVisible] = useState(false);
   const [typeMenuVisible, setTypeMenuVisible] = useState(false);
@@ -238,4 +238,4 @@ const Landing = () => {
   );
 };
 
-export default Landing;
+export default NewFile;

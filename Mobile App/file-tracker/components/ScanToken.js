@@ -57,9 +57,6 @@ export default function ScanToken() {
           }}
         >
           <Capture
-            updateAttempt={() => {
-              setAttempt(attempt + 1);
-            }}
             onSubmit={(image) => {
               var name = image.uri.split("/").pop();
               let formData = new FormData();
@@ -83,7 +80,7 @@ export default function ScanToken() {
                       setToken(String(data.id));
                     })
                     .catch((err) => {
-                      updateAttempt();
+                      setAttempt(attempt + 1);
                       alert("Try again!");
                     });
                 })
