@@ -11,6 +11,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
 
 const FileTimeline = (props) => {
+  const [isOfficeHolder, setIsOfficeHolder] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [file, setFile] = useState({
     token: props.token,
@@ -30,7 +31,7 @@ const FileTimeline = (props) => {
       source={{
         uri: "https://wallpaperaccess.com/full/3063516.png",
       }}
-      imageStyle={{ opacity: 1 }}
+      imageStyle={{ opacity: 0.5 }}
       resizeMode={"cover"}
     >
       <View
@@ -60,7 +61,7 @@ const FileTimeline = (props) => {
             width: "100%",
           }}
         >
-          <View style={{ height: "22%" }}>
+          <View style={{ height: isOfficeHolder ? "22%" : "12%" }}>
             <Title style={{ fontSize: 30, flexWrap: "wrap" }}>
               {file.name}
             </Title>
@@ -74,23 +75,25 @@ const FileTimeline = (props) => {
                 height: "auto",
               }}
             >
-              <Button
-                style={{
-                  width: "40%",
-                  height: "52%",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginTop: "5%",
-                }}
-                mode="contained"
-                color="black"
-                onPress={() => {}}
-              >
-                <AntDesign name="scan1" size={14} color="white" />
-                {"  "}Scan
-              </Button>
+              {isOfficeHolder && (
+                <Button
+                  style={{
+                    width: "40%",
+                    height: "52%",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginTop: "5%",
+                  }}
+                  mode="contained"
+                  color="black"
+                  onPress={() => {}}
+                >
+                  <AntDesign name="scan1" size={14} color="white" />
+                  {"  "}Scan
+                </Button>
+              )}
 
-              <Button
+              {/* <Button
                 style={{
                   width: "40%",
                   height: "52%",
@@ -105,12 +108,18 @@ const FileTimeline = (props) => {
                 onPress={() => {}}
               >
                 <AntDesign name="closecircleo" size={14} color="white" />
-                {"  "} Close
-              </Button>
+              {"  "} Close
+              </Button> */}
             </View>
           </View>
 
-          <View style={{ width: "100%", marginLeft: "-2%", height: "78%" }}>
+          <View
+            style={{
+              width: "100%",
+              marginLeft: "-2%",
+              height: isOfficeHolder ? "78%" : "88%",
+            }}
+          >
             <ScrollView
               style={{
                 width: "100%",
@@ -142,11 +151,11 @@ const FileTimeline = (props) => {
                 style={{
                   borderLeftWidth: 2,
                   backgroundColor: "transparent",
-                  paddingTop: "8%",
+                  paddingTop: "5%",
                   width: "100%",
                   paddingRight: "5%",
-                  marginLeft: "2%",
-                  marginTop: "2%",
+                  marginLeft: isOfficeHolder ? "2%" : "3%",
+                  marginTop: "0%",
                 }}
               >
                 {file.history.map((event) => {
@@ -155,7 +164,7 @@ const FileTimeline = (props) => {
                       style={{
                         paddingLeft: "10%",
                         position: "relative",
-                        marginBottom: "10%",
+                        marginBottom: "6%",
                       }}
                       key={event.date}
                     >

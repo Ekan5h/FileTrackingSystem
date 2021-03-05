@@ -7,6 +7,7 @@ import {
   Menu,
   IconButton,
   Provider,
+  Caption,
 } from "react-native-paper";
 import {
   View,
@@ -18,30 +19,27 @@ import {
   StatusBar,
 } from "react-native";
 
-const NewFile = () => {
-  const [name, setName] = useState("");
+const FileAction = (props) => {
   const [remarks, setRemarks] = useState("");
+  const [actionMenuVisible, setActionMenuVisible] = useState(false);
   const [officeMenuVisible, setOfficeMenuVisible] = useState(false);
-  const [typeMenuVisible, setTypeMenuVisible] = useState(false);
-  const [fileTypes, setFileTypes] = useState(["Form", "Bill", "Letter"]);
   const [offices, setOffices] = useState(["Accounts", "Research", "ICSR"]);
-  const [fileType, setFileType] = useState("");
-  const [submittedTo, setSubmittedTo] = useState("");
-  const [errors, setErrors] = useState([
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-  ]);
+  const [actions, setActions] = useState(["Forward", "Close"]);
+  const [forwardingTo, setForwardingTo] = useState("");
+  const [action, setAction] = useState("");
+  const [errors, setErrors] = useState([undefined, undefined, undefined]);
+  const [file, setFile] = useState({
+    token: props.token,
+    name: "Budget approval",
+  });
 
+  const openActionMenu = () => setActionMenuVisible(true);
+  const closeActionMenu = () => setActionMenuVisible(false);
   const openOfficeMenu = () => setOfficeMenuVisible(true);
   const closeOfficeMenu = () => setOfficeMenuVisible(false);
-  const openTypeMenu = () => setTypeMenuVisible(true);
-  const closeTypeMenu = () => setTypeMenuVisible(false);
   const validateForm = () => {
     var newErrors = [undefined, undefined, undefined];
-    if (name === "") newErrors[0] = "Please enter a file name";
-    if (fileType === "") newErrors[1] = "Please select a file type";
+    if (action === "") newErrors[0] = "Please select an action";
     setErrors(newErrors);
   };
 
@@ -53,7 +51,7 @@ const NewFile = () => {
           uri: "https://wallpaperaccess.com/full/3063516.png",
         }}
         imageStyle={{ opacity: 0.5 }}
-        resizeMode={"cover"} // cover or contain its upto you view look
+        resizeMode={"cover"}
       >
         <TouchableWithoutFeedback
           style={{
@@ -88,26 +86,53 @@ const NewFile = () => {
               }}
             >
               <Title style={{ fontSize: 30, flexWrap: "wrap" }}>
-                Create new file
+                {file.name}
               </Title>
-              <TextInput
-                label="Name"
-                value={name}
-                maxLength={20}
-                onChangeText={(name) => setName(name)}
-                mode="outlined"
-                selectionColor="rgba(0, 0, 0, 0.2)"
-                style={{
-                  width: "70%",
-                  marginTop: "4%",
-                }}
-                theme={{
-                  colors: {
-                    primary: "black",
-                    underlineColor: "transparent",
-                  },
-                }}
-              />
+              <Caption style={{ fontSize: 14 }}>
+                Tracking ID: {file.token}
+              </Caption>
+
+              <Menu
+                visible={actionMenuVisible}
+                onDismiss={closeActionMenu}
+                anchor={
+                  <Pressable onPress={openActionMenu} style={{ width: "70%" }}>
+                    <TextInput
+                      label="Action"
+                      value={action}
+                      mode="outlined"
+                      style={{
+                        marginTop: "6%",
+                      }}
+                      theme={{
+                        colors: {
+                          primary: "black",
+                          underlineColor: "transparent",
+                        },
+                      }}
+                      editable={false}
+                      right={
+                        <TextInput.Icon
+                          name="chevron-down"
+                          onPress={openActionMenu}
+                        />
+                      }
+                    />
+                  </Pressable>
+                }
+              >
+                {actions.map((action) => (
+                  <Menu.Item
+                    key={action}
+                    onPress={() => {
+                      setAction(action);
+                      setActionMenuVisible(false);
+                    }}
+                    title={action}
+                    style={{ width: Dimensions.get("window").width / 1.5 }}
+                  />
+                ))}
+              </Menu>
               {errors[0] && (
                 <Text
                   style={{
@@ -120,65 +145,16 @@ const NewFile = () => {
                 </Text>
               )}
               <Menu
-                visible={typeMenuVisible}
-                onDismiss={closeTypeMenu}
-                anchor={
-                  <Pressable onPress={openTypeMenu} style={{ width: "70%" }}>
-                    <TextInput
-                      label="File type"
-                      value={fileType}
-                      mode="outlined"
-                      style={{
-                        marginTop: "3%",
-                      }}
-                      theme={{
-                        colors: {
-                          primary: "black",
-                          underlineColor: "transparent",
-                        },
-                      }}
-                      editable={false}
-                      right={
-                        <TextInput.Icon
-                          name="chevron-down"
-                          onPress={openTypeMenu}
-                        />
-                      }
-                    />
-                  </Pressable>
-                }
-              >
-                {fileTypes.map((type) => (
-                  <Menu.Item
-                    key={type}
-                    onPress={() => {
-                      setFileType(type);
-                      setTypeMenuVisible(false);
-                    }}
-                    title={type}
-                    style={{ width: Dimensions.get("window").width / 1.5 }}
-                  />
-                ))}
-              </Menu>
-              {errors[1] && (
-                <Text
-                  style={{
-                    color: "rgb(176, 1, 1)",
-                    marginTop: "1%",
-                    marginLeft: "1%",
-                  }}
-                >
-                  {errors[1]}
-                </Text>
-              )}
-              <Menu
                 visible={officeMenuVisible}
                 onDismiss={closeOfficeMenu}
                 anchor={
-                  <Pressable onPress={openOfficeMenu} style={{ width: "70%" }}>
+                  <Pressable
+                    onPress={action === "Forward" ? openOfficeMenu : null}
+                    style={{ width: "70%" }}
+                  >
                     <TextInput
-                      label="Submitted to"
-                      value={submittedTo}
+                      label="Forwarding to"
+                      value={forwardingTo}
                       mode="outlined"
                       style={{
                         marginTop: "3%",
@@ -190,10 +166,11 @@ const NewFile = () => {
                         },
                       }}
                       editable={false}
+                      disabled={action === "Forward" ? false : true}
                       right={
                         <TextInput.Icon
                           name="chevron-down"
-                          onPress={openOfficeMenu}
+                          onPress={action === "Forward" ? openOfficeMenu : null}
                         />
                       }
                     />
@@ -204,7 +181,7 @@ const NewFile = () => {
                   <Menu.Item
                     key={office}
                     onPress={() => {
-                      setSubmittedTo(office);
+                      setForwardingTo(office);
                       setOfficeMenuVisible(false);
                     }}
                     title={office}
@@ -256,4 +233,4 @@ const NewFile = () => {
   );
 };
 
-export default NewFile;
+export default FileAction;

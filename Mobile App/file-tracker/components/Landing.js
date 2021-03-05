@@ -45,7 +45,7 @@ const Landing = ({ navigation }) => {
                   justifyContent: "center",
                   borderColor: "white",
                   borderWidth: 0.5,
-                  marginTop: "10%",
+                  marginTop: "6%",
                   width: "65%",
                 }}
                 color="white"
@@ -61,7 +61,7 @@ const Landing = ({ navigation }) => {
                 justifyContent: "center",
                 borderColor: "white",
                 borderWidth: 0.5,
-                marginTop: isOfficeAccount ? "3%" : "10%",
+                marginTop: isOfficeAccount ? "3%" : "6%",
                 width: "65%",
               }}
               color="white"
