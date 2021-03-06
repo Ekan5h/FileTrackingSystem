@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
-import { Text, View, StyleSheet, Image, Dimensions, ScrollView, KeyboardAvoidingView } from 'react-native';
-import { Button, TextInput, Subheading } from "react-native-paper";
+import { Text, View, StyleSheet, Image, Dimensions, ScrollView, KeyboardAvoidingView, ImageBackground } from 'react-native';
+import { Button, TextInput, Subheading, IconButton } from "react-native-paper";
 import DropdownAlert from 'react-native-dropdownalert';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -19,21 +19,32 @@ export default function LoginPage({navigation}) {
     const [otp, setOTP] = useState('');
 
     return (
+      <ImageBackground
+        style={{ flex: 1, resizeMode: "cover" }}
+        source={{
+          uri: "https://wallpaperaccess.com/full/3063516.png",
+        }}
+        imageStyle={{ opacity: 0.5 }}
+        resizeMode={"cover"} // cover or contain its upto you view look
+      >
       <KeyboardAvoidingView>
-      <ScrollView>
+      <ScrollView keyboardShouldPersistTaps={'handled'}>
         <>
             { !enterEmail && (
-                <Text style={styles.back} 
-                onPress={ ()=>{
+                <IconButton
+                icon="arrow-left"
+                color="black"
+                size={30}
+                style={styles.back}
+                onPress={() => {
                     setEnterEmail(true);
                     clearTimeout(resendTimeout);
                     setResendTimeout(null);
                     clearInterval(timeInterval);
                     setTimeInterval(null);
                     setTimeLeft(600);
-                }}>
-                Back
-                </Text>
+                }}
+              />
             ) }
 
             <View style={{
@@ -43,7 +54,7 @@ export default function LoginPage({navigation}) {
                 padding: 8,
             }}>
 
-                <Image style={styles.logo} source={require("../assets/adaptive-icon.png")} />
+                <Image style={styles.logo} source={require("../assets/logo.jpg")} />
                 
                 <Text style={styles.paragraph}>
                     File Tracker
@@ -68,10 +79,11 @@ export default function LoginPage({navigation}) {
 
                         <Button 
                             loading={loading}
-                            disabled={loading}
                             style={styles.login_btn} 
                             mode="contained"
-                            onPress={async ()=>{
+                            onPress={
+                              loading? ()=>{}:
+                              async ()=>{
                                 if(!(/^[a-zA-Z0-9+_\.-]+@[a-zA-Z0-9\.-]+\.[a-zA-Z]+$/.test(email))){
                                     dropDown.alertWithType('error', 'Enter email address', 'The provided email does not look like one');
                                     return 0;
@@ -81,7 +93,7 @@ export default function LoginPage({navigation}) {
                                 formData.append("email", email);
                                 let error = null;
                                 try{
-                                  error = await fetch('http://192.168.1.2:5000/generateOTP', {
+                                  error = await fetch('http://filetracking.azurewebsites.net/generateOTP', {
                                     method: 'POST',
                                     body: formData,
                                     headers: {
@@ -147,7 +159,7 @@ export default function LoginPage({navigation}) {
                                 formData.append("email", email);
                                 let error = null;
                                 try{
-                                  error = await fetch('http://192.168.1.2:5000/generateOTP', {
+                                  error = await fetch('http://filetracking.azurewebsites.net/generateOTP', {
                                     method: 'POST',
                                     body: formData,
                                     headers: {
@@ -178,10 +190,10 @@ export default function LoginPage({navigation}) {
 
                         <Button 
                             loading={loading}
-                            disabled={loading}
                             style={styles.login_btn} 
                             mode="contained"
                             onPress={
+                                loading? ()=>{}:
                                 async ()=>{
                                   setLoading(true);
                                   let formData = new FormData()
@@ -190,7 +202,7 @@ export default function LoginPage({navigation}) {
                                   formData.append('login',true);
                                   let match = null;
                                   try{
-                                    match = await fetch('http://192.168.1.2:5000/verifyOTP',
+                                    match = await fetch('http://filetracking.azurewebsites.net/verifyOTP',
                                     {
                                       method:'POST',
                                       body:formData,
@@ -214,11 +226,11 @@ export default function LoginPage({navigation}) {
                                     setLoading(false);
                                     try {
                                       await AsyncStorage.setItem('@email', email);
-                                      if (match.profile)
+                                      if (!match.profile)
                                         await AsyncStorage.setItem('@profile', "true");
                                     } catch (e) {
                                       dropDown.alertWithType('error','Error saving data','Something went wrong.');
-                                      await fetch('192.168.1.2:5000/logout');
+                                      await fetch('http://filetracking.azurewebsites.net/logout');
                                     }
                                     setTimeout(()=>{
                                       setEnterEmail(true);
@@ -249,6 +261,7 @@ export default function LoginPage({navigation}) {
         </>
         </ScrollView>
       </KeyboardAvoidingView>
+      </ImageBackground>
     );
 }
 
@@ -262,15 +275,11 @@ const styles = StyleSheet.create({
     login_btn: {
         padding: 0.00599520384*windowHeight,
         marginTop: 0.0239808153*windowHeight,
+        backgroundColor: "black",
     },
     email: {
         marginTop: 0.0959232614*windowHeight,
         width: "80%",
-        backgroundColor: "white",
-        fontSize: 0.0239808153*windowHeight,
-        padding: 0.00599520384*windowHeight,
-        paddingEnd: 20,
-        paddingStart: 20,
     },
     logo: {
         height: 0.119904077*windowHeight,

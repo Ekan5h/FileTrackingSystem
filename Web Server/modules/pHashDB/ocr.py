@@ -3,6 +3,7 @@ from azure.cognitiveservices.vision.computervision.models import OperationStatus
 from azure.cognitiveservices.vision.computervision.models import VisualFeatureTypes
 from msrest.authentication import CognitiveServicesCredentials
 from configparser import ConfigParser
+from modules.pHashDB.search import search_tree
 from array import array
 import os
 from PIL import Image
@@ -39,7 +40,7 @@ def readTag(url):
 
     operation_id = operation_location_remote.split("/")[-1]
 
-    reco = []
+    reco = ''
 
     while True:
         get_handw_text_results = computervision_client.get_read_result(operation_id)
@@ -50,12 +51,13 @@ def readTag(url):
     if get_handw_text_results.status == OperationStatusCodes.succeeded:
         for text_result in get_handw_text_results.analyze_result.read_results:
             for line in text_result.lines:
-                ans = ''
-                for x in line.text:
-                    try:
-                        ans = ans + str(int(x))
-                    except:
-                        pass
+                ans = line.text
                 print(line.text)
-                reco.append(ans)
-    return min(reco, key=lambda x:abs(len(x)-6))
+                reco += ans
+            ans += ' '
+
+    x = search_tree.find(reco.lower(), len(reco)+5)
+    if len(x)>0:
+        return x[0][1]
+    else:
+        return ''

@@ -33,7 +33,7 @@ class Institutions(db.Model):
 
 class OfficeEmails(db.Model):
     email = db.Column(db.String, primary_key=True)
-    name = db.Column(db.String)
+    name = db.Column(db.String, unique=True)
     institution = db.Column(db.String)
 
     def __init__(self, email, name, institution):
@@ -42,7 +42,7 @@ class OfficeEmails(db.Model):
         self.institution = institution
 
     def __repr__(self):
-        return self.name + ',' + self.institution
+        return self.name + ', ' + self.institution
 
 class Users(UserMixin, db.Model):
     login_email = db.Column(db.String, primary_key=True)
@@ -66,41 +66,36 @@ class Files(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     created_by = db.Column(db.String)
+    created_on = db.Column(db.DateTime)
     category = db.Column(db.String)
     location = db.Column(db.String)
-    tag_number = db.Column(db.Integer, nullable=True)
+    confirmed = db.Column(db.Boolean)
     
-    def __init__(self, name, created_by, category, location, tag_number):
+    def __init__(self, name, created_by, category, location):
         self.name = name
         self.created_by = created_by
+        self.created_on = datetime.now()
         self.category = category
         self.location = location
-        self.tag_number = tag_number
+        self.confirmed = False
 
     def __repr__(self):
-        return self.created_by+': '+self.name+': '+self.location+': '+str(self.tag_number)
-
-class Tags(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    file_id = db.Column(db.Integer)
-
-    def __init__(self, id, file_id):
-        self.id = id
-        self.file_id = file_id
-
-    def __repr__(self):
-        return str(self.id) + " : " + str(self.file_id)
+        return self.created_by+': '+self.name+': '+self.location
 
 class FileLogs(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     file_id = db.Column(db.Integer)
     location = db.Column(db.String)
     time = db.Column(db.DateTime)
+    outcome = db.Column(db.String)
+    remarks = db.Column(db.String)
 
-    def __init__(self, file_id, location):
+    def __init__(self, file_id, location, outcome, remarks):
         self.file_id = file_id
         self.location = location
         self.time = datetime.now()
+        self.outcome = outcome
+        self.remarks = remarks
 
     def __repr__(self):
         return str(self.id)+" "+self.location+" "+str(self.time)

@@ -85,3 +85,18 @@ def getOffices():
         return jsonify(ret)
     except Exception as e:
         return jsonify({'error':True, 'msg':str(e) + session['name']})
+
+@office_ops.route('/searchOffices' , methods=['GET'])
+@login_required
+def searchOffices():
+    try:
+        q = request.args['q']
+        q = q.split()
+        query = '%'+'%'.join(q)+'%'
+        offices = OfficeEmails.query.filter(OfficeEmails.name.like(query))
+        ret = []
+        for office in offices:
+            ret.append({'name':office.name, 'email':office.email})
+        return jsonify(ret)
+    except Exception as e:
+        return jsonify({'error':True, 'msg':str(e) + session['name']})

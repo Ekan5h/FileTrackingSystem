@@ -9,3 +9,4 @@ imagehash
 imutils
 azure-cognitiveservices-vision-computervision
 psycopg2
+pybktree

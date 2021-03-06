@@ -6,6 +6,7 @@ from blueprints.auth import auth
 from blueprints.scan import scan
 from blueprints.user_ops import user_ops
 from blueprints.office_ops import office_ops
+from blueprints.file_ops import file_ops
 
 
 app = Flask(__name__)
@@ -13,6 +14,7 @@ app.register_blueprint(auth)
 app.register_blueprint(scan)
 app.register_blueprint(user_ops)
 app.register_blueprint(office_ops)
+app.register_blueprint(file_ops)
 
 app.secret_key = b'\n\x7f&J\xae\xce&\xea\x05e\xdb\x7f\xd3\xbc\x1a6'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://lloyjdgw:2JGfBtw9jvfGkmOPmqqIEO06Dms-HZU1@john.db.elephantsql.com:5432/lloyjdgw'
@@ -30,6 +32,10 @@ def load_user(token):
 @app.route('/home')
 def home():
 	return render_template('index.jinja2')
+
+@app.route('/')
+def root():
+	return "<font face='comic sans ms'><center><br><br><h1>File Tracking System</h1><br><h3>Project currently under development!</h3><img src='https://i.pinimg.com/originals/ef/03/f8/ef03f898ffa6f5eac9a37622cd73cd4b.gif'>"
 
 @app.after_request
 def after_request(response):

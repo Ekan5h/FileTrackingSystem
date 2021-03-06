@@ -4,6 +4,8 @@ __pycache__/
 *$py.class
 *.ini
 .expo-shared/*
+.expo/*
+.vscode/*
 
 # C extensions
 *.so

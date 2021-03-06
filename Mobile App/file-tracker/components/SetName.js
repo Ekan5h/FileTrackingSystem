@@ -49,7 +49,8 @@ export default function SetName({navigation}, prop) {
                 style={{
                     marginTop:0.035971223*windowHeight,
                     paddingLeft:(20/440)*windowWidth,
-                    paddingRight:(20/440)*windowWidth
+                    paddingRight:(20/440)*windowWidth,
+                    backgroundColor: "black",
                 }}
                 onPress={
                     () => {
@@ -59,7 +60,7 @@ export default function SetName({navigation}, prop) {
                         }
                         let formData = new FormData();
                         formData.append('name', name);
-                        fetch('http://192.168.1.2:5000/setName',{
+                        fetch('http://filetracking.azurewebsites.net/setName',{
                             method:'POST',
                             body:formData,
                             headers:{
