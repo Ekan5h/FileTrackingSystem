@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Button,
   Text,
   Title,
   TextInput,
-  Menu,
   IconButton,
   Provider,
   Caption,
@@ -15,19 +14,18 @@ import {
   Pressable,
   TouchableWithoutFeedback,
   Keyboard,
-  Dimensions,
   StatusBar,
 } from "react-native";
+import Search from "./Search";
 
 const FileAction = (props) => {
   const [remarks, setRemarks] = useState("");
   const [actionMenuVisible, setActionMenuVisible] = useState(false);
   const [officeMenuVisible, setOfficeMenuVisible] = useState(false);
-  const [offices, setOffices] = useState(["Accounts", "Research", "ICSR"]);
-  const [actions, setActions] = useState(["Forward", "Close"]);
   const [forwardingTo, setForwardingTo] = useState("");
   const [action, setAction] = useState("");
   const [errors, setErrors] = useState([undefined, undefined, undefined]);
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const [file, setFile] = useState({
     token: props.token,
     name: "Budget approval",
@@ -42,6 +40,26 @@ const FileAction = (props) => {
     if (action === "") newErrors[0] = "Please select an action";
     setErrors(newErrors);
   };
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        setKeyboardVisible(true);
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        setKeyboardVisible(false);
+      }
+    );
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
 
   return (
     <Provider>
@@ -65,24 +83,26 @@ const FileAction = (props) => {
           accessible={false}
         >
           <View style={{ backgroundColor: "transparent", height: "100%" }}>
-            <IconButton
-              icon="arrow-left"
-              color="black"
-              size={30}
-              style={{
-                position: "absolute",
-                top: 1 * StatusBar.currentHeight,
-                left: 4,
-              }}
-              onPress={() => {}}
-            />
+            {!isKeyboardVisible && (
+              <IconButton
+                icon="arrow-left"
+                color="black"
+                size={30}
+                style={{
+                  position: "absolute",
+                  top: 1 * StatusBar.currentHeight,
+                  left: 4,
+                }}
+                onPress={() => {}}
+              />
+            )}
             <View
               style={{
                 flex: 1,
                 backgroundColor: "transparent",
                 justifyContent: "center",
                 paddingLeft: "8%",
-                marginTop: "-5%",
+                // marginTop: "0%",
               }}
             >
               <Title style={{ fontSize: 30, flexWrap: "wrap" }}>
@@ -92,47 +112,35 @@ const FileAction = (props) => {
                 Tracking ID: {file.token}
               </Caption>
 
-              <Menu
-                visible={actionMenuVisible}
-                onDismiss={closeActionMenu}
-                anchor={
-                  <Pressable onPress={openActionMenu} style={{ width: "70%" }}>
-                    <TextInput
-                      label="Action"
-                      value={action}
-                      mode="outlined"
-                      style={{
-                        marginTop: "6%",
-                      }}
-                      theme={{
-                        colors: {
-                          primary: "black",
-                          underlineColor: "transparent",
-                        },
-                      }}
-                      editable={false}
-                      right={
-                        <TextInput.Icon
-                          name="chevron-down"
-                          onPress={openActionMenu}
-                        />
-                      }
+              <Pressable onPress={openActionMenu} style={{ width: "70%" }}>
+                <TextInput
+                  label="Action"
+                  value={action}
+                  mode="outlined"
+                  style={{
+                    marginTop: "6%",
+                  }}
+                  theme={{
+                    colors: {
+                      primary: "black",
+                      underlineColor: "transparent",
+                    },
+                  }}
+                  editable={false}
+                  right={
+                    <TextInput.Icon
+                      name="chevron-right"
+                      onPress={openActionMenu}
                     />
-                  </Pressable>
-                }
-              >
-                {actions.map((action) => (
-                  <Menu.Item
-                    key={action}
-                    onPress={() => {
-                      setAction(action);
-                      setActionMenuVisible(false);
-                    }}
-                    title={action}
-                    style={{ width: Dimensions.get("window").width / 1.5 }}
-                  />
-                ))}
-              </Menu>
+                  }
+                />
+              </Pressable>
+              <Search
+                searchFor="fileAction"
+                showModal={actionMenuVisible}
+                closeModal={closeActionMenu}
+                setOption={setAction}
+              />
               {errors[0] && (
                 <Text
                   style={{
@@ -144,51 +152,39 @@ const FileAction = (props) => {
                   {errors[0]}
                 </Text>
               )}
-              <Menu
-                visible={officeMenuVisible}
-                onDismiss={closeOfficeMenu}
-                anchor={
-                  <Pressable
-                    onPress={action === "Forward" ? openOfficeMenu : null}
-                    style={{ width: "70%" }}
-                  >
-                    <TextInput
-                      label="Forwarding to"
-                      value={forwardingTo}
-                      mode="outlined"
-                      style={{
-                        marginTop: "3%",
-                      }}
-                      theme={{
-                        colors: {
-                          primary: "black",
-                          underlineColor: "transparent",
-                        },
-                      }}
-                      editable={false}
-                      disabled={action === "Forward" ? false : true}
-                      right={
-                        <TextInput.Icon
-                          name="chevron-down"
-                          onPress={action === "Forward" ? openOfficeMenu : null}
-                        />
-                      }
-                    />
-                  </Pressable>
-                }
+              <Pressable
+                onPress={action === "Forward" ? openOfficeMenu : null}
+                style={{ width: "70%" }}
               >
-                {offices.map((office) => (
-                  <Menu.Item
-                    key={office}
-                    onPress={() => {
-                      setForwardingTo(office);
-                      setOfficeMenuVisible(false);
-                    }}
-                    title={office}
-                    style={{ width: Dimensions.get("window").width / 1.5 }}
-                  />
-                ))}
-              </Menu>
+                <TextInput
+                  label="Forwarding to"
+                  value={forwardingTo}
+                  mode="outlined"
+                  style={{
+                    marginTop: "3%",
+                  }}
+                  theme={{
+                    colors: {
+                      primary: "black",
+                      underlineColor: "transparent",
+                    },
+                  }}
+                  editable={false}
+                  disabled={action === "Forward" ? false : true}
+                  right={
+                    <TextInput.Icon
+                      name="chevron-right"
+                      onPress={action === "Forward" ? openOfficeMenu : null}
+                    />
+                  }
+                />
+              </Pressable>
+              <Search
+                searchFor="offices"
+                showModal={officeMenuVisible}
+                closeModal={closeOfficeMenu}
+                setOption={setForwardingTo}
+              />
               <TextInput
                 label="Remarks"
                 value={remarks}
@@ -211,7 +207,7 @@ const FileAction = (props) => {
                 icon="check"
                 style={{
                   width: "40%",
-                  height: 42,
+                  height: 48,
                   alignItems: "center",
                   justifyContent: "center",
                   marginTop: "5%",

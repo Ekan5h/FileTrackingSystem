@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Search from "./Search";
 import {
   Button,
   Text,
   Title,
   TextInput,
-  Menu,
   IconButton,
   Provider,
 } from "react-native-paper";
@@ -14,7 +14,6 @@ import {
   Pressable,
   TouchableWithoutFeedback,
   Keyboard,
-  Dimensions,
   StatusBar,
 } from "react-native";
 
@@ -23,8 +22,6 @@ const NewFile = () => {
   const [remarks, setRemarks] = useState("");
   const [officeMenuVisible, setOfficeMenuVisible] = useState(false);
   const [typeMenuVisible, setTypeMenuVisible] = useState(false);
-  const [fileTypes, setFileTypes] = useState(["Form", "Bill", "Letter"]);
-  const [offices, setOffices] = useState(["Accounts", "Research", "ICSR"]);
   const [fileType, setFileType] = useState("");
   const [submittedTo, setSubmittedTo] = useState("");
   const [errors, setErrors] = useState([
@@ -33,6 +30,7 @@ const NewFile = () => {
     undefined,
     undefined,
   ]);
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
   const openOfficeMenu = () => setOfficeMenuVisible(true);
   const closeOfficeMenu = () => setOfficeMenuVisible(false);
@@ -44,6 +42,26 @@ const NewFile = () => {
     if (fileType === "") newErrors[1] = "Please select a file type";
     setErrors(newErrors);
   };
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        setKeyboardVisible(true);
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        setKeyboardVisible(false);
+      }
+    );
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
 
   return (
     <Provider>
@@ -67,24 +85,26 @@ const NewFile = () => {
           accessible={false}
         >
           <View style={{ backgroundColor: "transparent", height: "100%" }}>
-            <IconButton
-              icon="arrow-left"
-              color="black"
-              size={30}
-              style={{
-                position: "absolute",
-                top: 1 * StatusBar.currentHeight,
-                left: 4,
-              }}
-              onPress={() => {}}
-            />
+            {!isKeyboardVisible && (
+              <IconButton
+                icon="arrow-left"
+                color="black"
+                size={30}
+                style={{
+                  position: "absolute",
+                  top: 1 * StatusBar.currentHeight,
+                  left: 4,
+                }}
+                onPress={() => {}}
+              />
+            )}
             <View
               style={{
                 flex: 1,
                 backgroundColor: "transparent",
                 justifyContent: "center",
                 paddingLeft: "8%",
-                marginTop: "-5%",
+                // marginTop: "-5%",
               }}
             >
               <Title style={{ fontSize: 30, flexWrap: "wrap" }}>
@@ -119,47 +139,35 @@ const NewFile = () => {
                   {errors[0]}
                 </Text>
               )}
-              <Menu
-                visible={typeMenuVisible}
-                onDismiss={closeTypeMenu}
-                anchor={
-                  <Pressable onPress={openTypeMenu} style={{ width: "70%" }}>
-                    <TextInput
-                      label="File type"
-                      value={fileType}
-                      mode="outlined"
-                      style={{
-                        marginTop: "3%",
-                      }}
-                      theme={{
-                        colors: {
-                          primary: "black",
-                          underlineColor: "transparent",
-                        },
-                      }}
-                      editable={false}
-                      right={
-                        <TextInput.Icon
-                          name="chevron-down"
-                          onPress={openTypeMenu}
-                        />
-                      }
+              <Pressable onPress={openTypeMenu} style={{ width: "70%" }}>
+                <TextInput
+                  label="File type"
+                  value={fileType}
+                  mode="outlined"
+                  style={{
+                    marginTop: "3%",
+                  }}
+                  theme={{
+                    colors: {
+                      primary: "black",
+                      underlineColor: "transparent",
+                    },
+                  }}
+                  editable={false}
+                  right={
+                    <TextInput.Icon
+                      name="chevron-right"
+                      onPress={openTypeMenu}
                     />
-                  </Pressable>
-                }
-              >
-                {fileTypes.map((type) => (
-                  <Menu.Item
-                    key={type}
-                    onPress={() => {
-                      setFileType(type);
-                      setTypeMenuVisible(false);
-                    }}
-                    title={type}
-                    style={{ width: Dimensions.get("window").width / 1.5 }}
-                  />
-                ))}
-              </Menu>
+                  }
+                />
+              </Pressable>
+              <Search
+                searchFor="fileType"
+                showModal={typeMenuVisible}
+                closeModal={closeTypeMenu}
+                setOption={setFileType}
+              />
               {errors[1] && (
                 <Text
                   style={{
@@ -171,47 +179,35 @@ const NewFile = () => {
                   {errors[1]}
                 </Text>
               )}
-              <Menu
-                visible={officeMenuVisible}
-                onDismiss={closeOfficeMenu}
-                anchor={
-                  <Pressable onPress={openOfficeMenu} style={{ width: "70%" }}>
-                    <TextInput
-                      label="Submitted to"
-                      value={submittedTo}
-                      mode="outlined"
-                      style={{
-                        marginTop: "3%",
-                      }}
-                      theme={{
-                        colors: {
-                          primary: "black",
-                          underlineColor: "transparent",
-                        },
-                      }}
-                      editable={false}
-                      right={
-                        <TextInput.Icon
-                          name="chevron-down"
-                          onPress={openOfficeMenu}
-                        />
-                      }
+              <Pressable onPress={openOfficeMenu} style={{ width: "70%" }}>
+                <TextInput
+                  label="Submitted to"
+                  value={submittedTo}
+                  mode="outlined"
+                  style={{
+                    marginTop: "3%",
+                  }}
+                  theme={{
+                    colors: {
+                      primary: "black",
+                      underlineColor: "transparent",
+                    },
+                  }}
+                  editable={false}
+                  right={
+                    <TextInput.Icon
+                      name="chevron-right"
+                      onPress={openOfficeMenu}
                     />
-                  </Pressable>
-                }
-              >
-                {offices.map((office) => (
-                  <Menu.Item
-                    key={office}
-                    onPress={() => {
-                      setSubmittedTo(office);
-                      setOfficeMenuVisible(false);
-                    }}
-                    title={office}
-                    style={{ width: Dimensions.get("window").width / 1.5 }}
-                  />
-                ))}
-              </Menu>
+                  }
+                />
+              </Pressable>
+              <Search
+                searchFor="offices"
+                showModal={officeMenuVisible}
+                closeModal={closeOfficeMenu}
+                setOption={setSubmittedTo}
+              />
               <TextInput
                 label="Remarks"
                 value={remarks}
@@ -234,7 +230,7 @@ const NewFile = () => {
                 icon="check"
                 style={{
                   width: "40%",
-                  height: 42,
+                  height: 48,
                   alignItems: "center",
                   justifyContent: "center",
                   marginTop: "5%",

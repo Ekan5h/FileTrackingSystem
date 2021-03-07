@@ -1,20 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Avatar,
   Title,
   Caption,
-  Paragraph,
   Drawer,
-  Text,
   TouchableRipple,
-  Switch,
 } from "react-native-paper";
-import {
-  View,
-  RefreshControl,
-  ScrollView,
-  ImageBackground,
-} from "react-native";
+import { View } from "react-native";
 import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
