@@ -15,6 +15,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   StatusBar,
+  Modal,
 } from "react-native";
 import Search from "./Search";
 
@@ -62,63 +63,147 @@ const FileAction = (props) => {
   }, []);
 
   return (
-    <Provider>
-      <ImageBackground
-        style={{ flex: 1, resizeMode: "cover" }}
-        source={{
-          uri: "https://wallpaperaccess.com/full/3063516.png",
-        }}
-        imageStyle={{ opacity: 0.5 }}
-        resizeMode={"cover"}
-      >
-        <TouchableWithoutFeedback
-          style={{
-            flex: 1,
-            width: "100%",
-            height: "100%",
+    <Modal
+      animationType="slide"
+      visible={props.showModal}
+      useNativeDriver={true}
+      animationIn="slideInLeft"
+      animationOut="slideOutRight"
+      onRequestClose={() => props.closeModal()}
+    >
+      <Provider>
+        <ImageBackground
+          style={{ flex: 1, resizeMode: "cover" }}
+          source={{
+            uri: "https://wallpaperaccess.com/full/3063516.png",
           }}
-          onPress={() => {
-            Keyboard.dismiss();
-          }}
-          accessible={false}
+          imageStyle={{ opacity: 0.5 }}
+          resizeMode={"cover"}
         >
-          <View style={{ backgroundColor: "transparent", height: "100%" }}>
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: "transparent",
-                justifyContent: "center",
-                paddingLeft: "8%",
-                // marginTop: "0%",
-              }}
-            >
-              {!isKeyboardVisible && (
-                <IconButton
-                  icon="arrow-left"
-                  color="black"
-                  size={30}
-                  style={{
-                    position: "absolute",
-                    top: 1 * StatusBar.currentHeight,
-                    left: 4,
-                  }}
-                  onPress={() => {}}
-                />
-              )}
-              <Title style={{ fontSize: 30, flexWrap: "wrap" }}>
-                {file.name}
-              </Title>
-              <Caption style={{ fontSize: 14 }}>
-                Tracking ID: {file.token}
-              </Caption>
+          <TouchableWithoutFeedback
+            style={{
+              flex: 1,
+              width: "100%",
+              height: "100%",
+            }}
+            onPress={() => {
+              Keyboard.dismiss();
+            }}
+            accessible={false}
+          >
+            <View style={{ backgroundColor: "transparent", height: "100%" }}>
+              <View
+                style={{
+                  flex: 1,
+                  backgroundColor: "transparent",
+                  justifyContent: "center",
+                  paddingLeft: "8%",
+                  // marginTop: "0%",
+                }}
+              >
+                {!isKeyboardVisible && (
+                  <IconButton
+                    icon="chevron-down"
+                    color="black"
+                    size={30}
+                    style={{
+                      position: "absolute",
+                      top: 1 * StatusBar.currentHeight,
+                      left: 4,
+                    }}
+                    onPress={props.closeModal}
+                  />
+                )}
+                <Title style={{ fontSize: 30, flexWrap: "wrap" }}>
+                  {file.name}
+                </Title>
+                <Caption style={{ fontSize: 14 }}>
+                  Tracking ID: {file.token}
+                </Caption>
 
-              <Pressable onPress={openActionMenu} style={{ width: "70%" }}>
+                <Pressable onPress={openActionMenu} style={{ width: "70%" }}>
+                  <TextInput
+                    label="Action"
+                    value={action}
+                    mode="outlined"
+                    style={{
+                      marginTop: "6%",
+                    }}
+                    theme={{
+                      colors: {
+                        primary: "black",
+                        underlineColor: "transparent",
+                      },
+                    }}
+                    editable={false}
+                    right={
+                      <TextInput.Icon
+                        name="chevron-right"
+                        onPress={openActionMenu}
+                      />
+                    }
+                  />
+                </Pressable>
+                <Search
+                  searchFor="fileActions"
+                  showModal={actionMenuVisible}
+                  closeModal={closeActionMenu}
+                  setOption={setAction}
+                />
+                {errors[0] && (
+                  <Text
+                    style={{
+                      color: "rgb(176, 1, 1)",
+                      marginTop: "1%",
+                      marginLeft: "1%",
+                    }}
+                  >
+                    {errors[0]}
+                  </Text>
+                )}
+                <Pressable
+                  onPress={action === "Forward" ? openOfficeMenu : null}
+                  style={{ width: "70%" }}
+                >
+                  <TextInput
+                    label="Forwarding to"
+                    value={forwardingTo}
+                    mode="outlined"
+                    style={{
+                      marginTop: "3%",
+                    }}
+                    theme={{
+                      colors: {
+                        primary: "black",
+                        underlineColor: "transparent",
+                      },
+                    }}
+                    editable={false}
+                    disabled={action === "Forward" ? false : true}
+                    right={
+                      <TextInput.Icon
+                        name="chevron-right"
+                        onPress={action === "Forward" ? openOfficeMenu : null}
+                      />
+                    }
+                  />
+                </Pressable>
+                <Search
+                  searchFor="offices"
+                  showModal={officeMenuVisible}
+                  closeModal={closeOfficeMenu}
+                  setOption={setForwardingTo}
+                />
                 <TextInput
-                  label="Action"
-                  value={action}
+                  label="Remarks"
+                  value={remarks}
+                  maxLength={40}
+                  onChangeText={(remarks) => setRemarks(remarks)}
                   mode="outlined"
+                  selectionColor="rgba(0, 0, 0, 0.2)"
                   style={{
-                    marginTop: "6%",
+                    width: "70%",
+                    marginTop: "2%",
                   }}
                   theme={{
                     colors: {
@@ -126,106 +211,31 @@ const FileAction = (props) => {
                       underlineColor: "transparent",
                     },
                   }}
-                  editable={false}
-                  right={
-                    <TextInput.Icon
-                      name="chevron-right"
-                      onPress={openActionMenu}
-                    />
-                  }
                 />
-              </Pressable>
-              <Search
-                searchFor="fileActions"
-                showModal={actionMenuVisible}
-                closeModal={closeActionMenu}
-                setOption={setAction}
-              />
-              {errors[0] && (
-                <Text
+                <Button
+                  icon="check"
                   style={{
-                    color: "rgb(176, 1, 1)",
-                    marginTop: "1%",
-                    marginLeft: "1%",
+                    width: "40%",
+                    height: 48,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginTop: "5%",
+                    paddingVertical: "1%",
+                  }}
+                  mode="contained"
+                  color="black"
+                  onPress={() => {
+                    validateForm();
                   }}
                 >
-                  {errors[0]}
-                </Text>
-              )}
-              <Pressable
-                onPress={action === "Forward" ? openOfficeMenu : null}
-                style={{ width: "70%" }}
-              >
-                <TextInput
-                  label="Forwarding to"
-                  value={forwardingTo}
-                  mode="outlined"
-                  style={{
-                    marginTop: "3%",
-                  }}
-                  theme={{
-                    colors: {
-                      primary: "black",
-                      underlineColor: "transparent",
-                    },
-                  }}
-                  editable={false}
-                  disabled={action === "Forward" ? false : true}
-                  right={
-                    <TextInput.Icon
-                      name="chevron-right"
-                      onPress={action === "Forward" ? openOfficeMenu : null}
-                    />
-                  }
-                />
-              </Pressable>
-              <Search
-                searchFor="offices"
-                showModal={officeMenuVisible}
-                closeModal={closeOfficeMenu}
-                setOption={setForwardingTo}
-              />
-              <TextInput
-                label="Remarks"
-                value={remarks}
-                maxLength={40}
-                onChangeText={(remarks) => setRemarks(remarks)}
-                mode="outlined"
-                selectionColor="rgba(0, 0, 0, 0.2)"
-                style={{
-                  width: "70%",
-                  marginTop: "2%",
-                }}
-                theme={{
-                  colors: {
-                    primary: "black",
-                    underlineColor: "transparent",
-                  },
-                }}
-              />
-              <Button
-                icon="check"
-                style={{
-                  width: "40%",
-                  height: 48,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginTop: "5%",
-                  paddingVertical: "1%",
-                }}
-                mode="contained"
-                color="black"
-                onPress={() => {
-                  validateForm();
-                }}
-              >
-                Confirm
-              </Button>
+                  Confirm
+                </Button>
+              </View>
             </View>
-          </View>
-        </TouchableWithoutFeedback>
-      </ImageBackground>
-    </Provider>
+          </TouchableWithoutFeedback>
+        </ImageBackground>
+      </Provider>
+    </Modal>
   );
 };
 

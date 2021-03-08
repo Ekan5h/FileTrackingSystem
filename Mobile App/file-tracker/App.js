@@ -38,7 +38,7 @@ export default function App() {
   // return <FileTimeline token="123456"></FileTimeline>;
   // return <Landing></Landing>;
   // return <NewFile></NewFile>;
-  // return <ScanToken></ScanToken>;
+  return <ScanToken></ScanToken>;
   const [email, setEmail] = useState(null);
   const [profile, setProfile] = useState(null);
 

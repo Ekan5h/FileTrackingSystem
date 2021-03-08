@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { View, ImageBackground, StatusBar } from "react-native";
 import Capture from "./Capture";
-import { Button, TextInput, Subheading, IconButton } from "react-native-paper";
+import FileAction from "./FileAction";
+import {
+  Button,
+  TextInput,
+  Subheading,
+  IconButton,
+  Text,
+} from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function ScanToken() {
@@ -10,6 +17,8 @@ export default function ScanToken() {
   const [subheading, setSubheading] = useState(
     "Click a clear picture of the token."
   );
+  const [showFileAction, setShowFileAction] = useState(false);
+  const [tokenError, setTokenError] = useState("");
 
   useEffect(() => {
     if (attempt > 1) setSubheading("Try again or type the token instead!");
@@ -44,7 +53,9 @@ export default function ScanToken() {
           }}
           onPress={() => {}}
         />
-        <Subheading>{subheading}</Subheading>
+        <Subheading style={{ color: attempt > 1 ? "rgb(176, 1, 1)" : "black" }}>
+          {subheading}
+        </Subheading>
 
         <View
           style={{
@@ -105,6 +116,11 @@ export default function ScanToken() {
               justifyContent: "center",
             }}
           >
+            <FileAction
+              token="123456"
+              showModal={showFileAction}
+              closeModal={() => setShowFileAction(false)}
+            />
             <TextInput
               label="Token number"
               value={token}
@@ -132,11 +148,26 @@ export default function ScanToken() {
               color="black"
               onPress={() => {
                 console.log("Send to server");
+                var error = ""; // set to error message if API call fails
+                if (!error) setShowFileAction(true);
+                else setTokenError(error);
               }}
             >
               <Ionicons name="checkmark" size={24} color="white" />
             </Button>
           </View>
+
+          {tokenError !== "" && (
+            <Text
+              style={{
+                color: "rgb(176, 1, 1)",
+                marginTop: "5%",
+                marginLeft: "1%",
+              }}
+            >
+              {tokenError}
+            </Text>
+          )}
         </View>
       </View>
     </ImageBackground>
