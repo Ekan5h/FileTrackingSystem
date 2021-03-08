@@ -153,6 +153,7 @@ const Search = (props) => {
                     alignItems: "center",
                     paddingBottom: "15%",
                   }}
+                  keyboardShouldPersistTaps={"handled"}
                 >
                   <View
                     style={{

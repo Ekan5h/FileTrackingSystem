@@ -21,7 +21,7 @@ const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
 export default function App() {
-  // return <Filter />;
+  return <Filter />;
   // return <Search searchFor="offices" />;
   // return (
   //   <NavigationContainer>
