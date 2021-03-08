@@ -93,19 +93,6 @@ const Filter = (props) => {
           accessible={false}
         >
           <View style={{ backgroundColor: "transparent", height: "100%" }}>
-            <IconButton
-              icon="arrow-left"
-              color="black"
-              size={30}
-              style={{
-                position: "absolute",
-                top: 1 * StatusBar.currentHeight,
-                left: 4,
-              }}
-              onPress={() => {
-                console.log("[ress");
-              }}
-            />
             <View
               style={{
                 flex: 1,
@@ -115,6 +102,17 @@ const Filter = (props) => {
                 // marginTop: "0%",
               }}
             >
+              <IconButton
+                icon="arrow-left"
+                color="black"
+                size={30}
+                style={{
+                  position: "absolute",
+                  top: 1 * StatusBar.currentHeight,
+                  left: 4,
+                }}
+                onPress={() => {}}
+              />
               <Title style={{ fontSize: 30, flexWrap: "wrap" }}>Filter</Title>
               <Pressable onPress={openFileMenu} style={{ width: "70%" }}>
                 <TextInput

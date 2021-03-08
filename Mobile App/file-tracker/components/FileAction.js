@@ -83,19 +83,6 @@ const FileAction = (props) => {
           accessible={false}
         >
           <View style={{ backgroundColor: "transparent", height: "100%" }}>
-            {!isKeyboardVisible && (
-              <IconButton
-                icon="arrow-left"
-                color="black"
-                size={30}
-                style={{
-                  position: "absolute",
-                  top: 1 * StatusBar.currentHeight,
-                  left: 4,
-                }}
-                onPress={() => {}}
-              />
-            )}
             <View
               style={{
                 flex: 1,
@@ -105,6 +92,19 @@ const FileAction = (props) => {
                 // marginTop: "0%",
               }}
             >
+              {!isKeyboardVisible && (
+                <IconButton
+                  icon="arrow-left"
+                  color="black"
+                  size={30}
+                  style={{
+                    position: "absolute",
+                    top: 1 * StatusBar.currentHeight,
+                    left: 4,
+                  }}
+                  onPress={() => {}}
+                />
+              )}
               <Title style={{ fontSize: 30, flexWrap: "wrap" }}>
                 {file.name}
               </Title>
