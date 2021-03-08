@@ -18,7 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Landing = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
-  const [files, setFiles] = useState([]);
+  const [files, setFiles] = useState([]); // pass filter object as props
   const [isOfficeAccount, setIsOfficeAccount] = useState(false);
 
   return (

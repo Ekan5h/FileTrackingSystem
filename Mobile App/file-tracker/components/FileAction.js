@@ -136,7 +136,7 @@ const FileAction = (props) => {
                 />
               </Pressable>
               <Search
-                searchFor="fileAction"
+                searchFor="fileActions"
                 showModal={actionMenuVisible}
                 closeModal={closeActionMenu}
                 setOption={setAction}

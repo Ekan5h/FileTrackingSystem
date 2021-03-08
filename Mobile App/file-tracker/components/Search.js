@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { TextInput, IconButton, List } from "react-native-paper";
+import { TextInput, IconButton, List, Button } from "react-native-paper";
 import {
   View,
   ImageBackground,
@@ -10,6 +10,7 @@ import {
   Modal,
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 
 const db = {
   offices: {
@@ -29,11 +30,11 @@ const db = {
     ],
     placeholder: "Search for an office",
   },
-  fileType: {
+  fileTypes: {
     options: ["Form", "Bill", "Letter"],
     placeholder: "Search for a file type",
   },
-  fileAction: {
+  fileActions: {
     options: ["Forward", "Accept", "Reject", "Requires input"],
     placeholder: "Search for an action",
   },
@@ -46,6 +47,7 @@ const Search = (props) => {
   const [placeholder, setPlaceholder] = useState(
     db[props.searchFor]["placeholder"]
   );
+  const [checked, setChecked] = useState([]);
 
   useEffect(() => {
     var reg = new RegExp(query.split("").join("\\w*").replace(/\W/, ""), "i");
@@ -65,6 +67,8 @@ const Search = (props) => {
       animationIn="slideInLeft"
       animationOut="slideOutRight"
       onRequestClose={() => {
+        if (props.multiple) props.setOption(checked);
+        // console.log("checkd", checked);
         props.closeModal();
       }}
     >
@@ -97,8 +101,12 @@ const Search = (props) => {
                 top: 1 * StatusBar.currentHeight,
                 left: 4,
               }}
-              onPress={() => props.closeModal()}
+              onPress={() => {
+                if (props.multiple) props.setOption(checked);
+                props.closeModal();
+              }}
             />
+
             <View
               style={{
                 flex: 1,
@@ -135,6 +143,7 @@ const Search = (props) => {
                     />
                   }
                 />
+
                 <ScrollView
                   style={{
                     width: "100%",
@@ -157,8 +166,20 @@ const Search = (props) => {
                           key={option}
                           title={option}
                           onPress={() => {
-                            props.setOption(option);
-                            props.closeModal();
+                            if (!props.multiple) {
+                              props.setOption(option);
+                              props.closeModal();
+                            }
+                            var idx = checked.indexOf(option);
+                            if (idx == -1) {
+                              var newChecked = checked.concat([option]);
+                              setChecked(newChecked);
+                            } else {
+                              var newChecked = checked.filter(
+                                (c) => c !== option
+                              );
+                              setChecked(newChecked);
+                            }
                           }}
                           style={{
                             width: "78%",
@@ -166,12 +187,40 @@ const Search = (props) => {
                             borderBottomColor: "black",
                             paddingVertical: "2%",
                             paddingLeft: "0%",
+                            // justifyContent: "center",
                           }}
+                          right={() =>
+                            checked.indexOf(option) !== -1 && (
+                              <Feather
+                                name="check"
+                                size={18}
+                                color="black"
+                                style={{ marginTop: "4%", marginRight: "1%" }}
+                              />
+                            )
+                          }
                         />
                       );
                     })}
                   </View>
                 </ScrollView>
+                <View
+                  style={{
+                    alignItems: "flex-end",
+                    marginRight: "20.5%",
+                    marginTop: "4%",
+                    marginBottom: "10%",
+                  }}
+                >
+                  <Button
+                    color="black"
+                    labelStyle={{ fontSize: 14 }}
+                    compact={true}
+                    onPress={() => setChecked([])}
+                  >
+                    Clear all
+                  </Button>
+                </View>
               </View>
             </View>
           </View>

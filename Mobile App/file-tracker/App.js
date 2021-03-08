@@ -8,16 +8,20 @@ import FileTimeline from "./components/FileTimeline";
 import FileAction from "./components/FileAction";
 import DrawerContent from "./components/DrawerContent";
 import Search from "./components/Search";
+import Filter from "./components/Filter";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import * as SplashScreen from "expo-splash-screen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+// import "intl";
+// import "intl/locale-data/jsonp/en";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
 export default function App() {
+  // return <Filter />;
   // return <Search searchFor="offices" />;
   // return (
   //   <NavigationContainer>

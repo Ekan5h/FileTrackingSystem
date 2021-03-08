@@ -163,7 +163,7 @@ const NewFile = () => {
                 />
               </Pressable>
               <Search
-                searchFor="fileType"
+                searchFor="fileTypes"
                 showModal={typeMenuVisible}
                 closeModal={closeTypeMenu}
                 setOption={setFileType}
