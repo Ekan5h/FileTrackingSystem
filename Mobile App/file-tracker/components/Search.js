@@ -191,7 +191,8 @@ const Search = (props) => {
                             // justifyContent: "center",
                           }}
                           right={() =>
-                            checked.indexOf(option) !== -1 && (
+                            checked.indexOf(option) !== -1 &&
+                            props.multiple && (
                               <Feather
                                 name="check"
                                 size={18}
