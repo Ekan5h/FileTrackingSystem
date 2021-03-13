@@ -44,14 +44,14 @@ def verifyOTP():
 				if user:
 					login_user(user)
 					if len(user.name):
-						return jsonify({'match':True, 'profile':True})
+						return jsonify({'match':True, 'profile':True, 'name':user.name, 'offices':user.emails})
 					else:
-						return jsonify({'match':True, 'profile':False})
+						return jsonify({'match':True, 'profile':False, 'name':'', 'offices':user.emails})
 				user = Users(addr)
 				db.session.add(user)
 				db.session.commit()
 				login_user(user, remember=True)
-				return jsonify({'match':True, 'profile':False})
+				return jsonify({'match':True, 'profile':False, 'offices':''})
 			return jsonify({'match':True})
 		else:
 			return jsonify({'match':False})
