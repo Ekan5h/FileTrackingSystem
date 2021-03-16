@@ -157,3 +157,26 @@ def fileTagSearch():
         return jsonify(ret)
     except Exception as e:
         return jsonify({'error': True, 'msg': str(e)})
+
+@file_ops.route('/fileTagComplete', methods=['GET'])
+@login_required
+def fileTagComplete():
+    try:
+        office, file_tag = [request.form[x] for x in ['office', 'file_tag']]
+        fs = Tags.query.filter(Tags.email==current_user.login_email, Tags.tag.ilike("%" + file_tag + "%")).all()
+
+        for x in fs:
+            f = Files.query.filter_by(id=x.file_id).first()
+            ret.append(
+                {
+                    'name': f.name,
+                    'tag': x.file_tag,
+                    'trackingID': crypt.encrypt(f.id),
+                    'type': f.category,
+                    'status':'Currently with ' + f.location if f.location else 'File Processed'
+                }
+            )
+
+        return jsonify(ret)
+    except Exception as e:
+        return jsonify({'error': True, 'msg': str(e)})
