@@ -99,3 +99,12 @@ class FileLogs(db.Model):
 
     def __repr__(self):
         return str(self.id)+" "+self.location+" "+str(self.time)
+
+class Tags(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    file_id = db.Column(db.Integer)
+    tag = db.Column(db.String)
+    email = db.Column(db.String)
+
+    def __repr__(self):
+        return str(self.tag) + " " + str(self.file_id) + " " + str(self.email)
