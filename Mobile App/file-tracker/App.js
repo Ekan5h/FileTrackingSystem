@@ -21,6 +21,7 @@ const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
 export default function App() {
+  return <LoginPage />;
   // return <LoginPage />;
   // return <SetName />;
   // return <Feedback />;

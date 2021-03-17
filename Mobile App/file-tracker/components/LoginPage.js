@@ -8,6 +8,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   ImageBackground,
+  StatusBar,
 } from "react-native";
 import { Button, TextInput, Subheading, IconButton } from "react-native-paper";
 import DropdownAlert from "react-native-dropdownalert";
@@ -30,19 +31,23 @@ export default function LoginPage({ navigation }) {
   return (
     <ImageBackground
       style={{ flex: 1, resizeMode: "cover" }}
-      source={require("../assets/white_bg.png")}
-      imageStyle={{ opacity: 0.5 }}
-      resizeMode={"cover"} // cover or contain its upto you view look
+      source={require("../assets/black_bg.jpg")}
+      imageStyle={{ opacity: 0.9 }}
+      resizeMode={"cover"}
     >
-      <KeyboardAvoidingView>
+      <KeyboardAvoidingView style={{ width: "100%", flex: 1 }}>
         <ScrollView keyboardShouldPersistTaps={"handled"}>
           <>
             {!enterEmail && (
               <IconButton
                 icon="arrow-left"
-                color="black"
+                color="white"
                 size={30}
-                style={styles.back}
+                style={{
+                  position: "absolute",
+                  top: 1 * StatusBar.currentHeight,
+                  left: 4,
+                }}
                 onPress={() => {
                   setEnterEmail(true);
                   clearTimeout(resendTimeout);
@@ -53,23 +58,20 @@ export default function LoginPage({ navigation }) {
                 }}
               />
             )}
-
             <View
               style={{
-                paddingTop: enterEmail
-                  ? 0.191846523 * windowHeight
-                  : 0.119904077 * windowHeight,
-                flex: 1,
+                marginTop: "30%",
                 alignItems: "center",
                 padding: 8,
               }}
             >
               <Image
-                style={styles.logo}
-                source={require("../assets/logo.jpg")}
+                style={{
+                  height: 0.5 * windowHeight,
+                  width: 0.5 * windowHeight,
+                }}
+                source={require("../assets/main_logo.png")}
               />
-
-              <Text style={styles.paragraph}>File Tracker</Text>
 
               {enterEmail && (
                 <>
@@ -78,8 +80,11 @@ export default function LoginPage({ navigation }) {
                     textContentType="emailAddress"
                     autoCompleteType="email"
                     autoCapitalize="none"
-                    style={styles.email}
-                    label="Personal Email Address"
+                    style={{
+                      marginTop: "-8%",
+                      width: "80%",
+                    }}
+                    placeholder="Personal Email Address"
                     mode="outlined"
                     theme={{
                       colors: {
@@ -95,7 +100,14 @@ export default function LoginPage({ navigation }) {
 
                   <Button
                     loading={loading}
-                    style={styles.login_btn}
+                    color="white"
+                    style={{
+                      justifyContent: "center",
+                      borderColor: "white",
+                      borderWidth: 0.5,
+                      marginTop: "4%",
+                      width: "40%",
+                    }}
                     mode="contained"
                     onPress={
                       loading
@@ -181,8 +193,11 @@ export default function LoginPage({ navigation }) {
                   <TextInput
                     onChangeText={(txt) => setOTP(txt)}
                     keyboardType="numeric"
-                    style={styles.email}
-                    label="Enter OTP"
+                    style={{
+                      marginTop: "-8%",
+                      width: "80%",
+                    }}
+                    placeholder="Enter OTP"
                     mode="outlined"
                     theme={{
                       colors: {
@@ -192,12 +207,19 @@ export default function LoginPage({ navigation }) {
                     }}
                   />
 
-                  <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      flexWrap: "wrap",
+                      marginLeft: "-3.5%",
+                    }}
+                  >
                     <Button
                       icon="reload"
                       disabled={!resend}
                       labelStyle={{
                         fontSize: 0.0340909091 * windowWidth,
+                        color: "white",
                       }}
                       onPress={async () => {
                         setResend(false);
@@ -249,10 +271,11 @@ export default function LoginPage({ navigation }) {
                     </Button>
                     <Text
                       style={{
-                        fontSize: 0.0340909091 * windowWidth,
+                        fontSize: 0.0351909091 * windowWidth,
                         marginTop: 0.0107913669 * windowHeight,
                         marginLeft: 0.204545455 * windowWidth,
-                        color: "gray",
+                        marginLeft: "22%",
+                        color: "white",
                       }}
                     >
                       Time left:{" "}
@@ -263,8 +286,15 @@ export default function LoginPage({ navigation }) {
 
                   <Button
                     loading={loading}
-                    style={styles.login_btn}
+                    style={{
+                      justifyContent: "center",
+                      borderColor: "white",
+                      borderWidth: 0.5,
+                      marginTop: "4%",
+                      width: "40%",
+                    }}
                     mode="contained"
+                    color="white"
                     onPress={
                       loading
                         ? () => {}
@@ -371,31 +401,3 @@ export default function LoginPage({ navigation }) {
     </ImageBackground>
   );
 }
-
-const styles = StyleSheet.create({
-  back: {
-    marginTop: 0.035971223 * windowHeight,
-    marginLeft: 0.035971223 * windowHeight,
-    fontSize: 0.0215827338 * windowHeight,
-    height: 0.035971223 * windowHeight,
-  },
-  login_btn: {
-    padding: 0.00599520384 * windowHeight,
-    marginTop: 0.0239808153 * windowHeight,
-    backgroundColor: "black",
-  },
-  email: {
-    marginTop: 0.0959232614 * windowHeight,
-    width: "80%",
-  },
-  logo: {
-    height: 0.119904077 * windowHeight,
-    width: 0.119904077 * windowHeight,
-  },
-  paragraph: {
-    margin: 0.0287769784 * windowHeight,
-    fontSize: 0.035971223 * windowHeight,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-});
