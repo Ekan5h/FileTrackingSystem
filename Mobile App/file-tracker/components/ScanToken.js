@@ -27,9 +27,7 @@ export default function ScanToken() {
   return (
     <ImageBackground
       style={{ flex: 1, resizeMode: "cover" }}
-      source={{
-        uri: "https://wallpaperaccess.com/full/3063516.png",
-      }}
+      source={require("../assets/white_bg.png")}
       imageStyle={{ opacity: 1 }}
       resizeMode={"cover"} // cover or contain its upto you view look
     >

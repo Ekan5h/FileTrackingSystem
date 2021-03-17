@@ -10,6 +10,7 @@ import { View } from "react-native";
 import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 
 const DrawerContent = (props) => {
@@ -74,11 +75,20 @@ const DrawerContent = (props) => {
             />
             <DrawerItem
               icon={() => (
+                <FontAwesome name="history" size={24} color="black" />
+              )}
+              label="File history"
+              onPress={() => {
+                props.navigation.navigate("FileHistory");
+              }}
+            />
+            <DrawerItem
+              icon={() => (
                 <MaterialIcons name="feedback" size={24} color="black" />
               )}
               label="Feedback"
               onPress={() => {
-                props.navigation.navigate("NewFile");
+                props.navigation.navigate("Feedback");
               }}
             />
             <DrawerItem

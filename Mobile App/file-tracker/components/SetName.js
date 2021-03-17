@@ -1,92 +1,157 @@
-import React, {useState} from 'react';
-import { Text, View, Dimensions } from 'react-native';
-import { Button, TextInput } from "react-native-paper";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useState, useEffect } from "react";
+import {
+  Keyboard,
+  View,
+  Dimensions,
+  ImageBackground,
+  TouchableWithoutFeedback,
+} from "react-native";
+import { Button, TextInput, Title, Text } from "react-native-paper";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
-import DropdownAlert from 'react-native-dropdownalert';
+import DropdownAlert from "react-native-dropdownalert";
 
-const windowWidth = Dimensions.get('window').width;
-const windowHeight = Dimensions.get('window').height;
+const windowWidth = Dimensions.get("window").width;
+const windowHeight = Dimensions.get("window").height;
 
+export default function SetName({ navigation }, prop) {
+  const [name, setName] = useState("");
+  const [dropDown, setDropDown] = useState(null);
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  const [error, setError] = useState(undefined);
 
-export default function SetName({navigation}, prop) {
-    const [name, setName] = useState('');
-    const [dropDown, setDropDown] = useState(null);
-    
-    return (
-        <>
-        <View style={{
-          justifyContent:'center',
-          alignItems:'center',
-          height:"100%"
-        }}>
-            <View style={{width:"80%"}}>
-                <Text style={{
-                    fontSize:0.0419664269*windowHeight,
-                    fontWeight:"bold",
-                    marginBottom:0.0599520384*windowHeight
-                }}>
-                    Set your name
-                </Text>
-            </View>
-            <TextInput 
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        setKeyboardVisible(true);
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        setKeyboardVisible(false);
+      }
+    );
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
+
+  return (
+    <ImageBackground
+      style={{ flex: 1, resizeMode: "cover" }}
+      source={require("../assets/white_bg.png")}
+      imageStyle={{ opacity: 0.5 }}
+      resizeMode={"cover"}
+    >
+      <TouchableWithoutFeedback
+        style={{
+          flex: 1,
+          width: "100%",
+          height: "100%",
+        }}
+        onPress={() => {
+          Keyboard.dismiss();
+        }}
+        accessible={false}
+      >
+        <View
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+          }}
+        >
+          <View style={{ width: "80%", alignItems: "center" }}>
+            <Title style={{ fontSize: 20, flexWrap: "wrap" }}>
+              What should we call you?
+            </Title>
+          </View>
+          <TextInput
+            value={name}
             mode="outlined"
-            label="Enter Name"
+            label="Enter your name"
             autoCompleteType="name"
             textContentType="name"
-            onChangeText={
-                (t)=>{
-                    setName(t);
-                }
-            }
+            onChangeText={(t) => {
+              setName(t);
+            }}
             style={{
-                width:"80%",
-                fontSize:20
-            }}/>
-
-            <Button
-                mode="contained"
-                style={{
-                    marginTop:0.035971223*windowHeight,
-                    paddingLeft:(20/440)*windowWidth,
-                    paddingRight:(20/440)*windowWidth,
-                    backgroundColor: "black",
-                }}
-                onPress={
-                    () => {
-                        if(name.length == 0){
-                            dropDown.alertWithType('error','Please enter a name','');
-                            return 0;
-                        }
-                        let formData = new FormData();
-                        formData.append('name', name);
-                        fetch('http://filetracking.azurewebsites.net/setName',{
-                            method:'POST',
-                            body:formData,
-                            headers:{
-                            'content-type':'multipart/form-data'
-                            }
-                        }).then(
-                            async ()=>{
-                                await AsyncStorage.removeItem('@profile');
-                                await AsyncStorage.setItem('@name', name);
-                                navigation.reset({
-                                  index: 0,
-                                  routes: [{ name: 'Landing' }],
-                                });
-                            }
-                        ).catch(
-                            (e)=>{
-                                dropDown.alertWithType('error','Network Error','Could not reach the server!')
-                            }
-                        )
-                    }
-                }
+              width: "70%",
+              marginTop: "2.5%",
+            }}
+            theme={{
+              colors: {
+                primary: "black",
+                underlineColor: "transparent",
+              },
+            }}
+            selectionColor="rgba(0, 0, 0, 0.2)"
+            maxLength={30}
+          />
+          {error && (
+            <Text
+              style={{
+                color: "rgb(176, 1, 1)",
+                marginTop: "1%",
+                marginLeft: "1%",
+              }}
             >
-                <Ionicons name="checkmark" size={30} color="white" />
-            </Button>
+              {error}
+            </Text>
+          )}
+          <Button
+            icon="check"
+            style={{
+              width: "40%",
+              height: 48,
+              alignItems: "center",
+              justifyContent: "center",
+              marginTop: "5%",
+              paddingVertical: "1%",
+            }}
+            mode="contained"
+            color="black"
+            onPress={() => {
+              if (name.length == 0) {
+                setError("Please enter your name");
+                return;
+              }
+              let formData = new FormData();
+              formData.append("name", name);
+              fetch("http://filetracking.azurewebsites.net/setName", {
+                method: "POST",
+                body: formData,
+                headers: {
+                  "content-type": "multipart/form-data",
+                },
+              })
+                .then(async () => {
+                  await AsyncStorage.removeItem("@profile");
+                  await AsyncStorage.setItem("@name", name);
+                  navigation.reset({
+                    index: 0,
+                    routes: [{ name: "Landing" }],
+                  });
+                })
+                .catch((e) => {
+                  dropDown.alertWithType(
+                    "error",
+                    "Network Error",
+                    "Could not reach the server!"
+                  );
+                });
+            }}
+          >
+            {" "}
+            Confirm
+          </Button>
         </View>
-        <DropdownAlert ref={(r)=>setDropDown(r)}/>
-        </>
-    );
+        {/* <DropdownAlert ref={(r) => setDropDown(r)} /> */}
+      </TouchableWithoutFeedback>
+    </ImageBackground>
+  );
 }

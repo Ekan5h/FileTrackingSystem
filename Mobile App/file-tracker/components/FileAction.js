@@ -74,9 +74,7 @@ const FileAction = (props) => {
       <Provider>
         <ImageBackground
           style={{ flex: 1, resizeMode: "cover" }}
-          source={{
-            uri: "https://wallpaperaccess.com/full/3063516.png",
-          }}
+          source={require("../assets/white_bg.png")}
           imageStyle={{ opacity: 0.5 }}
           resizeMode={"cover"}
         >

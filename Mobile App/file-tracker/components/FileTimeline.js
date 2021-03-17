@@ -6,7 +6,15 @@ import {
   ScrollView,
   RefreshControl,
 } from "react-native";
-import { Button, Text, Title, IconButton, Caption } from "react-native-paper";
+import {
+  Button,
+  Text,
+  Title,
+  IconButton,
+  Caption,
+  Chip,
+} from "react-native-paper";
+import Search from "./Search";
 import { AntDesign } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
 
@@ -23,14 +31,25 @@ const FileTimeline = (props) => {
         remarks: "This is my budget",
       },
     ],
+    tags: ["Budget", "Important", "Processed"],
   });
+  const [showTags, setShowTags] = useState(file.tags.slice(0, 2));
+  const [tagsMenuVisible, setTagsMenuVisible] = useState(false);
+  const openTagsMenu = () => setTagsMenuVisible(true);
+  const closeTagsMenu = () => setTagsMenuVisible(false);
+  const setTags = (checked) => {
+    console.log("Closed");
+    var newFile = { ...file };
+    newFile.tags = checked;
+    setFile(newFile);
+    setShowTags(newFile.tags.slice(0, 2));
+    // API CALL TO CHANGE TAGS
+  };
 
   return (
     <ImageBackground
       style={{ flex: 1, resizeMode: "cover" }}
-      source={{
-        uri: "https://wallpaperaccess.com/full/3063516.png",
-      }}
+      source={require("../assets/white_bg.png")}
       imageStyle={{ opacity: 0.5 }}
       resizeMode={"cover"}
     >
@@ -61,13 +80,61 @@ const FileTimeline = (props) => {
             width: "100%",
           }}
         >
-          <View style={{ height: isOfficeHolder ? "22%" : "12%" }}>
+          <View style={{ height: isOfficeHolder ? "24.5%" : "17.5%" }}>
             <Title style={{ fontSize: 30, flexWrap: "wrap" }}>
               {file.name}
             </Title>
             <Caption style={{ fontSize: 15 }}>
               Tracking ID: {file.token}
             </Caption>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "flex-start",
+                height: "auto",
+                marginTop: "1.8%",
+              }}
+            >
+              <Chip
+                textStyle={{ fontSize: 11 }}
+                onPress={openTagsMenu}
+                style={{ borderRadius: 0, marginRight: 4 }}
+                icon="pencil"
+              >
+                Edit tags
+              </Chip>
+              <Search
+                searchFor="tags"
+                showModal={tagsMenuVisible}
+                closeModal={closeTagsMenu}
+                setOption={setTags}
+                multiple={true}
+                checked={file.tags}
+                addNew={true}
+              />
+              {showTags.map((tag) => {
+                return (
+                  <Chip
+                    textStyle={{ fontSize: 11 }}
+                    onPress={() => {}}
+                    style={{ borderRadius: 0, marginRight: 4 }}
+                    key={tag}
+                  >
+                    {tag}
+                  </Chip>
+                );
+              })}
+              {showTags.length < file.tags.length && (
+                <Chip
+                  textStyle={{ fontSize: 11 }}
+                  onPress={() => {}}
+                  style={{ borderRadius: 0, marginRight: 4 }}
+                >
+                  +{String(file.tags.length - showTags.length)}
+                </Chip>
+              )}
+            </View>
+
             <View
               style={{
                 flexDirection: "row",
@@ -82,7 +149,7 @@ const FileTimeline = (props) => {
                     height: "52%",
                     alignItems: "center",
                     justifyContent: "center",
-                    marginTop: "5%",
+                    marginTop: "2.5%",
                   }}
                   mode="contained"
                   color="black"
@@ -92,32 +159,15 @@ const FileTimeline = (props) => {
                   {"  "}Scan
                 </Button>
               )}
-
-              {/* <Button
-                style={{
-                  width: "40%",
-                  height: "52%",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginTop: "5%",
-                  paddingVertical: "1%",
-                  marginLeft: "2%",
-                }}
-                mode="contained"
-                color="black"
-                onPress={() => {}}
-              >
-                <AntDesign name="closecircleo" size={14} color="white" />
-              {"  "} Close
-              </Button> */}
             </View>
           </View>
 
           <View
             style={{
               width: "100%",
-              marginLeft: "-2%",
-              height: isOfficeHolder ? "78%" : "88%",
+              marginLeft: isOfficeHolder ? "-1%" : "-1.5%",
+              marginTop: "1%",
+              height: isOfficeHolder ? "75%" : "82%",
             }}
           >
             <ScrollView

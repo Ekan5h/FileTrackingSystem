@@ -21,10 +21,13 @@ const NewFile = () => {
   const [name, setName] = useState("");
   const [remarks, setRemarks] = useState("");
   const [officeMenuVisible, setOfficeMenuVisible] = useState(false);
+  const [transferMenuVisible, setTransferMenuVisible] = useState(false);
   const [typeMenuVisible, setTypeMenuVisible] = useState(false);
   const [fileType, setFileType] = useState("");
   const [submittedTo, setSubmittedTo] = useState("");
+  const [transferTo, setTransferTo] = useState("");
   const [errors, setErrors] = useState([
+    undefined,
     undefined,
     undefined,
     undefined,
@@ -34,6 +37,8 @@ const NewFile = () => {
 
   const openOfficeMenu = () => setOfficeMenuVisible(true);
   const closeOfficeMenu = () => setOfficeMenuVisible(false);
+  const openTransferMenu = () => setTransferMenuVisible(true);
+  const closeTransferMenu = () => setTransferMenuVisible(false);
   const openTypeMenu = () => setTypeMenuVisible(true);
   const closeTypeMenu = () => setTypeMenuVisible(false);
   const validateForm = () => {
@@ -67,11 +72,9 @@ const NewFile = () => {
     <Provider>
       <ImageBackground
         style={{ flex: 1, resizeMode: "cover" }}
-        source={{
-          uri: "https://wallpaperaccess.com/full/3063516.png",
-        }}
+        source={require("../assets/white_bg.png")}
         imageStyle={{ opacity: 0.5 }}
-        resizeMode={"cover"} // cover or contain its upto you view look
+        resizeMode={"cover"}
       >
         <TouchableWithoutFeedback
           style={{
@@ -91,7 +94,6 @@ const NewFile = () => {
                 backgroundColor: "transparent",
                 justifyContent: "center",
                 paddingLeft: "8%",
-                // marginTop: "-5%",
               }}
             >
               {!isKeyboardVisible && (
@@ -107,7 +109,9 @@ const NewFile = () => {
                   onPress={() => {}}
                 />
               )}
-              <Title style={{ fontSize: 30, flexWrap: "wrap" }}>
+              <Title
+                style={{ fontSize: 30, flexWrap: "wrap", marginTop: "8%" }}
+              >
                 Create new file
               </Title>
               <TextInput
@@ -207,6 +211,35 @@ const NewFile = () => {
                 showModal={officeMenuVisible}
                 closeModal={closeOfficeMenu}
                 setOption={setSubmittedTo}
+              />
+              <Pressable onPress={openTransferMenu} style={{ width: "70%" }}>
+                <TextInput
+                  label="Transfer ownership"
+                  value={transferTo}
+                  mode="outlined"
+                  style={{
+                    marginTop: "3%",
+                  }}
+                  theme={{
+                    colors: {
+                      primary: "black",
+                      underlineColor: "transparent",
+                    },
+                  }}
+                  editable={false}
+                  right={
+                    <TextInput.Icon
+                      name="chevron-right"
+                      onPress={openTransferMenu}
+                    />
+                  }
+                />
+              </Pressable>
+              <Search
+                searchFor="users"
+                showModal={transferMenuVisible}
+                closeModal={closeTransferMenu}
+                setOption={setTransferTo}
               />
               <TextInput
                 label="Remarks"

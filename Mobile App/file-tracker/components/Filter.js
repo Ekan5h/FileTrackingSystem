@@ -6,9 +6,6 @@ import {
   TextInput,
   IconButton,
   Provider,
-  Caption,
-  DefaultTheme,
-  DarkTheme,
 } from "react-native-paper";
 import {
   View,
@@ -34,10 +31,13 @@ const Filter = (props) => {
   const [currEndDate, setCurrEndDate] = useState(new Date());
   const [fileTypes, setFileTypes] = useState([]);
   const [handledBy, setHandledBy] = useState([]);
+  const [tags, setTags] = useState([]);
   const [fileTypesText, setFileTypesText] = useState("");
   const [handledByText, setHandledByText] = useState("");
+  const [tagsText, setTagsText] = useState("");
   const [fileMenuVisible, setFileMenuVisible] = useState(false);
   const [officeMenuVisible, setOfficeMenuVisible] = useState(false);
+  const [tagsMenuVisible, setTagsMenuVisible] = useState(false);
   const [errors, setErrors] = useState([undefined]);
 
   const [showStart, setShowStart] = useState(false);
@@ -59,6 +59,8 @@ const Filter = (props) => {
   const closeFileMenu = () => setFileMenuVisible(false);
   const openOfficeMenu = () => setOfficeMenuVisible(true);
   const closeOfficeMenu = () => setOfficeMenuVisible(false);
+  const openTagsMenu = () => setTagsMenuVisible(true);
+  const closeTagsMenu = () => setTagsMenuVisible(false);
   const validateForm = () => {
     var newErrors = [undefined];
     if (startDate && endDate && startDate > endDate)
@@ -69,15 +71,14 @@ const Filter = (props) => {
   useEffect(() => {
     setFileTypesText(fileTypes.join(", "));
     setHandledByText(handledBy.join(", "));
-  }, [fileTypes, handledBy]);
+    setTagsText(tags.join(", "));
+  }, [fileTypes, handledBy, tags]);
 
   return (
     <Provider>
       <ImageBackground
         style={{ flex: 1, resizeMode: "cover" }}
-        source={{
-          uri: "https://wallpaperaccess.com/full/3063516.png",
-        }}
+        source={require("../assets/white_bg.png")}
         imageStyle={{ opacity: 0.5 }}
         resizeMode={"cover"}
       >
@@ -113,7 +114,11 @@ const Filter = (props) => {
                 }}
                 onPress={() => {}}
               />
-              <Title style={{ fontSize: 30, flexWrap: "wrap" }}>Filter</Title>
+              <Title
+                style={{ fontSize: 30, flexWrap: "wrap", marginTop: "6%" }}
+              >
+                Filter
+              </Title>
               <Pressable onPress={openFileMenu} style={{ width: "70%" }}>
                 <TextInput
                   label="File types"
@@ -143,7 +148,7 @@ const Filter = (props) => {
                 closeModal={closeFileMenu}
                 setOption={setFileTypes}
                 multiple={true}
-                checked={fileTypes}
+                checked={[]}
               />
               <Pressable onPress={openOfficeMenu} style={{ width: "70%" }}>
                 <TextInput
@@ -174,7 +179,39 @@ const Filter = (props) => {
                 closeModal={closeOfficeMenu}
                 setOption={setHandledBy}
                 multiple={true}
-                checked={handledBy}
+                checked={[]}
+              />
+              <Pressable onPress={openTagsMenu} style={{ width: "70%" }}>
+                <TextInput
+                  label="Tags"
+                  value={tagsText}
+                  mode="outlined"
+                  style={{
+                    marginTop: "3%",
+                  }}
+                  theme={{
+                    colors: {
+                      primary: "black",
+                      underlineColor: "transparent",
+                    },
+                  }}
+                  editable={false}
+                  right={
+                    <TextInput.Icon
+                      name="chevron-right"
+                      onPress={openTagsMenu}
+                    />
+                  }
+                />
+              </Pressable>
+              <Search
+                searchFor="tags"
+                showModal={tagsMenuVisible}
+                closeModal={closeTagsMenu}
+                setOption={setTags}
+                multiple={true}
+                checked={[]}
+                addNew={false}
               />
               <Pressable
                 onPress={() => setShowStart(true)}
