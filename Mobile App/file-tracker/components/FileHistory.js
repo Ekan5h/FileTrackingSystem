@@ -10,6 +10,7 @@ import {
 } from "react-native-paper";
 import {
   View,
+  Image,
   ImageBackground,
   RefreshControl,
   StatusBar,
@@ -22,35 +23,43 @@ const FileHistory = (props) => {
   const [files, setFiles] = useState([]);
   const [offices, setOffices] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  useEffect(() => {
+    if (props.success) setShowSuccess(true);
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 3000);
+  }, []);
 
   const reload = async (offices) => {
     // alert(JSON.stringify(offices));
     setRefreshing(true);
     let fils = {};
-    for(let i=0; i<offices.length; i++){
-      let ret = await fetch('http://192.168.1.6:5000/showProcessed?office='+offices[i].office ,{method:'GET'});
-      ret = await ret.json()
-      for(let file of ret){
-        fils[file.trackingID] = file
+    for (let i = 0; i < offices.length; i++) {
+      let ret = await fetch(
+        "http://192.168.1.6:5000/showProcessed?office=" + offices[i].office,
+        { method: "GET" }
+      );
+      ret = await ret.json();
+      for (let file of ret) {
+        fils[file.trackingID] = file;
       }
     }
     let ret = [];
-    for(let k in fils) ret.push(fils[k]);
+    for (let k in fils) ret.push(fils[k]);
     setFiles(ret);
     setRefreshing(false);
-  }
+  };
 
-  if(offices.length == 0){
-    AsyncStorage.getItem('@offices').then(
-      ret => {
+  if (offices.length == 0) {
+    AsyncStorage.getItem("@offices")
+      .then((ret) => {
         setOffices(JSON.parse(ret));
         reload(JSON.parse(ret));
-      }
-    ).catch(
-      () => alert("Something went wrong!")
-    )
-  }  
-
+      })
+      .catch(() => alert("Something went wrong!"));
+  }
 
   return (
     <ImageBackground
@@ -60,6 +69,22 @@ const FileHistory = (props) => {
       resizeMode={"cover"}
     >
       <View style={{ backgroundColor: "transparent", height: "100%" }}>
+        {showSuccess && (
+          <View
+            style={{
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
+              height: "100%",
+              // backgroundColor: "yellow",
+            }}
+          >
+            <Image
+              style={{ height: 400, width: 400 }}
+              source={require("../assets/success.gif")}
+            />
+          </View>
+        )}
         <IconButton
           icon="menu"
           color="black"
@@ -97,7 +122,7 @@ const FileHistory = (props) => {
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
-                onRefresh={()=>reload(offices)}
+                onRefresh={() => reload(offices)}
               />
             }
           >

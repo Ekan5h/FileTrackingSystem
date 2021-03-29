@@ -1,13 +1,30 @@
 import React, { useState, useEffect } from "react";
-import { Appbar, Button, TouchableRipple, Menu, Subheading, Paragraph, Caption,FAB, IconButton, Provider } from "react-native-paper";
-import { View, RefreshControl, ScrollView, ImageBackground, Animated, Image, } from "react-native";
+import {
+  Appbar,
+  Button,
+  TouchableRipple,
+  Menu,
+  Subheading,
+  Paragraph,
+  Caption,
+  FAB,
+  IconButton,
+  Provider,
+} from "react-native-paper";
+import {
+  View,
+  RefreshControl,
+  ScrollView,
+  ImageBackground,
+  Animated,
+  Image,
+} from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import FileTimeline from "./FileTimeline";
 import FileAction from "./FileAction";
 import ScanToken from "./ScanToken";
-
-
+import Search from "./Search";
 
 const Landing = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
@@ -28,26 +45,26 @@ const Landing = ({ navigation }) => {
   const [x2, setX2] = useState(0);
   const [translateX, setTranslateX] = useState(new Animated.Value(0));
   const [loading, setLoading] = useState(true);
+  const [tags, setTags] = useState([]);
+  const [tagsMenuVisible, setTagsMenuVisible] = useState(false);
+  const openTagsMenu = () => setTagsMenuVisible(true);
+  const closeTagsMenu = () => setTagsMenuVisible(false);
 
-  if(offices==null)
-    AsyncStorage.getItem('@offices').then(
-      (ret) => {
-        if(ret==null) return 0;
-        ret = JSON.parse(ret);
-        if (ret.length){
-          setIsOfficeAccount(true);
-          setTab(0);
-        }
-        setOffices(ret);
-        AsyncStorage.getItem('@office').then(
-          (ret) => {
-            if(ret!=null){
-              setOffice(ret);
-            }
-          }
-        )
+  if (offices == null)
+    AsyncStorage.getItem("@offices").then((ret) => {
+      if (ret == null) return 0;
+      ret = JSON.parse(ret);
+      if (ret.length) {
+        setIsOfficeAccount(true);
+        setTab(0);
       }
-    )
+      setOffices(ret);
+      AsyncStorage.getItem("@office").then((ret) => {
+        if (ret != null) {
+          setOffice(ret);
+        }
+      });
+    });
 
   const handleSlide = (x) => {
     Animated.spring(translateX, {
@@ -61,44 +78,42 @@ const Landing = ({ navigation }) => {
     // Make API call based on value of tab. (1 = queue, 2=received, 3 = sent)
     // Make sure to setLoading to false
     if (tab === 0 && loading) {
-      fetch('http:192.168.1.6:5000/showFiles', {method:'GET'}).then(
-        async ret => {
+      fetch("http:192.168.1.6:5000/showFiles", { method: "GET" })
+        .then(async (ret) => {
           ret = await ret.json();
           setFiles(ret);
           setLoading(false);
-        }
-      ).catch(
-        ()=>{
+        })
+        .catch(() => {
           alert("Could not get files!");
           setLoading(false);
-        }
-      )
+        });
     } else if (tab === 1) {
-      fetch('http:192.168.1.6:5000/showReceived?office='+office, {method:'GET'}).then(
-        async ret => {
+      fetch("http:192.168.1.6:5000/showReceived?office=" + office, {
+        method: "GET",
+      })
+        .then(async (ret) => {
           ret = await ret.json();
           setFiles(ret);
           setLoading(false);
-        }
-      ).catch(
-        ()=>{
+        })
+        .catch(() => {
           alert("Could not get files!");
           setLoading(false);
-        }
-      )
+        });
     } else if (tab === 2) {
-      fetch('http:192.168.1.6:5000/showQueue?office='+office, {method:'GET'}).then(
-        async ret => {
+      fetch("http:192.168.1.6:5000/showQueue?office=" + office, {
+        method: "GET",
+      })
+        .then(async (ret) => {
           ret = await ret.json();
           setFiles(ret);
           setLoading(false);
-        }
-      ).catch(
-        ()=>{
+        })
+        .catch(() => {
           alert("Could not get files!");
           setLoading(false);
-        }
-      )
+        });
     }
   }, [tab, office]);
 
@@ -109,32 +124,55 @@ const Landing = ({ navigation }) => {
         source={require("../assets/black_bg.jpg")}
         resizeMode={"cover"} // cover or contain its upto you view look
       >
-        <Appbar.Header style={{backgroundColor:'rgba(0, 0, 0, 0)', elevation:0, paddingTop:5}}>
+        <Appbar.Header
+          style={{
+            backgroundColor: "rgba(0, 0, 0, 0)",
+            elevation: 0,
+            paddingTop: 5,
+          }}
+        >
           <Appbar.Action icon="menu" onPress={navigation.openDrawer} />
-          {isOfficeAccount && <>
-          <Appbar.Content onPress={()=>setMenuVisible(true)} style={{backgroundColor:'rgba(255,255,255,0.1)', padding:10}} title={office} />
-          {offices!=null && <Menu
-            visible={menuVisible}
-            style={{width:"90%"}}
-            onDismiss={()=>setMenuVisible(false)}
-            anchor={<Appbar.Action onPress={()=>setMenuVisible(true)} color="white" icon="chevron-down" />}
-          >
-            {offices.map((x) => {
-              return (
-                <Menu.Item 
-                  onPress={()=>{
-                    if(tab!=0) setLoading(true);
-                    setOffice(x.office);
-                    setMenuVisible(false);
-                    AsyncStorage.setItem('@office',x.office);
-                  }} 
-                  title={x.office}
-                  key={x.office}
-                />
-              );
-            })}
-          </Menu>}
-          </>}
+          {isOfficeAccount && (
+            <>
+              <Appbar.Content
+                onPress={() => setMenuVisible(true)}
+                style={{
+                  backgroundColor: "rgba(255,255,255,0.1)",
+                  padding: 10,
+                }}
+                title={office}
+              />
+              {offices != null && (
+                <Menu
+                  visible={menuVisible}
+                  style={{ width: "90%" }}
+                  onDismiss={() => setMenuVisible(false)}
+                  anchor={
+                    <Appbar.Action
+                      onPress={() => setMenuVisible(true)}
+                      color="white"
+                      icon="chevron-down"
+                    />
+                  }
+                >
+                  {offices.map((x) => {
+                    return (
+                      <Menu.Item
+                        onPress={() => {
+                          if (tab != 0) setLoading(true);
+                          setOffice(x.office);
+                          setMenuVisible(false);
+                          AsyncStorage.setItem("@office", x.office);
+                        }}
+                        title={x.office}
+                        key={x.office}
+                      />
+                    );
+                  })}
+                </Menu>
+              )}
+            </>
+          )}
         </Appbar.Header>
 
         <View style={{ flex: 1, backgroundColor: "transparent" }}>
@@ -156,7 +194,7 @@ const Landing = ({ navigation }) => {
                 }}
                 color="white"
                 onPress={() => {
-                  setPostScanning('scan')
+                  setPostScanning("scan");
                   setScanning(true);
                 }}
               >
@@ -176,7 +214,7 @@ const Landing = ({ navigation }) => {
               }}
               color="white"
               onPress={() => {
-                navigation.navigate('NewFile');
+                navigation.navigate("NewFile");
               }}
             >
               <AntDesign name="addfile" size={14} color="white" />
@@ -193,7 +231,7 @@ const Landing = ({ navigation }) => {
               }}
               color="white"
               onPress={() => {
-                setPostScanning('track')
+                setPostScanning("track");
                 setScanning(true);
               }}
             >
@@ -227,98 +265,102 @@ const Landing = ({ navigation }) => {
                     onRefresh={() => {
                       // dummy logic
                       setRefreshing(true);
-                      let url = 'http:192.168.1.6:5000/showFiles';
-                      if(tab == 1) url = 'http:192.168.1.6:5000/showReceived?office='+office;
-                      else if(tab == 2) url = 'http:192.168.1.6:5000/showQueue?office='+office;
-                      
-                      fetch(url, {method:'GET'}).then(
-                        async ret => {
+                      let url = "http:192.168.1.6:5000/showFiles";
+                      if (tab == 1)
+                        url =
+                          "http:192.168.1.6:5000/showReceived?office=" + office;
+                      else if (tab == 2)
+                        url =
+                          "http:192.168.1.6:5000/showQueue?office=" + office;
+
+                      fetch(url, { method: "GET" })
+                        .then(async (ret) => {
                           ret = await ret.json();
                           setFiles(ret);
                           setRefreshing(false);
-                        }
-                      ).catch(
-                        ()=>{
+                        })
+                        .catch(() => {
                           alert("Could not get files!");
                           setRefreshing(false);
-                        }
-                      )
+                        });
                     }}
                   />
                 }
               >
-                {isOfficeAccount && <View
-                  style={{
-                    marginTop: "3%",
-                    marginBottom: "3%",
-                    alignItems: "center",
-                    width: "90%",
-                    flexDirection: "row",
-                    position: "relative",
-                  }}
-                >
-                  <Animated.View
+                {isOfficeAccount && (
+                  <View
                     style={{
-                      position: "absolute",
-                      width: "33%",
-                      height: "100%",
-                      borderBottomColor: "black",
-                      borderBottomWidth: 1,
-                      transform: [{ translateX }],
+                      marginTop: "3%",
+                      marginBottom: "3%",
+                      alignItems: "center",
+                      width: "90%",
+                      flexDirection: "row",
+                      position: "relative",
                     }}
-                  />
-                  <Button
-                    mode="outlined"
-                    style={{
-                      borderWidth: 0,
-                      width: "33%",
-                    }}
-                    color={tab === 0 ? "black" : "grey"}
-                    onPress={() => {
-                      if (tab === 0) return;
-                      setLoading(true);
-                      handleSlide(x0);
-                      setTab(0);
-                    }}
-                    onLayout={(event) => setX0(event.nativeEvent.layout.x)}
                   >
-                    Created
-                  </Button>
-                  <Button
-                    mode="outlined"
-                    style={{
-                      borderWidth: 0,
-                      width: "33%",
-                    }}
-                    color={tab === 1 ? "black" : "grey"}
-                    onPress={() => {
-                      if (tab === 1) return;
-                      setLoading(true);
-                      handleSlide(x1);
-                      setTab(1);
-                    }}
-                    onLayout={(event) => setX1(event.nativeEvent.layout.x)}
-                  >
-                    Received
-                  </Button>
-                  <Button
-                    mode="outlined"
-                    style={{
-                      borderWidth: 0,
-                      width: "33%",
-                    }}
-                    color={tab === 2 ? "black" : "grey"}
-                    onPress={() => {
-                      if (tab === 2) return;
-                      setLoading(true);
-                      handleSlide(x2);
-                      setTab(2);
-                    }}
-                    onLayout={(event) => setX2(event.nativeEvent.layout.x)}
-                  >
-                    Queue
-                  </Button>
-                </View>}
+                    <Animated.View
+                      style={{
+                        position: "absolute",
+                        width: "33%",
+                        height: "100%",
+                        borderBottomColor: "black",
+                        borderBottomWidth: 1,
+                        transform: [{ translateX }],
+                      }}
+                    />
+                    <Button
+                      mode="outlined"
+                      style={{
+                        borderWidth: 0,
+                        width: "33%",
+                      }}
+                      color={tab === 0 ? "black" : "grey"}
+                      onPress={() => {
+                        if (tab === 0) return;
+                        setLoading(true);
+                        handleSlide(x0);
+                        setTab(0);
+                      }}
+                      onLayout={(event) => setX0(event.nativeEvent.layout.x)}
+                    >
+                      Created
+                    </Button>
+                    <Button
+                      mode="outlined"
+                      style={{
+                        borderWidth: 0,
+                        width: "33%",
+                      }}
+                      color={tab === 1 ? "black" : "grey"}
+                      onPress={() => {
+                        if (tab === 1) return;
+                        setLoading(true);
+                        handleSlide(x1);
+                        setTab(1);
+                      }}
+                      onLayout={(event) => setX1(event.nativeEvent.layout.x)}
+                    >
+                      Received
+                    </Button>
+                    <Button
+                      mode="outlined"
+                      style={{
+                        borderWidth: 0,
+                        width: "33%",
+                      }}
+                      color={tab === 2 ? "black" : "grey"}
+                      onPress={() => {
+                        if (tab === 2) return;
+                        setLoading(true);
+                        handleSlide(x2);
+                        setTab(2);
+                      }}
+                      onLayout={(event) => setX2(event.nativeEvent.layout.x)}
+                    >
+                      Queue
+                    </Button>
+                  </View>
+                )}
 
                 {loading && (
                   <View
@@ -334,7 +376,9 @@ const Landing = ({ navigation }) => {
                 {!loading && (
                   <>
                     {files.length === 0 && (
-                      <Subheading style={{ marginTop: isOfficeAccount?"4%":"20%" }}>
+                      <Subheading
+                        style={{ marginTop: isOfficeAccount ? "4%" : "20%" }}
+                      >
                         No files to show!
                       </Subheading>
                     )}
@@ -355,11 +399,11 @@ const Landing = ({ navigation }) => {
                         >
                           <TouchableRipple
                             onPress={() => {
-                              if(tab == 0){
+                              if (tab == 0) {
                                 setToken(file.trackingID);
                                 setFileName(file.name);
                                 setViewingFile(true);
-                              }else if(tab == 1){
+                              } else if (tab == 1) {
                                 setToken(file.trackingID);
                                 setFileName(file.name);
                                 setFileAction(true);
@@ -417,28 +461,36 @@ const Landing = ({ navigation }) => {
                                       style={{ margin: 0 }}
                                       onPress={() => {
                                         let formData = new FormData();
-                                        formData.append('tag', file.trackingID);
-                                        fetch('http://192.168.1.6:5000/confirmFile', {
-                                          method:'POST',
-                                          body: formData,
-                                          headers: {
-                                            "content-type": "multipart/form-data",
-                                          },
-                                        }).then(
-                                          async ret => {
+                                        formData.append("tag", file.trackingID);
+                                        fetch(
+                                          "http://192.168.1.6:5000/confirmFile",
+                                          {
+                                            method: "POST",
+                                            body: formData,
+                                            headers: {
+                                              "content-type":
+                                                "multipart/form-data",
+                                            },
+                                          }
+                                        )
+                                          .then(async (ret) => {
                                             ret = await ret.json();
-                                            if(ret.error){
+                                            if (ret.error) {
                                               alert("Some error occurred!");
                                               return 0;
-                                            }else{
-                                              setFiles(files => {
-                                                return files.filter(x => x.trackingID != file.trackingID)
+                                            } else {
+                                              setFiles((files) => {
+                                                return files.filter(
+                                                  (x) =>
+                                                    x.trackingID !=
+                                                    file.trackingID
+                                                );
                                               });
                                             }
-                                          }
-                                        ).catch(
-                                          () => alert("Could not update status!")
-                                        )
+                                          })
+                                          .catch(() =>
+                                            alert("Could not update status!")
+                                          );
                                       }}
                                     />
                                     <IconButton
@@ -446,9 +498,7 @@ const Landing = ({ navigation }) => {
                                       color="red"
                                       size={22}
                                       style={{ margin: 0 }}
-                                      onPress={() => {
-
-                                      }}
+                                      onPress={() => {}}
                                     />
                                   </View>
                                 )}
@@ -462,9 +512,22 @@ const Landing = ({ navigation }) => {
                 )}
               </ScrollView>
               <FAB
+                icon="tag"
+                color="white"
+                small
+                // size={30}
+                style={{
+                  position: "absolute",
+                  bottom: "17%",
+                  right: "6%",
+                  backgroundColor: "black",
+                }}
+                onPress={openTagsMenu}
+              />
+              <FAB
                 icon="filter"
                 color="white"
-                // medium
+                small
                 // size={30}
                 style={{
                   position: "absolute",
@@ -474,82 +537,99 @@ const Landing = ({ navigation }) => {
                 }}
                 onPress={() => {}}
               />
+              <Search
+                searchFor="tags"
+                showModal={tagsMenuVisible}
+                closeModal={closeTagsMenu}
+                setOption={setTags}
+                multiple={true}
+                checked={[]}
+                addNew={false}
+              />
             </View>
           </View>
         </View>
       </ImageBackground>
-      {token && <FileTimeline 
-        showModal={viewingFile}
-        token={token}
-        name={fileName}
-        closeModal={()=>{
-          setViewingFile(false);
-          setToken(null);
-        }}
-      />}
-      {token && <FileAction 
-        showModal={fileAction}
-        token={token}
-        name={fileName}
-        navigation={navigation}
-        office={office}
-        closeModal={()=>{
-          setFileAction(false);
-          setToken(null);
-        }}
-      />}
+      {token && (
+        <FileTimeline
+          showModal={viewingFile}
+          token={token}
+          name={fileName}
+          closeModal={() => {
+            setViewingFile(false);
+            setToken(null);
+          }}
+        />
+      )}
+      {token && (
+        <FileAction
+          showModal={fileAction}
+          token={token}
+          name={fileName}
+          navigation={navigation}
+          office={office}
+          closeModal={() => {
+            setFileAction(false);
+            setToken(null);
+          }}
+        />
+      )}
       <ScanToken
         showModal={scanning}
-        closeModal={()=>{setScanning(false)}}
+        closeModal={() => {
+          setScanning(false);
+        }}
         onSubmit={
-          postScanning=='track'? 
-          tag => {
-            setToken(tag);
-            setFileName('');
-            setViewingFile(true);
-          } : 
-          tag => {
-            fetch('http://192.168.1.6:5000/confirmed?tag='+tag+'&office='+office, {method:'GET'}).then(
-              async ret => {
-                ret = await ret.json()
-                if(ret.error){
-                  alert('Some error occurred!');
-                  return 0;
-                }
-                setFileName(ret.name);
-                if(ret.confirmed){
-                  setToken(tag);
-                  setFileAction(true);
-                  return 0;
-                }
-                let formData = new FormData();
-                formData.append('tag', tag);
-                fetch('http://192.168.1.6:5000/confirmFile', {
-                  method:'POST',
-                  body: formData,
-                  headers: {
-                    "content-type": "multipart/form-data",
-                  },
-                }).then(
-                  async ret => {
+          postScanning == "track"
+            ? (tag) => {
+                setToken(tag);
+                setFileName("");
+                setViewingFile(true);
+              }
+            : (tag) => {
+                fetch(
+                  "http://192.168.1.6:5000/confirmed?tag=" +
+                    tag +
+                    "&office=" +
+                    office,
+                  { method: "GET" }
+                )
+                  .then(async (ret) => {
                     ret = await ret.json();
-                    if(ret.error){
+                    if (ret.error) {
                       alert("Some error occurred!");
                       return 0;
-                    }else if(tab == 2){
-                      setFiles(files => {
-                        return files.filter(x => x.trackingID != tag)
-                      });
                     }
-                  }
-                ).catch(
-                  () => alert("Could not update status!")
-                )
+                    setFileName(ret.name);
+                    if (ret.confirmed) {
+                      setToken(tag);
+                      setFileAction(true);
+                      return 0;
+                    }
+                    let formData = new FormData();
+                    formData.append("tag", tag);
+                    fetch("http://192.168.1.6:5000/confirmFile", {
+                      method: "POST",
+                      body: formData,
+                      headers: {
+                        "content-type": "multipart/form-data",
+                      },
+                    })
+                      .then(async (ret) => {
+                        ret = await ret.json();
+                        if (ret.error) {
+                          alert("Some error occurred!");
+                          return 0;
+                        } else if (tab == 2) {
+                          setFiles((files) => {
+                            return files.filter((x) => x.trackingID != tag);
+                          });
+                        }
+                      })
+                      .catch(() => alert("Could not update status!"));
+                  })
+                  .catch(() => alert("Error contacting server!"));
               }
-            ).catch(
-              () => alert('Error contacting server!')
-            )
-          }
         }
       />
     </Provider>

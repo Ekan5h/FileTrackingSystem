@@ -26,27 +26,24 @@ function MainApp(props) {
       initialRouteName="Home"
       drawerContent={(props) => <DrawerContent {...props} />}
     >
-
       <Drawer.Screen name="Home" component={Landing} />
       <Drawer.Screen name="FileHistory" component={FileHistory} />
       <Drawer.Screen name="NewFile" component={NewFile} />
       <Drawer.Screen name="Feedback" component={Feedback} />
-
     </Drawer.Navigator>
-  )
+  );
 }
 
-async function readLocal(setEmail, setProfile){
-  try{
+async function readLocal(setEmail, setProfile) {
+  try {
     let email = await AsyncStorage.getItem("@email");
     let profile = await AsyncStorage.getItem("@profile");
-    
-    if ( email == null ) setEmail(false);
+
+    if (email == null) setEmail(false);
     else setEmail(email);
-    if ( profile == null ) setProfile(false);
+    if (profile == null) setProfile(false);
     else setProfile(profile);
-  
-  }catch{
+  } catch {
     alert("Could not open app ;(");
   }
 }
@@ -65,22 +62,18 @@ export default function App() {
 
   return (
     <NavigationContainer>
-
       {email != null && profile != null && (
-
         <Stack.Navigator
-          initialRouteName={ email ? (profile ? "SetName" : "MainApp") : "LoginPage" }
+          initialRouteName={
+            email ? (profile ? "SetName" : "MainApp") : "LoginPage"
+          }
           screenOptions={{ headerShown: false }}
         >
-
           <Stack.Screen name="MainApp" component={MainApp} />
           <Stack.Screen name="LoginPage" component={LoginPage} />
           <Stack.Screen name="SetName" component={SetName} />
-
         </Stack.Navigator>
-
       )}
-
     </NavigationContainer>
   );
 }

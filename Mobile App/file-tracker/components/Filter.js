@@ -31,13 +31,13 @@ const Filter = (props) => {
   const [currEndDate, setCurrEndDate] = useState(new Date());
   const [fileTypes, setFileTypes] = useState([]);
   const [handledBy, setHandledBy] = useState([]);
-  const [tags, setTags] = useState([]);
+  // const [tags, setTags] = useState([]);
   const [fileTypesText, setFileTypesText] = useState("");
   const [handledByText, setHandledByText] = useState("");
-  const [tagsText, setTagsText] = useState("");
+  // const [tagsText, setTagsText] = useState("");
   const [fileMenuVisible, setFileMenuVisible] = useState(false);
   const [officeMenuVisible, setOfficeMenuVisible] = useState(false);
-  const [tagsMenuVisible, setTagsMenuVisible] = useState(false);
+  // const [tagsMenuVisible, setTagsMenuVisible] = useState(false);
   const [errors, setErrors] = useState([undefined]);
 
   const [showStart, setShowStart] = useState(false);
@@ -59,8 +59,8 @@ const Filter = (props) => {
   const closeFileMenu = () => setFileMenuVisible(false);
   const openOfficeMenu = () => setOfficeMenuVisible(true);
   const closeOfficeMenu = () => setOfficeMenuVisible(false);
-  const openTagsMenu = () => setTagsMenuVisible(true);
-  const closeTagsMenu = () => setTagsMenuVisible(false);
+  // const openTagsMenu = () => setTagsMenuVisible(true);
+  // const closeTagsMenu = () => setTagsMenuVisible(false);
   const validateForm = () => {
     var newErrors = [undefined];
     if (startDate && endDate && startDate > endDate)
@@ -71,8 +71,8 @@ const Filter = (props) => {
   useEffect(() => {
     setFileTypesText(fileTypes.join(", "));
     setHandledByText(handledBy.join(", "));
-    setTagsText(tags.join(", "));
-  }, [fileTypes, handledBy, tags]);
+    // setTagsText(tags.join(", "));
+  }, [fileTypes, handledBy]);
 
   return (
     <Provider>
@@ -181,7 +181,7 @@ const Filter = (props) => {
                 multiple={true}
                 checked={[]}
               />
-              <Pressable onPress={openTagsMenu} style={{ width: "70%" }}>
+              {/* <Pressable onPress={openTagsMenu} style={{ width: "70%" }}>
                 <TextInput
                   label="Tags"
                   value={tagsText}
@@ -212,7 +212,7 @@ const Filter = (props) => {
                 multiple={true}
                 checked={[]}
                 addNew={false}
-              />
+              /> */}
               <Pressable
                 onPress={() => setShowStart(true)}
                 style={{ width: "70%" }}
