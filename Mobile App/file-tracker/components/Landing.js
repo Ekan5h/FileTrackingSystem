@@ -26,7 +26,7 @@ import FileAction from "./FileAction";
 import ScanToken from "./ScanToken";
 import Search from "./Search";
 
-const Landing = ({ navigation }) => {
+const Landing = ({ navigation, success }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [viewingFile, setViewingFile] = useState(false);
   const [scanning, setScanning] = useState(false);
@@ -45,6 +45,8 @@ const Landing = ({ navigation }) => {
   const [x2, setX2] = useState(0);
   const [translateX, setTranslateX] = useState(new Animated.Value(0));
   const [loading, setLoading] = useState(true);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showSuccessInit, setShowSuccessInit] = useState(false);
   const [tags, setTags] = useState([]);
   const [tagsMenuVisible, setTagsMenuVisible] = useState(false);
   const openTagsMenu = () => setTagsMenuVisible(true);
@@ -75,6 +77,14 @@ const Landing = ({ navigation }) => {
   };
 
   useEffect(() => {
+    if (success && !showSuccessInit) {
+      setShowSuccess(true);
+      setShowSuccessInit(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 3000);
+    }
+
     // Make API call based on value of tab. (1 = queue, 2=received, 3 = sent)
     // Make sure to setLoading to false
     if (tab === 0 && loading) {
@@ -115,10 +125,29 @@ const Landing = ({ navigation }) => {
           setLoading(false);
         });
     }
-  }, [tab, office]);
+  }, [tab, office, showSuccess]);
 
   return (
     <Provider>
+      {showSuccess && (
+        <ImageBackground
+          imageStyle={{ opacity: 0.5 }}
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            height: "100%",
+            resizeMode: "cover",
+          }}
+          source={require("../assets/white_bg.png")}
+          resizeMode={"cover"} // cover or contain its upto you view look
+        >
+          <Image
+            style={{ height: 400, width: 400 }}
+            source={require("../assets/success.gif")}
+          />
+        </ImageBackground>
+      )}
       <ImageBackground
         style={{ flex: 1, resizeMode: "cover" }}
         source={require("../assets/black_bg.jpg")}

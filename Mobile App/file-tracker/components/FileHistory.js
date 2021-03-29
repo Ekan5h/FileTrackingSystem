@@ -23,14 +23,6 @@ const FileHistory = (props) => {
   const [files, setFiles] = useState([]);
   const [offices, setOffices] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-
-  useEffect(() => {
-    if (props.success) setShowSuccess(true);
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 3000);
-  }, []);
 
   const reload = async (offices) => {
     // alert(JSON.stringify(offices));
@@ -69,22 +61,6 @@ const FileHistory = (props) => {
       resizeMode={"cover"}
     >
       <View style={{ backgroundColor: "transparent", height: "100%" }}>
-        {showSuccess && (
-          <View
-            style={{
-              justifyContent: "center",
-              alignItems: "center",
-              width: "100%",
-              height: "100%",
-              // backgroundColor: "yellow",
-            }}
-          >
-            <Image
-              style={{ height: 400, width: 400 }}
-              source={require("../assets/success.gif")}
-            />
-          </View>
-        )}
         <IconButton
           icon="menu"
           color="black"
