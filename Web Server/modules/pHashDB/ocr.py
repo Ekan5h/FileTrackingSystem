@@ -54,9 +54,9 @@ def readTag(url):
                 ans = line.text
                 print(line.text)
                 reco += ans
-            ans += ' '
+            reco += ' '
 
-    x = search_tree.find(reco.lower(), len(reco)+5)
+    x = search_tree.find(reco.upper(), len(reco)+5)
     if len(x)>0:
         return x[0][1]
     else:

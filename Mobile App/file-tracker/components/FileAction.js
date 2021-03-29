@@ -29,7 +29,7 @@ const FileAction = (props) => {
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const [file, setFile] = useState({
     token: props.token,
-    name: "Budget approval",
+    name: props.name,
   });
 
   const openActionMenu = () => setActionMenuVisible(true);
@@ -38,8 +38,17 @@ const FileAction = (props) => {
   const closeOfficeMenu = () => setOfficeMenuVisible(false);
   const validateForm = () => {
     var newErrors = [undefined, undefined, undefined];
-    if (action === "") newErrors[0] = "Please select an action";
+    let ret = true;
+    if (action === ""){
+      ret = false;
+      newErrors[0] = "Please select an action";
+    }
+    if (action === "Processed & Forwarded" && forwardingTo === ""){
+      ret = false;
+      newErrors[1] = "Please select who you are forwarding to"
+    }
     setErrors(newErrors);
+    return ret;
   };
 
   useEffect(() => {
@@ -177,11 +186,11 @@ const FileAction = (props) => {
                       },
                     }}
                     editable={false}
-                    disabled={action === "Forward" ? false : true}
+                    disabled={action == "Processed & Forwarded" || action == "Clarifications/Inputs needed" ? false : true}
                     right={
                       <TextInput.Icon
                         name="chevron-right"
-                        onPress={action === "Forward" ? openOfficeMenu : null}
+                        onPress={ action == "Processed & Forwarded" || action == "Clarifications/Inputs needed" ? openOfficeMenu : null }
                       />
                     }
                   />
@@ -192,6 +201,17 @@ const FileAction = (props) => {
                   closeModal={closeOfficeMenu}
                   setOption={setForwardingTo}
                 />
+                {errors[1] && (
+                  <Text
+                    style={{
+                      color: "rgb(176, 1, 1)",
+                      marginTop: "1%",
+                      marginLeft: "1%",
+                    }}
+                  >
+                    {errors[1]}
+                  </Text>
+                )}
                 <TextInput
                   label="Remarks"
                   value={remarks}
@@ -223,7 +243,48 @@ const FileAction = (props) => {
                   mode="contained"
                   color="black"
                   onPress={() => {
-                    validateForm();
+                    if(validateForm()){
+                      let type = -1
+                      if (action == "Processed & Forwarded") type = 1;
+                      if (action == "Clarifications/Inputs needed") type = 2;
+                      if (action == "Approved and Returned Finally") type = 3;
+                      if (action == "Approved and Kept Finally") type = 4;
+                      if (action == "Not Approved and Returned Finally") type = 5;
+                      if (action == "Not Approved and Kept Finally") type = 6;
+                      let next = "";
+                      if(type == 1 || type == 2){
+                        next = forwardingTo;
+                      }
+                      formData = new FormData()
+                      formData.append('tag', props.token);
+                      formData.append('type', type);
+                      formData.append('next', next);
+                      formData.append('office', props.office);
+                      formData.append('remarks', remarks);
+                      fetch('http://192.168.1.6:5000/updateFile',{
+                        method:'POST',
+                        body:formData,
+                        headers: {
+                          "content-type": "multipart/form-data",
+                        },
+                      }).then(
+                        async ret => {
+                          ret = await ret.json();
+                          if(ret.error==false){
+                            props.navigation.reset({
+                              index: 0,
+                              routes: [{
+                                name: "Home",
+                              }],
+                            });
+                          }else{
+                            alert('Something went wrong!');
+                          }
+                        }
+                      ).catch(
+                        () => alert("Could not update file!")
+                      )
+                    }
                   }}
                 >
                   Confirm

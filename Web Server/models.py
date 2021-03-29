@@ -47,13 +47,13 @@ class OfficeEmails(db.Model):
 class Users(UserMixin, db.Model):
     login_email = db.Column(db.String, primary_key=True)
     name = db.Column(db.String)
-    emails = db.Column(db.String, nullable=True)
+    offices = db.Column(db.String, nullable=True)
     token = db.Column(db.String, unique=True)
 
     def __init__(self, login_email):
         self.login_email = login_email
         self.name = ''
-        self.emails = ''
+        self.offices = ''
         self.token = serializer.dumps([self.login_email])
 
     def __repr__(self):
@@ -106,5 +106,27 @@ class Tags(db.Model):
     tag = db.Column(db.String)
     email = db.Column(db.String)
 
+    def __init__(self, file_id, tag, email):
+        self.file_id = file_id
+        self.tag = tag
+        self.email = email
+
     def __repr__(self):
         return str(self.tag) + " " + str(self.file_id) + " " + str(self.email)
+
+class TransferRequest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    file_id = db.Column(db.Integer)
+    from_id = db.Column(db.String)
+    to_id = db.Column(db.String)
+
+    def __init__(self, file_id, name, from_id, to_id):
+        self.file_id = file_id
+        self.name = name
+        self.from_id = from_id
+        self.to_id = to_id
+
+    def __repr__(self):
+        return "Transfer from " + from_id
+

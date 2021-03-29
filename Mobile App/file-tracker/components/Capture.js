@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import { TouchableOpacity, View, ImageBackground } from "react-native";
 import { Camera } from "expo-camera";
 import { Button } from "react-native-paper";
+import * as ImageManipulator from 'expo-image-manipulator';
 
 const Capture = (props) => {
   const [cameraRef, setCameraRef] = useState(null);
   const [image, setImage] = useState(null);
+  Camera.requestPermissionsAsync();
   return (
     <>
       {image && (
@@ -43,7 +45,7 @@ const Capture = (props) => {
               >
                 Retry
               </Button>
-              <Button
+              {/* <Button
                 icon="check"
                 style={{
                   width: "40%",
@@ -56,7 +58,7 @@ const Capture = (props) => {
                 }}
               >
                 Submit
-              </Button>
+              </Button> */}
             </View>
           </ImageBackground>
         </>
@@ -81,8 +83,14 @@ const Capture = (props) => {
             <TouchableOpacity
               onPress={async () => {
                 if (cameraRef) {
-                  let image = await cameraRef.takePictureAsync({ quality: 0 });
+                  let image = await cameraRef.takePictureAsync({ quality: 0, skipProcessing:true });
+                  let resized = await ImageManipulator.manipulateAsync(
+                    image.uri,
+                    [{resize: {height: image.height>image.width?400:300}}],
+                    { compress:0.3 }
+                  );
                   setImage(image);
+                  props.onSubmit(resized);
                   // console.log("clicked!");
                 }
               }}

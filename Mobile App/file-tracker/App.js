@@ -20,81 +20,67 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
-export default function App() {
-  return <LoginPage />;
-  // return <LoginPage />;
-  // return <SetName />;
-  // return <Feedback />;
-  // return <FileHistory />;
-  // return <FileTimeline token="123456"></FileTimeline>;
-  return <Filter />;
-  // return <Search searchFor="offices" />;
+function MainApp(props) {
   return (
-    <NavigationContainer>
-      <Drawer.Navigator
-        initialRouteName="Landing"
-        drawerContent={(props) => <DrawerContent {...props} />}
-      >
-        <Drawer.Screen name="Landing" component={Landing} />
-        <Drawer.Screen name="FileHistory" component={FileHistory} />
-        <Drawer.Screen name="Feedback" component={Feedback} />
-      </Drawer.Navigator>
-    </NavigationContainer>
-  );
-  // return <FileAction token="123456"></FileAction>;
-  // return <FileTimeline token="123456"></FileTimeline>;
-  return <Landing></Landing>;
-  return <NewFile></NewFile>;
-  // return <ScanToken></ScanToken>;
+    <Drawer.Navigator
+      initialRouteName="Home"
+      drawerContent={(props) => <DrawerContent {...props} />}
+    >
+
+      <Drawer.Screen name="Home" component={Landing} />
+      <Drawer.Screen name="FileHistory" component={FileHistory} />
+      <Drawer.Screen name="NewFile" component={NewFile} />
+      <Drawer.Screen name="Feedback" component={Feedback} />
+
+    </Drawer.Navigator>
+  )
+}
+
+async function readLocal(setEmail, setProfile){
+  try{
+    let email = await AsyncStorage.getItem("@email");
+    let profile = await AsyncStorage.getItem("@profile");
+    
+    if ( email == null ) setEmail(false);
+    else setEmail(email);
+    if ( profile == null ) setProfile(false);
+    else setProfile(profile);
+  
+  }catch{
+    alert("Could not open app ;(");
+  }
+}
+
+export default function App() {
   const [email, setEmail] = useState(null);
   const [profile, setProfile] = useState(null);
 
   SplashScreen.preventAutoHideAsync();
 
   useEffect(() => {
-    if (email != null && profile != null) {
-      SplashScreen.hideAsync();
-    }
+    if (email != null && profile != null) SplashScreen.hideAsync();
   });
 
-  AsyncStorage.getItem("@email")
-    .then((value) => {
-      if (value != null) {
-        setEmail(value);
-      } else {
-        setEmail(false);
-      }
-    })
-    .catch((e) => {
-      alert("Could not open app! Try again.");
-    });
-
-  AsyncStorage.getItem("@profile")
-    .then((value) => {
-      if (value != null) {
-        setProfile(value);
-      } else {
-        setProfile(false);
-      }
-    })
-    .catch((e) => {
-      alert("Could not open app! Try again.");
-    });
+  readLocal(setEmail, setProfile);
 
   return (
     <NavigationContainer>
+
       {email != null && profile != null && (
+
         <Stack.Navigator
-          initialRouteName={
-            email ? (profile ? "SetName" : "Landing") : "LoginPage"
-          }
+          initialRouteName={ email ? (profile ? "SetName" : "MainApp") : "LoginPage" }
           screenOptions={{ headerShown: false }}
         >
-          <Stack.Screen name="Landing" component={Landing} />
+
+          <Stack.Screen name="MainApp" component={MainApp} />
           <Stack.Screen name="LoginPage" component={LoginPage} />
           <Stack.Screen name="SetName" component={SetName} />
+
         </Stack.Navigator>
+
       )}
+
     </NavigationContainer>
   );
 }

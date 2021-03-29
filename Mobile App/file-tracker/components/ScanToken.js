@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, ImageBackground, StatusBar } from "react-native";
+import { View, ImageBackground, StatusBar, Modal } from "react-native";
 import Capture from "./Capture";
 import FileAction from "./FileAction";
 import {
@@ -10,21 +10,29 @@ import {
   Text,
 } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
+import { Camera } from "expo-camera";
 
-export default function ScanToken() {
-  const [token, setToken] = useState(null);
+export default function ScanToken(props) {
+  const [token, setToken] = useState('');
+  const [loading, setLoading] = useState(false);
   const [attempt, setAttempt] = useState(1);
   const [subheading, setSubheading] = useState(
     "Click a clear picture of the token."
   );
-  const [showFileAction, setShowFileAction] = useState(false);
-  const [tokenError, setTokenError] = useState("");
 
   useEffect(() => {
     if (attempt > 1) setSubheading("Try again or type the token instead!");
   });
 
   return (
+    <Modal
+      animationType="slide"
+      visible={props.showModal}
+      useNativeDriver={true}
+      animationIn="slideInLeft"
+      animationOut="slideOutRight"
+      onRequestClose={props.closeModal}
+    >
     <ImageBackground
       style={{ flex: 1, resizeMode: "cover" }}
       source={require("../assets/white_bg.png")}
@@ -49,7 +57,7 @@ export default function ScanToken() {
             top: 1 * StatusBar.currentHeight,
             left: 4,
           }}
-          onPress={() => {}}
+          onPress={props.closeModal}
         />
         <Subheading style={{ color: attempt > 1 ? "rgb(176, 1, 1)" : "black" }}>
           {subheading}
@@ -67,6 +75,7 @@ export default function ScanToken() {
         >
           <Capture
             onSubmit={(image) => {
+              setLoading(true);
               var name = image.uri.split("/").pop();
               let formData = new FormData();
               formData.append("image", {
@@ -74,8 +83,7 @@ export default function ScanToken() {
                 name: name,
                 type: "image/jpg",
               });
-              formData.append("algorithm", "PHASH");
-              fetch("http://ec6d5281343e.ngrok.io/dehashImage", {
+              fetch("http://192.168.1.6:5000/scan", {
                 method: "POST",
                 body: formData,
                 headers: {
@@ -87,14 +95,17 @@ export default function ScanToken() {
                     .json()
                     .then((data) => {
                       setToken(String(data.id));
+                      setLoading(false);
                     })
                     .catch((err) => {
                       setAttempt(attempt + 1);
                       alert("Try again!");
+                      setLoading(false);
                     });
                 })
                 .catch((ret) => {
                   alert("Network Error!");
+                  setLoading(false);
                 });
             }}
           ></Capture>
@@ -114,11 +125,6 @@ export default function ScanToken() {
               justifyContent: "center",
             }}
           >
-            <FileAction
-              token="123456"
-              showModal={showFileAction}
-              closeModal={() => setShowFileAction(false)}
-            />
             <TextInput
               label="Token number"
               value={token}
@@ -133,6 +139,8 @@ export default function ScanToken() {
               }}
             />
             <Button
+              loading={loading}
+              disabled={token.length==0}
               style={{
                 width: "0%",
                 alignItems: "center",
@@ -144,30 +152,18 @@ export default function ScanToken() {
               // icon="check"
               mode="contained"
               color="black"
-              onPress={() => {
+              onPress={loading?null:() => {
                 console.log("Send to server");
-                var error = ""; // set to error message if API call fails
-                if (!error) setShowFileAction(true);
-                else setTokenError(error);
+                props.onSubmit(token);
+                props.closeModal();
               }}
             >
-              <Ionicons name="checkmark" size={24} color="white" />
+              {!loading && <Ionicons name="checkmark" size={24} color="white" />}
             </Button>
           </View>
-
-          {tokenError !== "" && (
-            <Text
-              style={{
-                color: "rgb(176, 1, 1)",
-                marginTop: "5%",
-                marginLeft: "1%",
-              }}
-            >
-              {tokenError}
-            </Text>
-          )}
         </View>
       </View>
     </ImageBackground>
+    </Modal>
   );
 }

@@ -17,7 +17,7 @@ app.register_blueprint(office_ops)
 app.register_blueprint(file_ops)
 
 app.secret_key = b'\n\x7f&J\xae\xce&\xea\x05e\xdb\x7f\xd3\xbc\x1a6'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://lloyjdgw:2JGfBtw9jvfGkmOPmqqIEO06Dms-HZU1@john.db.elephantsql.com:5432/lloyjdgw'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://lgrrdxzb:RK4Wo5k3N6aAiHlKQ5NXKvBFa2-0s1OZ@arjuna.db.elephantsql.com:5432/lgrrdxzb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)

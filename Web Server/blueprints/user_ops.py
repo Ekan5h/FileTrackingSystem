@@ -21,6 +21,21 @@ def setName():
         return jsonify({'error':True, 'msg':str(e)})
     return "AddEmail"
 
+@user_ops.route('/getUsers', methods=['GET'])
+@login_required
+def getUsers():
+    try:
+        users = Users.query.all()
+        ret = [
+            {
+                'name': x.name,
+                'email': x.login_email
+            } for x in users
+        ]
+        print(ret)
+        return jsonify(ret) 
+    except Exception as e:
+        return jsonify({'error':True, 'msg':str(e)})
 
 @user_ops.route('/amiloggedin')
 def amiloggedin():

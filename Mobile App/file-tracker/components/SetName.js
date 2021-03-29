@@ -122,7 +122,7 @@ export default function SetName({ navigation }, prop) {
               }
               let formData = new FormData();
               formData.append("name", name);
-              fetch("http://filetracking.azurewebsites.net/setName", {
+              fetch("http://192.168.1.6:5000/setName", {
                 method: "POST",
                 body: formData,
                 headers: {
@@ -134,7 +134,7 @@ export default function SetName({ navigation }, prop) {
                   await AsyncStorage.setItem("@name", name);
                   navigation.reset({
                     index: 0,
-                    routes: [{ name: "Landing" }],
+                    routes: [{ name: "MainApp" }],
                   });
                 })
                 .catch((e) => {

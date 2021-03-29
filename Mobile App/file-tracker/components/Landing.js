@@ -1,71 +1,53 @@
 import React, { useState, useEffect } from "react";
-import {
-  Button,
-  TouchableRipple,
-  Subheading,
-  Paragraph,
-  Caption,
-  FAB,
-  IconButton,
-} from "react-native-paper";
-import {
-  View,
-  RefreshControl,
-  ScrollView,
-  ImageBackground,
-  Animated,
-  Image,
-} from "react-native";
+import { Appbar, Button, TouchableRipple, Menu, Subheading, Paragraph, Caption,FAB, IconButton, Provider } from "react-native-paper";
+import { View, RefreshControl, ScrollView, ImageBackground, Animated, Image, } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import FileTimeline from "./FileTimeline";
+import FileAction from "./FileAction";
+import ScanToken from "./ScanToken";
 
-// dummy data
-var new_files = [
-  {
-    name: "Test name",
-    status: "Pending Dean's approval",
-    trackingID: String(Math.floor(Math.random() * (1000000 - 100000) + 100000)),
-    received: 1,
-  },
-  {
-    name: "Test name",
-    status: "Pending Dean's approval",
-    trackingID: String(Math.floor(Math.random() * (1000000 - 100000) + 100000)),
-    received: -1,
-  },
-  {
-    name: "Test name",
-    status: "Pending Dean's approval",
-    trackingID: String(Math.floor(Math.random() * (1000000 - 100000) + 100000)),
-    received: 0,
-  },
-];
 
-var more_new_files = [
-  {
-    name: "Another test name",
-    status: "Pending Dean's approval",
-    trackingID: String(Math.floor(Math.random() * (1000000 - 100000) + 100000)),
-    received: 1,
-  },
-  {
-    name: "Another test name",
-    status: "Pending Dean's approval",
-    trackingID: String(Math.floor(Math.random() * (1000000 - 100000) + 100000)),
-    received: -1,
-  },
-];
 
 const Landing = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
-  const [files, setFiles] = useState(new_files); // pass filter object as props
+  const [viewingFile, setViewingFile] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const [postScanning, setPostScanning] = useState(null);
+  const [fileAction, setFileAction] = useState(false);
+  const [token, setToken] = useState(null);
+  const [fileName, setFileName] = useState("");
+  const [files, setFiles] = useState([]); // pass filter object as props
+  const [menuVisible, setMenuVisible] = useState(false);
   const [isOfficeAccount, setIsOfficeAccount] = useState(false);
+  const [office, setOffice] = useState("");
+  const [offices, setOffices] = useState(null);
   const [tab, setTab] = useState(0);
   const [x0, setX0] = useState(0);
   const [x1, setX1] = useState(0);
   const [x2, setX2] = useState(0);
   const [translateX, setTranslateX] = useState(new Animated.Value(0));
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  if(offices==null)
+    AsyncStorage.getItem('@offices').then(
+      (ret) => {
+        if(ret==null) return 0;
+        ret = JSON.parse(ret);
+        if (ret.length){
+          setIsOfficeAccount(true);
+          setTab(0);
+        }
+        setOffices(ret);
+        AsyncStorage.getItem('@office').then(
+          (ret) => {
+            if(ret!=null){
+              setOffice(ret);
+            }
+          }
+        )
+      }
+    )
 
   const handleSlide = (x) => {
     Animated.spring(translateX, {
@@ -75,47 +57,90 @@ const Landing = ({ navigation }) => {
     }).start();
   };
 
-  const changeReceivedStatus = (trackingID, newStatus) => {
-    var newFiles = [...files];
-    var idx = newFiles.findIndex((file) => file.trackingID === trackingID);
-    newFiles[idx].received = newStatus;
-    setFiles(newFiles);
-    // API CALL TO CHANGE RECEIVED STATUS
-    // Received attribute: received=1, not received=-1, unmarked=0
-  };
-
   useEffect(() => {
     // Make API call based on value of tab. (1 = queue, 2=received, 3 = sent)
     // Make sure to setLoading to false
-    if (tab === 0) {
-      setTimeout(() => {
-        setFiles(new_files);
-        setLoading(false);
-      }, 2000);
+    if (tab === 0 && loading) {
+      fetch('http:192.168.1.6:5000/showFiles', {method:'GET'}).then(
+        async ret => {
+          ret = await ret.json();
+          setFiles(ret);
+          setLoading(false);
+        }
+      ).catch(
+        ()=>{
+          alert("Could not get files!");
+          setLoading(false);
+        }
+      )
     } else if (tab === 1) {
-      setTimeout(() => {
-        setFiles(new_files);
-        setLoading(false);
-      }, 1000);
-    } else {
-      setTimeout(() => {
-        setFiles([]);
-        setLoading(false);
-      }, 1);
+      fetch('http:192.168.1.6:5000/showReceived?office='+office, {method:'GET'}).then(
+        async ret => {
+          ret = await ret.json();
+          setFiles(ret);
+          setLoading(false);
+        }
+      ).catch(
+        ()=>{
+          alert("Could not get files!");
+          setLoading(false);
+        }
+      )
+    } else if (tab === 2) {
+      fetch('http:192.168.1.6:5000/showQueue?office='+office, {method:'GET'}).then(
+        async ret => {
+          ret = await ret.json();
+          setFiles(ret);
+          setLoading(false);
+        }
+      ).catch(
+        ()=>{
+          alert("Could not get files!");
+          setLoading(false);
+        }
+      )
     }
-  }, [tab]);
+  }, [tab, office]);
 
   return (
-    <>
+    <Provider>
       <ImageBackground
         style={{ flex: 1, resizeMode: "cover" }}
         source={require("../assets/black_bg.jpg")}
         resizeMode={"cover"} // cover or contain its upto you view look
       >
+        <Appbar.Header style={{backgroundColor:'rgba(0, 0, 0, 0)', elevation:0, paddingTop:5}}>
+          <Appbar.Action icon="menu" onPress={navigation.openDrawer} />
+          {isOfficeAccount && <>
+          <Appbar.Content onPress={()=>setMenuVisible(true)} style={{backgroundColor:'rgba(255,255,255,0.1)', padding:10}} title={office} />
+          {offices!=null && <Menu
+            visible={menuVisible}
+            style={{width:"90%"}}
+            onDismiss={()=>setMenuVisible(false)}
+            anchor={<Appbar.Action onPress={()=>setMenuVisible(true)} color="white" icon="chevron-down" />}
+          >
+            {offices.map((x) => {
+              return (
+                <Menu.Item 
+                  onPress={()=>{
+                    if(tab!=0) setLoading(true);
+                    setOffice(x.office);
+                    setMenuVisible(false);
+                    AsyncStorage.setItem('@office',x.office);
+                  }} 
+                  title={x.office}
+                  key={x.office}
+                />
+              );
+            })}
+          </Menu>}
+          </>}
+        </Appbar.Header>
+
         <View style={{ flex: 1, backgroundColor: "transparent" }}>
           <View
             style={{
-              height: "30%",
+              height: "25%",
               alignItems: "center",
               justifyContent: "center",
             }}
@@ -127,11 +152,13 @@ const Landing = ({ navigation }) => {
                   justifyContent: "center",
                   borderColor: "white",
                   borderWidth: 0.5,
-                  marginTop: "6%",
                   width: "65%",
                 }}
                 color="white"
-                onPress={() => {}}
+                onPress={() => {
+                  setPostScanning('scan')
+                  setScanning(true);
+                }}
               >
                 <AntDesign name="scan1" size={14} color="white" />
                 {"   "}Scan a file
@@ -144,11 +171,13 @@ const Landing = ({ navigation }) => {
                 justifyContent: "center",
                 borderColor: "white",
                 borderWidth: 0.5,
-                marginTop: isOfficeAccount ? "3%" : "6%",
+                marginTop: isOfficeAccount ? "3%" : "-10%",
                 width: "65%",
               }}
               color="white"
-              onPress={() => {}}
+              onPress={() => {
+                navigation.navigate('NewFile');
+              }}
             >
               <AntDesign name="addfile" size={14} color="white" />
               {"   "}Create new file
@@ -164,18 +193,8 @@ const Landing = ({ navigation }) => {
               }}
               color="white"
               onPress={() => {
-                fetch("http://192.168.1.2:5000/logout")
-                  .then(async () => {
-                    try {
-                      await AsyncStorage.removeItem("@email");
-                    } catch {
-                      alert("Could not logout. Clear data.");
-                    }
-                    navigation.navigate("LoginPage");
-                  })
-                  .catch(() => {
-                    alert("Network Issues");
-                  });
+                setPostScanning('track')
+                setScanning(true);
               }}
             >
               <AntDesign name="search1" size={14} color="white" />
@@ -207,24 +226,28 @@ const Landing = ({ navigation }) => {
                     refreshing={refreshing}
                     onRefresh={() => {
                       // dummy logic
-                      var new_files = [
-                        {
-                          name: "Budget Approval",
-                          status: "Pending Dean's approval",
-                          trackingID: String(
-                            Math.floor(
-                              Math.random() * (1000000 - 100000) + 100000
-                            )
-                          ),
-                          received: 0,
-                        },
-                      ].concat(files);
-                      setFiles(new_files);
+                      setRefreshing(true);
+                      let url = 'http:192.168.1.6:5000/showFiles';
+                      if(tab == 1) url = 'http:192.168.1.6:5000/showReceived?office='+office;
+                      else if(tab == 2) url = 'http:192.168.1.6:5000/showQueue?office='+office;
+                      
+                      fetch(url, {method:'GET'}).then(
+                        async ret => {
+                          ret = await ret.json();
+                          setFiles(ret);
+                          setRefreshing(false);
+                        }
+                      ).catch(
+                        ()=>{
+                          alert("Could not get files!");
+                          setRefreshing(false);
+                        }
+                      )
                     }}
                   />
                 }
               >
-                <View
+                {isOfficeAccount && <View
                   style={{
                     marginTop: "3%",
                     marginBottom: "3%",
@@ -259,7 +282,7 @@ const Landing = ({ navigation }) => {
                     }}
                     onLayout={(event) => setX0(event.nativeEvent.layout.x)}
                   >
-                    Queue
+                    Created
                   </Button>
                   <Button
                     mode="outlined"
@@ -293,9 +316,9 @@ const Landing = ({ navigation }) => {
                     }}
                     onLayout={(event) => setX2(event.nativeEvent.layout.x)}
                   >
-                    Sent
+                    Queue
                   </Button>
-                </View>
+                </View>}
 
                 {loading && (
                   <View
@@ -311,7 +334,7 @@ const Landing = ({ navigation }) => {
                 {!loading && (
                   <>
                     {files.length === 0 && (
-                      <Subheading style={{ marginTop: "4%" }}>
+                      <Subheading style={{ marginTop: isOfficeAccount?"4%":"20%" }}>
                         No files to show!
                       </Subheading>
                     )}
@@ -331,7 +354,17 @@ const Landing = ({ navigation }) => {
                           key={file.trackingID}
                         >
                           <TouchableRipple
-                            onPress={() => {}}
+                            onPress={() => {
+                              if(tab == 0){
+                                setToken(file.trackingID);
+                                setFileName(file.name);
+                                setViewingFile(true);
+                              }else if(tab == 1){
+                                setToken(file.trackingID);
+                                setFileName(file.name);
+                                setFileAction(true);
+                              }
+                            }}
                             rippleColor="rgba(0, 0, 0, .15)"
                             style={{
                               width: "100%",
@@ -364,7 +397,7 @@ const Landing = ({ navigation }) => {
                                   paddingRight: "5%",
                                 }}
                               >
-                                {tab !== 0 ? (
+                                {tab !== 2 ? (
                                   <AntDesign
                                     name="right"
                                     size={16}
@@ -379,38 +412,42 @@ const Landing = ({ navigation }) => {
                                   >
                                     <IconButton
                                       icon="check"
-                                      color={
-                                        file.received === 1
-                                          ? "black"
-                                          : "#c2c2c2"
-                                      }
+                                      color="green"
                                       size={22}
                                       style={{ margin: 0 }}
                                       onPress={() => {
-                                        var newStatus =
-                                          file.received === 1 ? 0 : 1;
-                                        changeReceivedStatus(
-                                          file.trackingID,
-                                          newStatus
-                                        );
+                                        let formData = new FormData();
+                                        formData.append('tag', file.trackingID);
+                                        fetch('http://192.168.1.6:5000/confirmFile', {
+                                          method:'POST',
+                                          body: formData,
+                                          headers: {
+                                            "content-type": "multipart/form-data",
+                                          },
+                                        }).then(
+                                          async ret => {
+                                            ret = await ret.json();
+                                            if(ret.error){
+                                              alert("Some error occurred!");
+                                              return 0;
+                                            }else{
+                                              setFiles(files => {
+                                                return files.filter(x => x.trackingID != file.trackingID)
+                                              });
+                                            }
+                                          }
+                                        ).catch(
+                                          () => alert("Could not update status!")
+                                        )
                                       }}
                                     />
                                     <IconButton
                                       icon="close"
-                                      color={
-                                        file.received === -1
-                                          ? "black"
-                                          : "#c2c2c2"
-                                      }
+                                      color="red"
                                       size={22}
                                       style={{ margin: 0 }}
                                       onPress={() => {
-                                        var newStatus =
-                                          file.received === -1 ? 0 : -1;
-                                        changeReceivedStatus(
-                                          file.trackingID,
-                                          newStatus
-                                        );
+
                                       }}
                                     />
                                   </View>
@@ -441,7 +478,81 @@ const Landing = ({ navigation }) => {
           </View>
         </View>
       </ImageBackground>
-    </>
+      {token && <FileTimeline 
+        showModal={viewingFile}
+        token={token}
+        name={fileName}
+        closeModal={()=>{
+          setViewingFile(false);
+          setToken(null);
+        }}
+      />}
+      {token && <FileAction 
+        showModal={fileAction}
+        token={token}
+        name={fileName}
+        navigation={navigation}
+        office={office}
+        closeModal={()=>{
+          setFileAction(false);
+          setToken(null);
+        }}
+      />}
+      <ScanToken
+        showModal={scanning}
+        closeModal={()=>{setScanning(false)}}
+        onSubmit={
+          postScanning=='track'? 
+          tag => {
+            setToken(tag);
+            setFileName('');
+            setViewingFile(true);
+          } : 
+          tag => {
+            fetch('http://192.168.1.6:5000/confirmed?tag='+tag+'&office='+office, {method:'GET'}).then(
+              async ret => {
+                ret = await ret.json()
+                if(ret.error){
+                  alert('Some error occurred!');
+                  return 0;
+                }
+                setFileName(ret.name);
+                if(ret.confirmed){
+                  setToken(tag);
+                  setFileAction(true);
+                  return 0;
+                }
+                let formData = new FormData();
+                formData.append('tag', tag);
+                fetch('http://192.168.1.6:5000/confirmFile', {
+                  method:'POST',
+                  body: formData,
+                  headers: {
+                    "content-type": "multipart/form-data",
+                  },
+                }).then(
+                  async ret => {
+                    ret = await ret.json();
+                    if(ret.error){
+                      alert("Some error occurred!");
+                      return 0;
+                    }else if(tab == 2){
+                      setFiles(files => {
+                        return files.filter(x => x.trackingID != tag)
+                      });
+                    }
+                  }
+                ).catch(
+                  () => alert("Could not update status!")
+                )
+              }
+            ).catch(
+              () => alert('Error contacting server!')
+            )
+          }
+        }
+      />
+    </Provider>
   );
 };
 

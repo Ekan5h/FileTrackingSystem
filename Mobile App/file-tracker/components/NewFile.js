@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Search from "./Search";
+import WriteToken from "./WriteToken";
 import {
   Button,
   Text,
@@ -17,13 +18,13 @@ import {
   StatusBar,
 } from "react-native";
 
-const NewFile = () => {
+const NewFile = (props) => {
   const [name, setName] = useState("");
-  const [remarks, setRemarks] = useState("");
   const [officeMenuVisible, setOfficeMenuVisible] = useState(false);
   const [transferMenuVisible, setTransferMenuVisible] = useState(false);
   const [typeMenuVisible, setTypeMenuVisible] = useState(false);
   const [fileType, setFileType] = useState("");
+  const [tag, setTag] = useState(null);
   const [submittedTo, setSubmittedTo] = useState("");
   const [transferTo, setTransferTo] = useState("");
   const [errors, setErrors] = useState([
@@ -43,9 +44,21 @@ const NewFile = () => {
   const closeTypeMenu = () => setTypeMenuVisible(false);
   const validateForm = () => {
     var newErrors = [undefined, undefined, undefined];
-    if (name === "") newErrors[0] = "Please enter a file name";
-    if (fileType === "") newErrors[1] = "Please select a file type";
+    ret = true;
+    if (name === ""){
+      newErrors[0] = "Please enter a file name";
+      ret = false;
+    }
+    if (fileType === ""){
+      newErrors[1] = "Please select a file type";
+      ret = false;
+    }
+    if (submittedTo === ""){
+      newErrors[2] = "Please select an office";
+      ret = false;
+    }
     setErrors(newErrors);
+    return ret;
   };
 
   useEffect(() => {
@@ -106,7 +119,9 @@ const NewFile = () => {
                     top: 1 * StatusBar.currentHeight,
                     left: 4,
                   }}
-                  onPress={() => {}}
+                  onPress={() => {
+                    props.navigation.goBack();
+                  }}
                 />
               )}
               <Title
@@ -115,7 +130,7 @@ const NewFile = () => {
                 Create new file
               </Title>
               <TextInput
-                label="Name"
+                label="Name (Required)"
                 value={name}
                 maxLength={20}
                 onChangeText={(name) => setName(name)}
@@ -145,7 +160,7 @@ const NewFile = () => {
               )}
               <Pressable onPress={openTypeMenu} style={{ width: "70%" }}>
                 <TextInput
-                  label="File type"
+                  label="File type (Required)"
                   value={fileType}
                   mode="outlined"
                   style={{
@@ -185,7 +200,7 @@ const NewFile = () => {
               )}
               <Pressable onPress={openOfficeMenu} style={{ width: "70%" }}>
                 <TextInput
-                  label="Submitted to"
+                  label="Submitted to (Required)"
                   value={submittedTo}
                   mode="outlined"
                   style={{
@@ -212,6 +227,17 @@ const NewFile = () => {
                 closeModal={closeOfficeMenu}
                 setOption={setSubmittedTo}
               />
+              {errors[2] && (
+                <Text
+                  style={{
+                    color: "rgb(176, 1, 1)",
+                    marginTop: "1%",
+                    marginLeft: "1%",
+                  }}
+                >
+                  {errors[2]}
+                </Text>
+              )}
               <Pressable onPress={openTransferMenu} style={{ width: "70%" }}>
                 <TextInput
                   label="Transfer ownership"
@@ -241,24 +267,6 @@ const NewFile = () => {
                 closeModal={closeTransferMenu}
                 setOption={setTransferTo}
               />
-              <TextInput
-                label="Remarks"
-                value={remarks}
-                maxLength={40}
-                onChangeText={(remarks) => setRemarks(remarks)}
-                mode="outlined"
-                selectionColor="rgba(0, 0, 0, 0.2)"
-                style={{
-                  width: "70%",
-                  marginTop: "2%",
-                }}
-                theme={{
-                  colors: {
-                    primary: "black",
-                    underlineColor: "transparent",
-                  },
-                }}
-              />
               <Button
                 icon="check"
                 style={{
@@ -272,7 +280,35 @@ const NewFile = () => {
                 mode="contained"
                 color="black"
                 onPress={() => {
-                  validateForm();
+                  if(validateForm()){
+                    formData = new FormData();
+                    formData.append('name', name);
+                    formData.append('type', fileType);
+                    formData.append('submitted_to', submittedTo);
+                    if(transferTo){
+                      formData.append('transfer_to', transferTo);
+                    }
+                    fetch('http://192.168.1.6:5000/createFile', {
+                      method:'POST',
+                      body:formData,
+                      headers: {
+                        "content-type": "multipart/form-data",
+                      }
+                    }).then(
+                      async (ret) => {
+                        ret = await ret.json()
+                        if(!ret.tag){
+                          alert("Could not create file!");
+                          return 0;
+                        }else{
+                          setTag(ret.tag);
+                        }
+                      }
+                    ).catch(
+                      () => alert("Check Network Connection!")
+                    )
+                  }
+
                 }}
               >
                 Confirm
@@ -281,6 +317,12 @@ const NewFile = () => {
           </View>
         </TouchableWithoutFeedback>
       </ImageBackground>
+      <WriteToken 
+        showModal = {tag!=null}
+        token = {tag}
+        navigation = {props.navigation}
+        closeModal = {()=>{setTag(null)}}
+      />
     </Provider>
   );
 };

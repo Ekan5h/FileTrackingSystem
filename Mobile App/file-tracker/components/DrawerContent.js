@@ -12,14 +12,34 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const DrawerContent = (props) => {
   const [user, setUser] = useState({
     image:
-      "https://media-exp1.licdn.com/dms/image/C5603AQGCBSy7FjyYTQ/profile-displayphoto-shrink_400_400/0/1549821488426?e=1620259200&v=beta&t=w8fEAp24_aWlU66M6p1ROAOoPO_FBSfA5Hs8befmfxw",
-    name: "Hansin Ahuja",
-    email: "2018csb1094",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRE6XGQ9b93y4-wdN-oXWxQJuvWoLwbx5ChHQ&usqp=CAU",
+    name: "",
+    email: "",
+    office: ""
   });
+
+  if(user.email.length==0){
+    AsyncStorage.getItem('@email').then(
+      async ret =>{
+        if(ret == null) return 0;
+        let name = await AsyncStorage.getItem('@name');
+        let office = await AsyncStorage.getItem('@office');
+        setUser(usr => {
+          usr.email = ret;
+          usr.name = name;
+          usr.office = office;
+          return usr;
+        })
+      }
+    ).catch(
+      () => alert("Some error occurred")
+    )
+  }
 
   return (
     <View style={{ flex: 1 }}>
@@ -58,7 +78,7 @@ const DrawerContent = (props) => {
                       lineHeight: 14,
                     }}
                   >
-                    @{user.email}
+                    {user.email}
                   </Caption>
                 </View>
               </View>
@@ -70,16 +90,43 @@ const DrawerContent = (props) => {
               icon={() => <Entypo name="home" size={24} color="black" />}
               label="Home"
               onPress={() => {
-                props.navigation.navigate("Landing");
+                props.navigation.navigate("Home");
               }}
             />
-            <DrawerItem
+            {user.office.length>0 && <DrawerItem
               icon={() => (
                 <FontAwesome name="history" size={24} color="black" />
               )}
               label="File history"
               onPress={() => {
                 props.navigation.navigate("FileHistory");
+              }}
+            />}
+            <DrawerItem
+              icon={() => (
+                <FontAwesome name="exchange" size={24} color="black" />
+              )}
+              label="Pending Transfers"
+              onPress={() => {
+
+              }}
+            />
+            <DrawerItem
+              icon={() => (
+                <FontAwesome name="plus" size={24} color="black" />
+              )}
+              label="Add Office"
+              onPress={() => {
+
+              }}
+            />
+            <DrawerItem
+              icon={() => (
+                <FontAwesome name="minus" size={24} color="black" />
+              )}
+              label="Remove Office"
+              onPress={() => {
+
               }}
             />
             <DrawerItem
@@ -114,8 +161,25 @@ const DrawerContent = (props) => {
         <DrawerItem
           icon={() => <MaterialIcons name="logout" size={24} color="black" />}
           label="Sign Out"
-          onPress={() => {
+          onPress={async () => {
             console.log("Logout");
+            try{
+              await fetch('http://filetracking.azurewebsites.net/logout',{method:"GET"})
+              await AsyncStorage.removeItem("@email");
+              await AsyncStorage.removeItem("@profile");
+              await AsyncStorage.removeItem("@offices");
+              await AsyncStorage.removeItem("@office");
+              await AsyncStorage.removeItem("@name");
+              props.navigation.reset({
+                index: 0,
+                routes: [{
+                    name: "LoginPage",
+                  }],
+              });
+            }catch(e){
+              alert(e)
+              // alert("Could not signout");
+            }
           }}
         />
       </Drawer.Section>

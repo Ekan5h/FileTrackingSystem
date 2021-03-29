@@ -16,34 +16,11 @@ import { Feather } from "@expo/vector-icons";
 
 var db = {
   offices: {
-    options: [
-      "Accounts",
-      "Research",
-      "ICSR",
-      "Dean SA",
-      "Dean Acad",
-      "HOD CSE",
-      "HOD EE",
-      "HOD MME",
-      "HOD ME",
-      "Dean Research",
-      "Director",
-      "HOD Chemistry",
-    ],
+    options: [],
     placeholder: "Search for an office",
   },
   users: {
-    options: [
-      "Dr. ABC",
-      "Dr. DEF",
-      "Dr. GHI",
-      "Dr. JKL",
-      "Dr. MNO",
-      "Dr. PQR",
-      "Dr. STU",
-      "Dr. VWX",
-      "Dr. YZ",
-    ],
+    options: [],
     placeholder: "Search for a user",
   },
   fileTypes: {
@@ -51,14 +28,21 @@ var db = {
     placeholder: "Search for a file type",
   },
   fileActions: {
-    options: ["Forward", "Accept", "Reject", "Requires input"],
+    options: [
+      "Processed & Forwarded",
+      "Clarifications/Inputs needed",
+      "Approved and Returned Finally",
+      "Approved and Kept Finally",
+      "Not Approved and Returned Finally",
+      "Not Approved and Kept Finally",
+    ],
     placeholder: "Search for an action",
   },
   tags: {
     options: ["Important", "Budget", "Research", "Ignore", "Processed"],
     placeholder: "Search for a tag",
   },
-};
+}
 
 const Search = (props) => {
   const [allData, setAllData] = useState(db[props.searchFor]["options"]);
@@ -67,9 +51,26 @@ const Search = (props) => {
   const [placeholder, setPlaceholder] = useState(
     db[props.searchFor]["placeholder"]
   );
-  const [checked, setChecked] = useState(props.checked);
+  const [checked, setChecked] = useState(props.checked?props.checked:[]);
   const [showAddNew, setShowAddNew] = useState(false);
   const [newTag, setNewTag] = useState("");
+
+
+  if(props.searchFor == 'offices' && allData.length==0){
+    fetch('http://192.168.1.6:5000/getOffices', {method:'GET'}).then(
+      async (ret) => {
+        ret = await ret.json();
+        setAllData(ret.map(x=>x.name));
+      }
+    )
+  }else if(props.searchFor == 'users' && allData.length==0){
+    fetch('http://192.168.1.6:5000/getUsers', {method:'GET'}).then(
+      async (ret) => {
+        ret = await ret.json();
+        setAllData(ret.map(x=>x.name+', '+x.email));
+      }
+    )
+  }
 
   useEffect(() => {
     var reg = new RegExp(query.split("").join("\\w*").replace(/\W/, ""), "i");

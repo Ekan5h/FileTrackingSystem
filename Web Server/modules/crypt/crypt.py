@@ -11,35 +11,31 @@ def power(x, y):
     return (t*t)%n
 
 def encrypt(x):
-    print(x)
-    return stringify(power(x, e))
+    y = stringify(power(x, e))
+    y = 'A'*(6-len(y)) + y
+    return y
 
 def decrypt(x):
+    x = x.upper()
     return power(strtoint(x),d)
 
 def ntos(x):
-    if x<10:
-        return str(x)
-    return chr(97 + x - 10)
+    return chr(65 + x)
 
 def ston(x):
-    try:
-        x = int(x)
-        return x
-    except:
-        x = ord(x) - 97 + 10
-        return x
+    x = ord(x) - 65
+    return x
 
 def stringify(x):
     ans = ''
     while(x):
-        ans = ntos(x%36) + ans
-        x = x//36
+        ans = ntos(x%26) + ans
+        x = x//26
     return ans
 
 def strtoint(x):
     ans = 0
     for c in x:
-        ans = 36*ans + ston(c)
+        ans = 26*ans + ston(c)
     return ans
 
