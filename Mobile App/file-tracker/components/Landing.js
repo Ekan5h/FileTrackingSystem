@@ -18,6 +18,7 @@ import {
   ImageBackground,
   Animated,
   Image,
+  StatusBar,
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -27,6 +28,7 @@ import ScanToken from "./ScanToken";
 import Search from "./Search";
 
 const Landing = ({ navigation, success }) => {
+  const [allFiles, setAllFiles] = useState([]); // initialise with all files in the current tab. This will be passed to the search component
   const [refreshing, setRefreshing] = useState(false);
   const [viewingFile, setViewingFile] = useState(false);
   const [scanning, setScanning] = useState(false);
@@ -47,10 +49,11 @@ const Landing = ({ navigation, success }) => {
   const [loading, setLoading] = useState(true);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showSuccessInit, setShowSuccessInit] = useState(false);
-  const [tags, setTags] = useState([]);
-  const [tagsMenuVisible, setTagsMenuVisible] = useState(false);
-  const openTagsMenu = () => setTagsMenuVisible(true);
-  const closeTagsMenu = () => setTagsMenuVisible(false);
+  const [searchedFilesMenuVisible, setSearchedFilesMenuVisible] = useState(
+    false
+  );
+  const openSearchedFilesMenu = () => setSearchedFilesMenuVisible(true);
+  const closeSearchedFilesMenu = () => setSearchedFilesMenuVisible(false);
 
   if (offices == null)
     AsyncStorage.getItem("@offices").then((ret) => {
@@ -541,7 +544,7 @@ const Landing = ({ navigation, success }) => {
                 )}
               </ScrollView>
               <FAB
-                icon="tag"
+                icon="file-search"
                 color="white"
                 small
                 // size={30}
@@ -551,7 +554,7 @@ const Landing = ({ navigation, success }) => {
                   right: "6%",
                   backgroundColor: "black",
                 }}
-                onPress={openTagsMenu}
+                onPress={openSearchedFilesMenu}
               />
               <FAB
                 icon="filter"
@@ -566,15 +569,18 @@ const Landing = ({ navigation, success }) => {
                 }}
                 onPress={() => {}}
               />
-              <Search
-                searchFor="tags"
-                showModal={tagsMenuVisible}
-                closeModal={closeTagsMenu}
-                setOption={setTags}
-                multiple={true}
-                checked={[]}
-                addNew={false}
-              />
+              {allFiles && (
+                <Search
+                  searchFor="files"
+                  files={allFiles}
+                  showModal={searchedFilesMenuVisible}
+                  closeModal={closeSearchedFilesMenu}
+                  setOption={setFiles}
+                  multiple={true}
+                  checked={[]}
+                  addNew={false}
+                />
+              )}
             </View>
           </View>
         </View>
@@ -661,6 +667,7 @@ const Landing = ({ navigation, success }) => {
               }
         }
       />
+      <StatusBar backgroundColor="#1b1e25" barStyle="light-content" />
     </Provider>
   );
 };

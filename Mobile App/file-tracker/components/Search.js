@@ -42,7 +42,11 @@ var db = {
     options: ["Important", "Budget", "Research", "Ignore", "Processed"],
     placeholder: "Search for a tag",
   },
-}
+  files: {
+    options: [],
+    placeholder: "Search for a file/tracking ID",
+  },
+};
 
 const Search = (props) => {
   const [allData, setAllData] = useState(db[props.searchFor]["options"]);
@@ -51,36 +55,52 @@ const Search = (props) => {
   const [placeholder, setPlaceholder] = useState(
     db[props.searchFor]["placeholder"]
   );
-  const [checked, setChecked] = useState(props.checked?props.checked:[]);
+  const [checked, setChecked] = useState(props.checked ? props.checked : []);
   const [showAddNew, setShowAddNew] = useState(false);
   const [newTag, setNewTag] = useState("");
 
-
-  if(props.searchFor == 'offices' && allData.length==0){
-    fetch('http://192.168.1.6:5000/getOffices', {method:'GET'}).then(
+  if (props.searchFor == "offices" && allData.length == 0) {
+    fetch("http://192.168.1.6:5000/getOffices", { method: "GET" }).then(
       async (ret) => {
         ret = await ret.json();
-        setAllData(ret.map(x=>x.name));
+        setAllData(ret.map((x) => x.name));
       }
-    )
-  }else if(props.searchFor == 'users' && allData.length==0){
-    fetch('http://192.168.1.6:5000/getUsers', {method:'GET'}).then(
+    );
+  } else if (props.searchFor == "users" && allData.length == 0) {
+    fetch("http://192.168.1.6:5000/getUsers", { method: "GET" }).then(
       async (ret) => {
         ret = await ret.json();
-        setAllData(ret.map(x=>x.name+', '+x.email));
+        setAllData(ret.map((x) => x.name + ", " + x.email));
       }
-    )
+    );
   }
 
   useEffect(() => {
+    if (props.searchFor === "files") {
+      if (props.files.length !== allData.length) {
+        if (allData.length * props.files.length === 0) {
+          setAllData(props.files);
+          setCurrData(props.files);
+        } else {
+          if (props.files[0].trackingID !== allData[0].trackingID) {
+            setAllData(props.files);
+            setCurrData(props.files);
+          }
+        }
+      }
+    }
+
     var reg = new RegExp(query.split("").join("\\w*").replace(/\W/, ""), "i");
     var newData = allData.filter((option) => {
-      if (option.match(reg)) {
-        return option;
+      if (props.searchFor !== "files") {
+        if (option.match(reg)) return option;
+      } else {
+        if (option.trackingID.match(reg) || option.name.match(reg))
+          return option;
       }
     });
     setCurrData(newData);
-  }, [query, allData]);
+  }, [query, allData, props.files]);
 
   return (
     <Modal
@@ -169,7 +189,6 @@ const Search = (props) => {
                       <List.Item
                         title="Add new tag"
                         onPress={() => {
-                          console.log("press");
                           setShowAddNew(true);
                         }}
                         style={{
@@ -306,8 +325,8 @@ const Search = (props) => {
                     {currData.map((option) => {
                       return (
                         <List.Item
-                          key={option}
-                          title={option}
+                          key={props.files ? option.trackingID : option}
+                          title={props.files ? option.name : option}
                           onPress={() => {
                             if (!props.multiple) {
                               props.setOption(option);
