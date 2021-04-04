@@ -2,13 +2,12 @@ import React, { useState } from "react";
 import {
   Text,
   View,
-  Image,
   Dimensions,
   ScrollView,
   ImageBackground,
   StatusBar,
 } from "react-native";
-import { Button, TextInput, IconButton } from "react-native-paper";
+import { Button, TextInput, IconButton, Title } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const windowWidth = Dimensions.get("window").width;
@@ -24,7 +23,7 @@ export default function LoginPage({ navigation }) {
 
   const generateOTP = async () => {
     if (!/^[a-zA-Z0-9+_\.-]+@[a-zA-Z0-9\.-]+\.[a-zA-Z]+$/.test(email)) {
-      alert("Enter Valid Email")
+      alert("Enter valid email address");
       return 0;
     }
     setLoading(true);
@@ -41,13 +40,13 @@ export default function LoginPage({ navigation }) {
       });
       error = await error.json();
     } catch (e) {
-      alert("Some error occurred!");
+      alert("Some error occurred")
       setLoading(false);
       return 0;
     }
 
     if (error.error) {
-      alert("Some error occurred!");
+      alert("Some error occurred");
       setLoading(false);
       return 0;
     }
@@ -81,133 +80,107 @@ export default function LoginPage({ navigation }) {
       });
       error = await error.json();
     } catch (e) {
-      alert("Some error occurred!");
+      alert("Some error occurred")
       return 0;
     }
     if (error.error) {
-      alert("Some error occurred!");
+      alert("Some error occurred")
       return 0;
     }
-
     setTimeLeft(600);
   };
 
-  const login = async () => {
+  const addOffice = async () => {
     setLoading(true);
     let formData = new FormData();
     formData.append("email", email);
     formData.append("otp", otp);
-    formData.append("login", true);
-    let match = null;
-    try {
-      match = await fetch("http://192.168.1.6:5000/verifyOTP", {
-        method: "POST",
-        body: formData,
-        headers: {
-          "content-type": "multipart/form-data",
-        },
-      });
-      match = await match.json();
-    } catch (e) {
-      alert("Some error occurred!");
-      setLoading(false);
-      return 0;
-    }
-    if (match.error) {
-      alert("Some error occurred!");
-      setLoading(false);
-      return 0;
-    }
-    if (match.match) {
-      setLoading(false);
-      let offices = [];
-      if (match.offices.length)
-        offices = match.offices.split("$").map((x) => {
-          return { office: x };
-        });
+    formData.append("addoffice", true);
 
-      try {
-        await AsyncStorage.setItem("@email", email);
-        await AsyncStorage.setItem("@name", match.name);
-        await AsyncStorage.setItem("@offices", JSON.stringify(offices));
-        if (offices.length) {
-          await AsyncStorage.setItem("@office", offices[0].office);
-        } else {
-          await AsyncStorage.setItem("@office", "");
-        }
-        if (!match.profile) await AsyncStorage.setItem("@profile", "true");
-      } catch (e) {
-        alert(e);
-        alert("Some error occurred!");
-        await fetch("http://192.168.1.6:5000/logout", { method: "GET" });
-      }
-
-      setTimeout(() => {
-        setEnterEmail(true);
-        clearInterval(timeInterval);
-        setTimeInterval(null);
-        setTimeLeft(600);
-        navigation.reset({
-          index: 0,
-          routes: [
-            {
-              name: match.profile ? "MainApp" : "SetName",
-            },
-          ],
-        });
-      }, 200);
-
-      return 0;
-    }
-
-    alert("Wrong OTP!");
+    let ret = await fetch('http://192.168.1.6:5000/verifyOTP', {
+      method:'POST',
+      body:formData,
+      headers: {
+        "content-type": "multipart/form-data",
+      },
+    });
 
     setLoading(false);
 
-    return 0;
-  };
+    ret = await ret.json()
+
+    if(ret.error){
+        alert("Something's not right! Make sure it is an office email account!");
+        return 0;
+    }
+    if(!ret.match){
+        alert("Wrong OTP!");
+        return 0;
+    }
+
+    let offices = [];
+    alert(JSON.stringify(ret))
+    if (ret.offices.length)
+      offices = ret.offices.split("$").map((x) => {
+        return { office: x };
+      });
+    
+    await AsyncStorage.setItem("@offices", JSON.stringify(offices));
+    
+    if (offices.length==1) {
+      await AsyncStorage.setItem("@office", offices[0].office);
+    }
+    setEnterEmail(true);
+    alert("Office added successfully!");
+    
+    setTimeout(()=>navigation.reset({
+      index: 0,
+      routes: [
+        {
+        name: "Home",
+        },
+      ],
+    }), 500);
+  }
 
   return (
     <ImageBackground
       style={{ flex: 1, height: 1.2 * windowHeight }}
-      source={require("../assets/black_bg.jpg")}
+      source={require("../assets/white_bg.png")}
       imageStyle={{ opacity: 0.9 }}
       resizeMode={"cover"}
     >
-      <ScrollView keyboardShouldPersistTaps={"handled"}>
-        {!enterEmail && (
+      <ScrollView keyboardShouldPersistTaps={"handled"} style={{heigth:'100%'}}>
           <IconButton
-            icon="arrow-left"
-            color="white"
+            icon="menu"
+            color="black"
             size={30}
             style={{
               position: "absolute",
               top: 1 * StatusBar.currentHeight,
-              left: 4,
+              left: 4
             }}
-            onPress={() => {
+            onPress={enterEmail?navigation.openDrawer:() => {
               setEnterEmail(true);
               clearInterval(timeInterval);
               setTimeInterval(null);
               setTimeLeft(600);
             }}
           />
-        )}
 
         <View
           style={{
-            marginTop: "30%",
             alignItems: "center",
+            marginTop:'50%',
             padding: 8,
           }}
         >
-          <Image
-            style={{
-              height: 0.5 * windowHeight,
-              width: 0.5 * windowHeight,
-            }}
-            source={require("../assets/main_logo.png")}
-          />
+            <Title style={{
+                fontSize:30,
+                marginBottom:'20%'
+            }}>
+                Add Office Email
+            </Title>
 
           {enterEmail && (
             <>
@@ -217,10 +190,9 @@ export default function LoginPage({ navigation }) {
                 autoCompleteType="email"
                 autoCapitalize="none"
                 style={{
-                  marginTop: "-8%",
                   width: "80%",
                 }}
-                placeholder="Personal Email Address"
+                placeholder="Registered Office Email Address"
                 mode="outlined"
                 theme={{
                   colors: {
@@ -236,10 +208,11 @@ export default function LoginPage({ navigation }) {
 
               <Button
                 loading={loading}
-                color="white"
+                color="black"
                 style={{
                   justifyContent: "center",
                   borderColor: "white",
+                  paddingVertical:'1%',
                   borderWidth: 0.5,
                   marginTop: "4%",
                   width: "40%",
@@ -282,7 +255,7 @@ export default function LoginPage({ navigation }) {
                   icon="reload"
                   labelStyle={{
                     fontSize: 0.0340909091 * windowWidth,
-                    color: "white",
+                    color: "black",
                   }}
                   onPress={resendOTP}
                 >
@@ -294,7 +267,7 @@ export default function LoginPage({ navigation }) {
                     marginTop: 0.0107913669 * windowHeight,
                     marginLeft: 0.204545455 * windowWidth,
                     marginLeft: "22%",
-                    color: "white",
+                    color: "black",
                   }}
                 >
                   Time left:{" "}
@@ -305,18 +278,19 @@ export default function LoginPage({ navigation }) {
 
               <Button
                 loading={loading}
+                color="black"
                 style={{
                   justifyContent: "center",
                   borderColor: "white",
+                  paddingVertical:'1%',
                   borderWidth: 0.5,
                   marginTop: "4%",
                   width: "40%",
                 }}
                 mode="contained"
-                color="white"
-                onPress={loading ? () => {} : login}
+                onPress={loading ? () => {} : addOffice}
               >
-                Login
+                Add Office
               </Button>
             </>
           )}

@@ -84,3 +84,19 @@ def getOffices():
         return jsonify(ret)
     except Exception as e:
         return jsonify({'error':True, 'msg':str(e) + session['name']})
+
+
+@office_ops.route('/removeOffice' , methods=['GET'])
+@login_required
+def removeOffice():
+    try:
+        office = request.args['office']
+        offices = current_user.offices.split('$')
+        if office not in offices:
+            return jsonify({'error':True})
+        offices = '$'.join([x for x in offices if x!=office])
+        current_user.offices = offices
+        db.session.commit()
+        return jsonify({'error':False})
+    except Exception as e:
+        return jsonify({'error':True, 'msg':str(e) + session['name']})

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Search from "./Search";
 import { Button, Text, Title, TextInput, IconButton } from "react-native-paper";
 import {
   View,
@@ -10,7 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-const Feedback = () => {
+const Feedback = (props) => {
   const [text, setText] = useState("");
   const [error, setError] = useState(undefined);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
@@ -70,7 +69,7 @@ const Feedback = () => {
           >
             {!isKeyboardVisible && (
               <IconButton
-                icon="arrow-left"
+                icon="menu"
                 color="black"
                 size={30}
                 style={{
@@ -78,7 +77,7 @@ const Feedback = () => {
                   top: 1 * StatusBar.currentHeight,
                   left: 4,
                 }}
-                onPress={() => {}}
+                onPress={props.navigation.openDrawer}
               />
             )}
             <Title style={{ fontSize: 30, flexWrap: "wrap" }}>

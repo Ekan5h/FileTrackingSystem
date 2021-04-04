@@ -20,7 +20,8 @@ def createFile():
         tag = crypt.encrypt(new_file.id)
         search_tree.add(tag)
         if 'transfer_to' in request.form.keys():
-            newTransferRequest = TransferRequest(new_file.id, name, current_user.login_email, request.form['transfer_to'])
+            to_id = request.form['transfer_to'].split()[-1]
+            newTransferRequest = TransferRequest(new_file.id, name, current_user.login_email, to_id)
             db.session.add(newTransferRequest)
             db.session.commit()
         return jsonify({'tag':tag})
@@ -28,19 +29,21 @@ def createFile():
         return jsonify({'error':True, 'msg':str(e)})
 
 
-@file_ops.route('/confirmTransfer', methods=['POST'])
+@file_ops.route('/confirmTransfer', methods=['GET'])
 @login_required
-def confirmeTransfer():
+def confirmTransfer():
     try:
-        t_id = request.form['t_id']
-        tranfer = TransferRequest.filter_by(id=t_id).first()
-        f = Files.filter_by(id=transfer.file_id)
-        f.created_by = tranfer.to_id
-        log = FileLogs(f.id, tranfer.from_id, "Ownership transfered", "To " + tranfer.to_id)
+        t_id = request.args['tid']
+        transfer = TransferRequest.query.filter_by(id=t_id).first()
+        f = Files.query.filter_by(id=transfer.file_id).first()
+        f.created_by = transfer.to_id
+        log = FileLogs(f.id, transfer.from_id, "Ownership transfered", "To " + transfer.to_id)
         db.session.add(log)
-        db.session.delete(tranfer)
+        db.session.delete(transfer)
         db.session.commit()
+        return jsonify({'error':False})
     except Exception as e:
+        print(e)
         return jsonify({'error':True, 'msg':str(e)})
 
 @file_ops.route('/confirmFile' , methods=['POST'])
@@ -77,14 +80,16 @@ def showFiles():
 @login_required
 def showTransfers():
     try:
-        tranfers = TransferRequest.filter_by(to_id=current_user.login_email).all()
+        transfers = TransferRequest.query.filter_by(to_id=current_user.login_email).all()
         ret = [{'t_id':x.id,
                 'from':x.from_id,
                 'name':x.name, 
-                'trackingID':crypt.encrypt(x.id),
-                } for x in tranfers]
+                'trackingID':crypt.encrypt(x.file_id),
+                } for x in transfers]
+        print(ret)
         return jsonify(ret)
-    except:
+    except Exception as e:
+        print(e)
         return jsonify({'error':True})
 
 # Show Files sent to me but not received
@@ -229,81 +234,47 @@ def fileHistory():
         return jsonify({'error':True, 'msg':str(e)})
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+@file_ops.route('/addTag', methods=['POST'])
+@login_required
+def addTag():
+    try:
+        tag = request.form['tag']
+        tag_obj = Tags(-1, tag, current_user.login_email)
+        db.session.add(tag_obj)
+        db.session.commit()
+        return jsonify({'error':False})
+    except Exception as e:
+        print(e)
+        return jsonify({'error':True})
 
 @file_ops.route('/fileTag', methods=['POST'])
 @login_required
 def fileTag():
     try:
-        tag, office, file_tag = [request.form[x] for x in ['tag', 'office', 'file_tag']]
-        id = crypt.decrypt(tag)
-        file_tag = Tags(id, file_tag, email)
-        db.session.add(file_tag)
+        tags = request.form['tags'].split('$')
+        file_id = crypt.decrypt(request.form['file_id'])
+        tags_already = Tags.query.filter(Tags.file_id == file_id, Tags.email == current_user.login_email).all()
+        for tag in tags_already:
+            if tag.tag not in tags:
+                db.session.delete(tag)
+        tags_already = [x.tag for x in tags_already]
+        for tag in tags:
+            if tag not in tags_already:
+                tag_obj = Tags(file_id, tag, current_user.login_email)
+                db.session.add(tag_obj)
         db.session.commit()
-
-        return jsonify({"error": False})
+        return jsonify({'error':False})
     except Exception as e:
-        return jsonify({'error': True, 'msg': str(e)})
+        print(e)
+        return jsonify({'error':True})
 
-@file_ops.route('/fileTagSearch', methods=['POST'])
+@file_ops.route('/showTag', methods=['GET'])
 @login_required
-def fileTagSearch():
+def showTag():
     try:
-        office, file_tag = [request.form[x] for x in ['office', 'file_tag']]
-        fs = Tags.query.filter(Tags.email==current_user.login_email, Tags.tag == file_tag).all()
-
-        for x in fs:
-            f = Files.query.filter_by(id=x.file_id).first()
-            ret.append(
-                {
-                    'name': f.name,
-                    'tag': x.file_tag,
-                    'trackingID': crypt.encrypt(f.id),
-                    'type': f.category,
-                    'status':'Currently with ' + f.location if f.location else 'File Processed'
-                }
-            )
-
-        return jsonify(ret)
+        tags = Tags.query.filter_by(email=current_user.login_email).all()
+        ret = list(set([x.tag for x in tags]))
+        return jsonify({'tags':ret})
     except Exception as e:
-        return jsonify({'error': True, 'msg': str(e)})
-
-@file_ops.route('/fileTagComplete', methods=['GET'])
-@login_required
-def fileTagComplete():
-    try:
-        office, file_tag = [request.form[x] for x in ['office', 'file_tag']]
-        fs = Tags.query.filter(Tags.email==current_user.login_email, Tags.tag.ilike("%" + file_tag + "%")).all()
-
-        for x in fs:
-            f = Files.query.filter_by(id=x.file_id).first()
-            ret.append(
-                {
-                    'name': f.name,
-                    'tag': x.file_tag,
-                    'trackingID': crypt.encrypt(f.id),
-                    'type': f.category,
-                    'status':'Currently with ' + f.location if f.location else 'File Processed'
-                }
-            )
-
-        return jsonify(ret)
-    except Exception as e:
-        return jsonify({'error': True, 'msg': str(e)})
+        print(e)
+        return jsonify({'error':True})

@@ -1,59 +1,56 @@
-import React, { useState, useEffect } from "react";
-import FileTimeline from "./FileTimeline";
+import React, { useState, useEffect } from "react"
 import {
   Title,
   Subheading,
-  Paragraph,
-  Caption,
   IconButton,
   TouchableRipple,
+  Button
 } from "react-native-paper";
 import {
   View,
   ImageBackground,
-  RefreshControl,
   StatusBar,
   ScrollView,
 } from "react-native";
-import { AntDesign } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const FileHistory = (props) => {
-  const [files, setFiles] = useState([]);
-  const [token, setToken] = useState(null);
-  const [fileName, setFileName] = useState(null);
-  const [viewingFile, setViewingFile] = useState(false);
-  
+const RemoveOffice = (props) => {
   const [offices, setOffices] = useState([]);
-  const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState({});
 
-  const reload = async (offices) => {
-    // alert(JSON.stringify(offices));
-    setRefreshing(true);
-    let fils = {};
-    for (let i = 0; i < offices.length; i++) {
-      let ret = await fetch(
-        "http://192.168.1.6:5000/showProcessed?office=" + offices[i].office,
-        { method: "GET" }
-      );
+  const removeOffice = async office => {
+      setLoading(load => {
+          load = JSON.parse(JSON.stringify(load));
+          load[office] = true;
+          return load;
+      })
+      let ret = await fetch("http://192.168.1.6:5000/removeOffice?office="+office);
       ret = await ret.json();
-      for (let file of ret) {
-        fils[file.trackingID] = file;
+      if(ret.error){
+          alert("Could not remove office!");
+          setLoading(load => {
+            load = JSON.parse(JSON.stringify(load));
+            load[office] = false;
+            return load;
+          })
+          return 0;
       }
-    }
-    let ret = [];
-    for (let k in fils) ret.push(fils[k]);
-    setFiles(ret);
-    setRefreshing(false);
-  };
+      ret = offices.filter(x => x.office!=office);
+      setOffices(ret);
+      await AsyncStorage.setItem("@offices", JSON.stringify(ret));
+      if(ret.length > 0)
+      await AsyncStorage.setItem("@office", ret[0].office);
+      else
+      await AsyncStorage.setItem("@office", '');
+  }
 
   if (offices.length == 0) {
     AsyncStorage.getItem("@offices")
       .then((ret) => {
+        if(ret==null) return 0;
         setOffices(JSON.parse(ret));
-        reload(JSON.parse(ret));
       })
-      .catch(() => alert("Something went wrong!"));
+      .catch((e) => alert(e));
   }
 
   return (
@@ -85,8 +82,8 @@ const FileHistory = (props) => {
             marginTop: 3.5 * StatusBar.currentHeight,
           }}
         >
-          <Title style={{ marginLeft: "1%", fontSize: 30, flexWrap: "wrap", paddingLeft:"8%" }}>
-            File history
+          <Title style={{ marginLeft: "1%", fontSize: 30, flexWrap: "wrap", marginLeft:"8%" }}>
+            Offices
           </Title>
           <ScrollView
             style={{
@@ -97,40 +94,30 @@ const FileHistory = (props) => {
               alignItems: "center",
               paddingBottom: "10%",
             }}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={() => reload(offices)}
-              />
-            }
           >
             <View style={{ width: "100%", alignItems:"center" }}>
-              {files.length === 0 && (
-                <Subheading style={{ marginTop: "4%", paddingLeft: "2%" }}>
-                  No files to show!
+              {offices.length === 0 && (
+                <Subheading style={{ marginTop: "4%"}}>
+                  No offices added!
                 </Subheading>
               )}
 
-              {files.map((file, idx) => {
+              {offices.map((office, idx) => {
                 return (
                   <View
                     style={{
                       width: "85%",
-                      height: 100,
+                      height: 70,
                       borderColor: "black",
                       borderWidth: 1,
                       borderRadius: 10,
                       marginTop: idx === 0 ? "1.25%" : "4%",
                       overflow: "hidden",
                     }}
-                    key={file.trackingID}
+                    key={office.office}
                   >
                     <TouchableRipple
-                      onPress={() => {
-                        setToken(file.trackingID);
-                        setFileName(file.name);
-                        setViewingFile(true);
-                      }}
+                      onPress={() => {}}
                       rippleColor="rgba(0, 0, 0, .15)"
                       style={{
                         width: "100%",
@@ -146,12 +133,8 @@ const FileHistory = (props) => {
                           }}
                         >
                           <Subheading style={{ fontWeight: "bold" }}>
-                            {file.name}
+                            {office.office}
                           </Subheading>
-                          <Paragraph style={{ fontStyle: "italic" }}>
-                            {file.status}
-                          </Paragraph>
-                          <Caption>Tracking ID: {file.trackingID}</Caption>
                         </View>
                         <View
                           style={{
@@ -161,30 +144,39 @@ const FileHistory = (props) => {
                             paddingRight: "5%",
                           }}
                         >
-                          <AntDesign name="right" size={16} color="black" />
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            marginRight: "-4%",
+                          }}
+                        >
+                          {loading[office.office] && <Button
+                            loading={true}
+                            color="red"
+                            style={{ margin: 0, padding:0}}
+                          />}
+
+                          <IconButton
+                            icon="close"
+                            color="red"
+                            size={22}
+                            style={{ margin: 0 }}
+                            onPress={() => { removeOffice(office.office) }}
+                          />
+                          
                         </View>
                       </View>
-                    </TouchableRipple>
-                  </View>
+                    </View>
+                </TouchableRipple>
+              </View>
                 );
               })}
             </View>
           </ScrollView>
         </View>
       </View>
-      {token && (
-        <FileTimeline
-          showModal={viewingFile}
-          token={token}
-          name={fileName}
-          closeModal={() => {
-            setViewingFile(false);
-            setToken(null);
-          }}
-        />
-      )}
     </ImageBackground>
   );
 };
 
-export default FileHistory;
+export default RemoveOffice;

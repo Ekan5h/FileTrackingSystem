@@ -3,6 +3,7 @@ n = 2106833293
 # q = 20117 
 e = 45897
 d = 1043738009
+import time
 
 def power(x, y):
     if y==0: return 1
@@ -13,9 +14,11 @@ def power(x, y):
 def encrypt(x):
     y = stringify(power(x, e))
     y = 'A'*(6-len(y)) + y
+    y = time.ctime()[-2:] + y
     return y
 
 def decrypt(x):
+    x = x[2:]
     x = x.upper()
     return power(strtoint(x),d)
 

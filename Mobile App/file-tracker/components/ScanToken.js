@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { View, ImageBackground, StatusBar, Modal } from "react-native";
 import Capture from "./Capture";
-import FileAction from "./FileAction";
 import {
   Button,
   TextInput,
   Subheading,
   IconButton,
-  Text,
 } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
-import { Camera } from "expo-camera";
 
 export default function ScanToken(props) {
   const [token, setToken] = useState('');

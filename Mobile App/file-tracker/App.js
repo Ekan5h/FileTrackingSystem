@@ -2,15 +2,13 @@ import React, { useState, useEffect } from "react";
 import LoginPage from "./components/LoginPage.js";
 import Landing from "./components/Landing.js";
 import SetName from "./components/SetName.js";
-import ScanToken from "./components/ScanToken";
+import AddOffice from './components/AddOffice';
+import RemoveOffice from './components/RemoveOffice';
 import NewFile from "./components/NewFile";
-import FileTimeline from "./components/FileTimeline";
-import FileAction from "./components/FileAction";
 import DrawerContent from "./components/DrawerContent";
-import Search from "./components/Search";
-import Filter from "./components/Filter";
 import Feedback from "./components/Feedback";
 import FileHistory from "./components/FileHistory";
+import ShowTransfers from "./components/ShowTransfers";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createDrawerNavigator } from "@react-navigation/drawer";
@@ -28,8 +26,11 @@ function MainApp(props) {
     >
       <Drawer.Screen name="Home" component={Landing} />
       <Drawer.Screen name="FileHistory" component={FileHistory} />
+      <Drawer.Screen name="ShowTransfers" component={ShowTransfers} />
       <Drawer.Screen name="NewFile" component={NewFile} />
-      <Drawer.Screen name="Feedback" component={Feedback} />
+      <Drawer.Screen name="AddOffice" component={AddOffice} />
+      <Drawer.Screen name="RemoveOffice" component={RemoveOffice} />
+      {/* <Drawer.Screen name="Feedback" component={Feedback} /> */}
     </Drawer.Navigator>
   );
 }

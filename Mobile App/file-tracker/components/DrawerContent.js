@@ -84,7 +84,6 @@ const DrawerContent = (props) => {
               </View>
             </TouchableRipple>
           </View>
-
           <Drawer.Section style={{ marginTop: "4%" }}>
             <DrawerItem
               icon={() => <Entypo name="home" size={24} color="black" />}
@@ -93,7 +92,7 @@ const DrawerContent = (props) => {
                 props.navigation.navigate("Home");
               }}
             />
-            {user.office.length>0 && <DrawerItem
+            {user.office!=null && <DrawerItem
               icon={() => (
                 <FontAwesome name="history" size={24} color="black" />
               )}
@@ -108,7 +107,7 @@ const DrawerContent = (props) => {
               )}
               label="Pending Transfers"
               onPress={() => {
-
+                props.navigation.navigate("ShowTransfers");
               }}
             />
             <DrawerItem
@@ -117,7 +116,7 @@ const DrawerContent = (props) => {
               )}
               label="Add Office"
               onPress={() => {
-
+                props.navigation.navigate('AddOffice');
               }}
             />
             <DrawerItem
@@ -126,10 +125,10 @@ const DrawerContent = (props) => {
               )}
               label="Remove Office"
               onPress={() => {
-
+                props.navigation.navigate("RemoveOffice");
               }}
             />
-            <DrawerItem
+            {/* <DrawerItem
               icon={() => (
                 <MaterialIcons name="feedback" size={24} color="black" />
               )}
@@ -146,7 +145,7 @@ const DrawerContent = (props) => {
               onPress={() => {
                 // props.navigation.navigate("NewFile");
               }}
-            />
+            /> */}
           </Drawer.Section>
         </View>
       </DrawerContentScrollView>

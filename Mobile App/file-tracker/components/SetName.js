@@ -2,17 +2,11 @@ import React, { useState, useEffect } from "react";
 import {
   Keyboard,
   View,
-  Dimensions,
   ImageBackground,
   TouchableWithoutFeedback,
 } from "react-native";
 import { Button, TextInput, Title, Text } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Ionicons } from "@expo/vector-icons";
-import DropdownAlert from "react-native-dropdownalert";
-
-const windowWidth = Dimensions.get("window").width;
-const windowHeight = Dimensions.get("window").height;
 
 export default function SetName({ navigation }, prop) {
   const [name, setName] = useState("");

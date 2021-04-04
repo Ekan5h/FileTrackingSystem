@@ -128,5 +128,5 @@ class TransferRequest(db.Model):
         self.to_id = to_id
 
     def __repr__(self):
-        return "Transfer from " + from_id
+        return "Transfer from " + self.from_id
 

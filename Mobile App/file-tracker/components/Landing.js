@@ -18,7 +18,7 @@ import {
   ImageBackground,
   Animated,
   Image,
-  StatusBar,
+  StatusBar
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -28,7 +28,6 @@ import ScanToken from "./ScanToken";
 import Search from "./Search";
 
 const Landing = ({ navigation, success }) => {
-  const [allFiles, setAllFiles] = useState([]); // initialise with all files in the current tab. This will be passed to the search component
   const [refreshing, setRefreshing] = useState(false);
   const [viewingFile, setViewingFile] = useState(false);
   const [scanning, setScanning] = useState(false);
@@ -55,21 +54,25 @@ const Landing = ({ navigation, success }) => {
   const openSearchedFilesMenu = () => setSearchedFilesMenuVisible(true);
   const closeSearchedFilesMenu = () => setSearchedFilesMenuVisible(false);
 
-  if (offices == null)
-    AsyncStorage.getItem("@offices").then((ret) => {
-      if (ret == null) return 0;
-      ret = JSON.parse(ret);
-      if (ret.length) {
-        setIsOfficeAccount(true);
-        setTab(0);
+
+  const loadOffices = (x) => AsyncStorage.getItem("@offices").then((ret) => {
+    if (ret == null) return 0;
+    ret = JSON.parse(ret);
+    if (ret.length && x) {
+      setIsOfficeAccount(true);
+      setTab(0);
+    }
+    setOffices(ret);
+    AsyncStorage.getItem("@office").then((ret) => {
+      if (ret != null) {
+        setOffice(ret);
+        setTimeout(()=>loadOffices(false), 2000);
       }
-      setOffices(ret);
-      AsyncStorage.getItem("@office").then((ret) => {
-        if (ret != null) {
-          setOffice(ret);
-        }
-      });
     });
+  });
+
+  if (offices == null)
+    loadOffices(true);
 
   const handleSlide = (x) => {
     Animated.spring(translateX, {
@@ -157,10 +160,10 @@ const Landing = ({ navigation, success }) => {
         resizeMode={"cover"} // cover or contain its upto you view look
       >
         <Appbar.Header
+          statusBarHeight={0}
           style={{
-            backgroundColor: "rgba(0, 0, 0, 0)",
-            elevation: 0,
-            paddingTop: 5,
+            backgroundColor: "rgba(0,0,0,0)",
+            elevation: 0
           }}
         >
           <Appbar.Action icon="menu" onPress={navigation.openDrawer} />
@@ -424,7 +427,7 @@ const Landing = ({ navigation, success }) => {
                             borderColor: "black",
                             borderWidth: 1,
                             borderRadius: 10,
-                            marginTop: idx === 0 ? "1.25%" : "4%",
+                            marginTop: idx === 0 ? isOfficeAccount?"1.25%":"10%" : "4%",
                             overflow: "hidden",
                           }}
                           key={file.trackingID}
@@ -543,10 +546,10 @@ const Landing = ({ navigation, success }) => {
                   </>
                 )}
               </ScrollView>
-              <FAB
+              {tab!=2 && <FAB
                 icon="file-search"
                 color="white"
-                small
+                // small
                 // size={30}
                 style={{
                   position: "absolute",
@@ -555,11 +558,11 @@ const Landing = ({ navigation, success }) => {
                   backgroundColor: "black",
                 }}
                 onPress={openSearchedFilesMenu}
-              />
+              />}
               <FAB
                 icon="filter"
                 color="white"
-                small
+                // small
                 // size={30}
                 style={{
                   position: "absolute",
@@ -569,14 +572,24 @@ const Landing = ({ navigation, success }) => {
                 }}
                 onPress={() => {}}
               />
-              {allFiles && (
+              {files && searchedFilesMenuVisible && (
                 <Search
                   searchFor="files"
-                  files={allFiles}
+                  files={files}
                   showModal={searchedFilesMenuVisible}
                   closeModal={closeSearchedFilesMenu}
-                  setOption={setFiles}
-                  multiple={true}
+                  setOption={(file)=>{
+                    if (tab == 0) {
+                      setToken(file.trackingID);
+                      setFileName(file.name);
+                      setViewingFile(true);
+                    } else if (tab == 1) {
+                      setToken(file.trackingID);
+                      setFileName(file.name);
+                      setFileAction(true);
+                    }
+                  }}
+                  multiple={false}
                   checked={[]}
                   addNew={false}
                 />

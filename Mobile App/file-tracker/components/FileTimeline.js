@@ -8,7 +8,6 @@ import {
   Modal
 } from "react-native";
 import {
-  Button,
   Text,
   Title,
   IconButton,
@@ -16,7 +15,6 @@ import {
   Chip,
 } from "react-native-paper";
 import Search from "./Search";
-import { AntDesign } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
 
 const FileTimeline = (props) => {
@@ -37,13 +35,27 @@ const FileTimeline = (props) => {
   const [tagsMenuVisible, setTagsMenuVisible] = useState(false);
   const openTagsMenu = () => setTagsMenuVisible(true);
   const closeTagsMenu = () => setTagsMenuVisible(false);
-  const setTags = (checked) => {
+  const setTags = async (checked) => {
     console.log("Closed");
     var newFile = { ...file };
     newFile.tags = checked;
     setFile(newFile);
     setShowTags(newFile.tags.slice(0, 2));
     // API CALL TO CHANGE TAGS
+    console.log(checked.join('$'));
+    let fd = new FormData();
+    fd.append('tags', checked.join('$'));
+    fd.append('file_id', props.token);
+    let ret = await fetch('http://192.168.1.6:5000/fileTag',{
+      method:'POST',
+      body:fd,
+      headers: {
+        "content-type":
+          "multipart/form-data",
+      },
+    });
+    ret = await ret.json();
+    if(ret.error) alert("Some error occurred! Restart App");
   };
 
   if(file.history[0].date.length == 0){
@@ -51,6 +63,7 @@ const FileTimeline = (props) => {
       async ret => {
         ret = await ret.json();
         setFile(ret);
+        setShowTags(ret.tags.slice(0,2));
       }
     ).catch(
       () => alert("Could not get details!")

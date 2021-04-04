@@ -39,7 +39,7 @@ var db = {
     placeholder: "Search for an action",
   },
   tags: {
-    options: ["Important", "Budget", "Research", "Ignore", "Processed"],
+    options: [],
     placeholder: "Search for a tag",
   },
   files: {
@@ -50,6 +50,7 @@ var db = {
 
 const Search = (props) => {
   const [allData, setAllData] = useState(db[props.searchFor]["options"]);
+  const [dataset, setDataset] = useState(false);
   const [currData, setCurrData] = useState(allData);
   const [query, setQuery] = useState("");
   const [placeholder, setPlaceholder] = useState(
@@ -71,6 +72,14 @@ const Search = (props) => {
       async (ret) => {
         ret = await ret.json();
         setAllData(ret.map((x) => x.name + ", " + x.email));
+      }
+    );
+  } else if (props.searchFor == "tags" && !dataset) {
+    setDataset(true);
+    fetch("http://192.168.1.6:5000/showTag", { method: "GET" }).then(
+      async (ret) => {
+        ret = await ret.json();
+        setAllData(ret.tags);
       }
     );
   }
@@ -289,13 +298,25 @@ const Search = (props) => {
                             }}
                             mode="contained"
                             color="black"
-                            onPress={() => {
+                            onPress={async () => {
                               var newAllData = [...allData];
                               newAllData.push(newTag);
                               setAllData(newAllData);
                               setShowAddNew(false);
-                              setNewTag("");
                               // API CALL TO ADD TAG FOR THIS USER
+                              let fd = new FormData();
+                              fd.append('tag', newTag);
+                              let ret = await fetch('http://192.168.1.6:5000/addTag',{
+                                method:'POST',
+                                body:fd,
+                                headers: {
+                                  "content-type":
+                                    "multipart/form-data",
+                                },
+                              });
+                              ret = await ret.json();
+                              if(ret.error) alert("Some error occurred! Restart App");
+                              setNewTag("");
                             }}
                           >
                             Add new tag
@@ -326,7 +347,7 @@ const Search = (props) => {
                       return (
                         <List.Item
                           key={props.files ? option.trackingID : option}
-                          title={props.files ? option.name : option}
+                          title={props.files ? option.name+', '+option.trackingID : option}
                           onPress={() => {
                             if (!props.multiple) {
                               props.setOption(option);

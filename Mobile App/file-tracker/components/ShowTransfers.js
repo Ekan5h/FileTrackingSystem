@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import FileTimeline from "./FileTimeline";
 import {
   Title,
   Subheading,
@@ -15,46 +14,51 @@ import {
   StatusBar,
   ScrollView,
 } from "react-native";
-import { AntDesign } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const FileHistory = (props) => {
+const ShowTransfers = (props) => {
   const [files, setFiles] = useState([]);
-  const [token, setToken] = useState(null);
-  const [fileName, setFileName] = useState(null);
-  const [viewingFile, setViewingFile] = useState(false);
-  
-  const [offices, setOffices] = useState([]);
+  const [loaded, setLoaded] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  const reload = async (offices) => {
+
+  const reload = async () => {
     // alert(JSON.stringify(offices));
     setRefreshing(true);
-    let fils = {};
-    for (let i = 0; i < offices.length; i++) {
-      let ret = await fetch(
-        "http://192.168.1.6:5000/showProcessed?office=" + offices[i].office,
-        { method: "GET" }
-      );
-      ret = await ret.json();
-      for (let file of ret) {
-        fils[file.trackingID] = file;
-      }
+    let ret = await fetch('http://192.168.1.6:5000/showTransfers', {method:'GET'})
+    ret = await ret.json()
+    if(ret.error){
+        setRefreshing(false);
+        alert("Could not get files!");
+        return 0;
     }
-    let ret = [];
-    for (let k in fils) ret.push(fils[k]);
+
     setFiles(ret);
     setRefreshing(false);
   };
 
-  if (offices.length == 0) {
-    AsyncStorage.getItem("@offices")
-      .then((ret) => {
-        setOffices(JSON.parse(ret));
-        reload(JSON.parse(ret));
-      })
-      .catch(() => alert("Something went wrong!"));
+  if(!loaded){
+    setLoaded(true);
+    reload();
   }
+
+  const confirmFile = tid => {
+    return async () => {
+      setRefreshing(true);
+      let ret = await fetch('http://192.168.1.6:5000/confirmTransfer?tid=' + tid, {method:'GET'})
+      ret = await ret.json()
+      if(ret.error || ret.error == undefined){
+        setRefreshing(false);
+        alert("Could not confirm tranfer!")
+        return 0;
+      }
+      setRefreshing(false);
+      setFiles(file => {
+        file = JSON.parse(JSON.stringify(file))
+        return file.filter(f => f.t_id!=tid)
+      })
+    }
+  }
+
 
   return (
     <ImageBackground
@@ -86,7 +90,7 @@ const FileHistory = (props) => {
           }}
         >
           <Title style={{ marginLeft: "1%", fontSize: 30, flexWrap: "wrap", paddingLeft:"8%" }}>
-            File history
+            Pending Transfers
           </Title>
           <ScrollView
             style={{
@@ -100,7 +104,7 @@ const FileHistory = (props) => {
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
-                onRefresh={() => reload(offices)}
+                onRefresh={() => reload()}
               />
             }
           >
@@ -126,11 +130,7 @@ const FileHistory = (props) => {
                     key={file.trackingID}
                   >
                     <TouchableRipple
-                      onPress={() => {
-                        setToken(file.trackingID);
-                        setFileName(file.name);
-                        setViewingFile(true);
-                      }}
+                      onPress={() => {}}
                       rippleColor="rgba(0, 0, 0, .15)"
                       style={{
                         width: "100%",
@@ -149,7 +149,7 @@ const FileHistory = (props) => {
                             {file.name}
                           </Subheading>
                           <Paragraph style={{ fontStyle: "italic" }}>
-                            {file.status}
+                            {file.from}
                           </Paragraph>
                           <Caption>Tracking ID: {file.trackingID}</Caption>
                         </View>
@@ -161,7 +161,7 @@ const FileHistory = (props) => {
                             paddingRight: "5%",
                           }}
                         >
-                          <AntDesign name="right" size={16} color="black" />
+                          <IconButton icon="check" size={26} color="green" onPress={confirmFile(file.t_id)} />
                         </View>
                       </View>
                     </TouchableRipple>
@@ -172,19 +172,8 @@ const FileHistory = (props) => {
           </ScrollView>
         </View>
       </View>
-      {token && (
-        <FileTimeline
-          showModal={viewingFile}
-          token={token}
-          name={fileName}
-          closeModal={() => {
-            setViewingFile(false);
-            setToken(null);
-          }}
-        />
-      )}
     </ImageBackground>
   );
 };
 
-export default FileHistory;
+export default ShowTransfers;

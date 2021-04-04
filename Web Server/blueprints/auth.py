@@ -1,5 +1,5 @@
 from flask import Flask, render_template , request , jsonify, Blueprint
-from flask_login import login_user
+from flask_login import login_user, current_user
 import modules.email_client.email as email
 from datetime import datetime, timedelta
 from random import random
@@ -52,6 +52,17 @@ def verifyOTP():
 				db.session.commit()
 				login_user(user, remember=True)
 				return jsonify({'match':True, 'name':'', 'profile':False, 'offices':''})
+			elif 'addoffice' in request.form.keys() and request.form['addoffice']:
+				account = OfficeEmails.query.filter_by(email=addr).first()
+				user = current_user
+				if account.name in user.offices.split('$'):
+					raise Exception('Office already added!')
+				if len(user.offices):
+					user.offices = user.offices + '$' + account.name
+				else:
+					user.offices = account.name
+				db.session.commit()
+				return jsonify({'match':True, 'offices':user.offices})
 			return jsonify({'match':True})
 		else:
 			return jsonify({'match':False})
