@@ -18,13 +18,14 @@ import {
   ImageBackground,
   Animated,
   Image,
-  StatusBar
+  StatusBar,
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import FileTimeline from "./FileTimeline";
 import FileAction from "./FileAction";
 import ScanToken from "./ScanToken";
+import Filter from "./Filter";
 import Search from "./Search";
 
 const Landing = ({ navigation, success }) => {
@@ -36,8 +37,10 @@ const Landing = ({ navigation, success }) => {
   const [token, setToken] = useState(null);
   const [fileName, setFileName] = useState("");
   const [files, setFiles] = useState([]); // pass filter object as props
+  const [filteredFiles, setFilteredFiles] = useState([]);
+  const [filterObject, setFilterObject] = useState(null);
   const [menuVisible, setMenuVisible] = useState(false);
-  const [isOfficeAccount, setIsOfficeAccount] = useState(false);
+  const [isOfficeAccount, setIsOfficeAccount] = useState(true);
   const [office, setOffice] = useState("");
   const [offices, setOffices] = useState(null);
   const [tab, setTab] = useState(0);
@@ -51,28 +54,32 @@ const Landing = ({ navigation, success }) => {
   const [searchedFilesMenuVisible, setSearchedFilesMenuVisible] = useState(
     false
   );
+
+  const [showFilterMenu, setShowFilterMenu] = useState(false);
+
   const openSearchedFilesMenu = () => setSearchedFilesMenuVisible(true);
   const closeSearchedFilesMenu = () => setSearchedFilesMenuVisible(false);
+  const openFilterMenu = () => setShowFilterMenu(true);
+  const closeFilterMenu = () => setShowFilterMenu(false);
 
-
-  const loadOffices = (x) => AsyncStorage.getItem("@offices").then((ret) => {
-    if (ret == null) return 0;
-    ret = JSON.parse(ret);
-    if (ret.length && x) {
-      setIsOfficeAccount(true);
-      setTab(0);
-    }
-    setOffices(ret);
-    AsyncStorage.getItem("@office").then((ret) => {
-      if (ret != null) {
-        setOffice(ret);
-        setTimeout(()=>loadOffices(false), 2000);
+  const loadOffices = (x) =>
+    AsyncStorage.getItem("@offices").then((ret) => {
+      if (ret == null) return 0;
+      ret = JSON.parse(ret);
+      if (ret.length && x) {
+        setIsOfficeAccount(true);
+        setTab(0);
       }
+      setOffices(ret);
+      AsyncStorage.getItem("@office").then((ret) => {
+        if (ret != null) {
+          setOffice(ret);
+          setTimeout(() => loadOffices(false), 2000);
+        }
+      });
     });
-  });
 
-  if (offices == null)
-    loadOffices(true);
+  if (offices == null) loadOffices(true);
 
   const handleSlide = (x) => {
     Animated.spring(translateX, {
@@ -80,6 +87,44 @@ const Landing = ({ navigation, success }) => {
       duration: 100,
       useNativeDriver: true,
     }).start();
+  };
+
+  const filterFiles = () => {
+    if (!filterObject) return files;
+    var {
+      startDate,
+      endDate,
+      fileTypes,
+      tags,
+      handledBy,
+      sortAsc,
+    } = filterObject;
+    var filtered = files.filter((file) => {
+      if (startDate && file.time < startDate) return false;
+      if (endDate && file.time > endDate) return false;
+      if (fileTypes.length > 0 && !fileTypes.includes(file.type)) return false;
+      if (
+        tags.length > 0 &&
+        tags.filter((tag) => file.tags.includes(tag)).length == 0
+      )
+        return false;
+      if (
+        handledBy.length > 0 &&
+        handledBy.filter((user) => file.handledBy.includes(user)).length == 0
+      )
+        return false;
+      return true;
+    });
+    filtered.sort((file1, file2) => {
+      if (file1.time < file2.time) {
+        if (sortAsc) return -1;
+        else return 1;
+      } else {
+        if (sortAsc) return 1;
+        else return -1;
+      }
+    });
+    return filtered;
   };
 
   useEffect(() => {
@@ -98,6 +143,7 @@ const Landing = ({ navigation, success }) => {
         .then(async (ret) => {
           ret = await ret.json();
           setFiles(ret);
+          setFilteredFiles(filterFiles(ret));
           setLoading(false);
         })
         .catch(() => {
@@ -111,6 +157,7 @@ const Landing = ({ navigation, success }) => {
         .then(async (ret) => {
           ret = await ret.json();
           setFiles(ret);
+          setFilteredFiles(filterFiles(ret));
           setLoading(false);
         })
         .catch(() => {
@@ -124,6 +171,7 @@ const Landing = ({ navigation, success }) => {
         .then(async (ret) => {
           ret = await ret.json();
           setFiles(ret);
+          setFilteredFiles(filterFiles(ret));
           setLoading(false);
         })
         .catch(() => {
@@ -131,7 +179,9 @@ const Landing = ({ navigation, success }) => {
           setLoading(false);
         });
     }
-  }, [tab, office, showSuccess]);
+
+    setFilteredFiles(filterFiles(files));
+  }, [tab, office, showSuccess, filterObject, files]);
 
   return (
     <Provider>
@@ -163,7 +213,7 @@ const Landing = ({ navigation, success }) => {
           statusBarHeight={0}
           style={{
             backgroundColor: "rgba(0,0,0,0)",
-            elevation: 0
+            elevation: 0,
           }}
         >
           <Appbar.Action icon="menu" onPress={navigation.openDrawer} />
@@ -410,7 +460,7 @@ const Landing = ({ navigation, success }) => {
 
                 {!loading && (
                   <>
-                    {files.length === 0 && (
+                    {filteredFiles.length === 0 && (
                       <Subheading
                         style={{ marginTop: isOfficeAccount ? "4%" : "20%" }}
                       >
@@ -418,7 +468,7 @@ const Landing = ({ navigation, success }) => {
                       </Subheading>
                     )}
 
-                    {files.map((file, idx) => {
+                    {filteredFiles.map((file, idx) => {
                       return (
                         <View
                           style={{
@@ -427,7 +477,12 @@ const Landing = ({ navigation, success }) => {
                             borderColor: "black",
                             borderWidth: 1,
                             borderRadius: 10,
-                            marginTop: idx === 0 ? isOfficeAccount?"1.25%":"10%" : "4%",
+                            marginTop:
+                              idx === 0
+                                ? isOfficeAccount
+                                  ? "1.25%"
+                                  : "10%"
+                                : "4%",
                             overflow: "hidden",
                           }}
                           key={file.trackingID}
@@ -546,19 +601,21 @@ const Landing = ({ navigation, success }) => {
                   </>
                 )}
               </ScrollView>
-              {tab!=2 && <FAB
-                icon="file-search"
-                color="white"
-                // small
-                // size={30}
-                style={{
-                  position: "absolute",
-                  bottom: "17%",
-                  right: "6%",
-                  backgroundColor: "black",
-                }}
-                onPress={openSearchedFilesMenu}
-              />}
+              {tab != 2 && (
+                <FAB
+                  icon="file-search"
+                  color="white"
+                  // small
+                  // size={30}
+                  style={{
+                    position: "absolute",
+                    bottom: "20%",
+                    right: "6%",
+                    backgroundColor: "black",
+                  }}
+                  onPress={openSearchedFilesMenu}
+                />
+              )}
               <FAB
                 icon="filter"
                 color="white"
@@ -570,15 +627,23 @@ const Landing = ({ navigation, success }) => {
                   right: "6%",
                   backgroundColor: "black",
                 }}
-                onPress={() => {}}
+                onPress={openFilterMenu}
               />
+
+              <Filter
+                showModal={showFilterMenu}
+                closeModal={closeFilterMenu}
+                setFilterObject={setFilterObject}
+                tab={tab}
+              />
+
               {files && searchedFilesMenuVisible && (
                 <Search
                   searchFor="files"
                   files={files}
                   showModal={searchedFilesMenuVisible}
                   closeModal={closeSearchedFilesMenu}
-                  setOption={(file)=>{
+                  setOption={(file) => {
                     if (tab == 0) {
                       setToken(file.trackingID);
                       setFileName(file.name);
