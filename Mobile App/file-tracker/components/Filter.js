@@ -82,25 +82,29 @@ const Filter = (props) => {
     };
   };
 
+  const clearAll = () => {
+    props.setFilterObject(null);
+    setStartDate(null);
+    setEndDate(null);
+    setCurrStartDate(new Date());
+    setCurrEndDate(new Date());
+    setFileTypes([]);
+    setHandledBy([]);
+    setTags([]);
+    setFileTypesText("");
+    setFileTypesText("");
+    setTagsText("");
+    setSortAsc(false);
+    setErrors([undefined]);
+  };
+
   useEffect(() => {
     setFileTypesText(fileTypes.join(", "));
     setHandledByText(handledBy.join(", "));
     setTagsText(tags.join(", "));
     if (tab != props.tab) {
       setTab(props.tab);
-      props.setFilterObject(null);
-      setStartDate(null);
-      setEndDate(null);
-      setCurrStartDate(new Date());
-      setCurrEndDate(new Date());
-      setFileTypes([]);
-      setHandledBy([]);
-      setTags([]);
-      setFileTypesText("");
-      setFileTypesText("");
-      setTagsText("");
-      setSortAsc(false);
-      setErrors([undefined]);
+      clearAll();
     }
   }, [fileTypes, handledBy, props.tab]);
 
@@ -358,29 +362,47 @@ const Filter = (props) => {
                     {errors[0]}
                   </Text>
                 )}
-
-                <Button
-                  icon="check"
-                  style={{
-                    width: "40%",
-                    height: 48,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginTop: "5%",
-                    paddingVertical: "1%",
-                  }}
-                  mode="contained"
-                  color="black"
-                  onPress={() => {
-                    validateForm();
-                    if (!errors[0]) {
-                      props.setFilterObject(makeFilterObject());
-                      props.closeModal();
-                    }
-                  }}
-                >
-                  Confirm
-                </Button>
+                <View style={{ flexDirection: "row" }}>
+                  <Button
+                    icon="eraser"
+                    style={{
+                      width: "34%",
+                      height: 48,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginTop: "5%",
+                      paddingVertical: "1%",
+                    }}
+                    mode="contained"
+                    color="black"
+                    onPress={clearAll}
+                  >
+                    Clear
+                  </Button>
+                  <Button
+                    icon="check"
+                    style={{
+                      width: "34%",
+                      height: 48,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginTop: "5%",
+                      paddingVertical: "1%",
+                      marginLeft: "2%",
+                    }}
+                    mode="contained"
+                    color="black"
+                    onPress={() => {
+                      validateForm();
+                      if (!errors[0]) {
+                        props.setFilterObject(makeFilterObject());
+                        props.closeModal();
+                      }
+                    }}
+                  >
+                    Done
+                  </Button>
+                </View>
               </View>
             </View>
           </TouchableWithoutFeedback>

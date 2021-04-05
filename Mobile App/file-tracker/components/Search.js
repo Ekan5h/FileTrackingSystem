@@ -299,23 +299,32 @@ const Search = (props) => {
                             mode="contained"
                             color="black"
                             onPress={async () => {
+                              if (allData.includes(newTag)) {
+                                alert("Tag already exists!");
+                                return;
+                              }
                               var newAllData = [...allData];
                               newAllData.push(newTag);
                               setAllData(newAllData);
                               setShowAddNew(false);
+                              var newChecked = checked.concat([newTag]);
+                              setChecked(newChecked);
                               // API CALL TO ADD TAG FOR THIS USER
                               let fd = new FormData();
-                              fd.append('tag', newTag);
-                              let ret = await fetch('http://10.10.9.72:5000/addTag',{
-                                method:'POST',
-                                body:fd,
-                                headers: {
-                                  "content-type":
-                                    "multipart/form-data",
-                                },
-                              });
+                              fd.append("tag", newTag);
+                              let ret = await fetch(
+                                "http://10.10.9.72:5000/addTag",
+                                {
+                                  method: "POST",
+                                  body: fd,
+                                  headers: {
+                                    "content-type": "multipart/form-data",
+                                  },
+                                }
+                              );
                               ret = await ret.json();
-                              if(ret.error) alert("Some error occurred! Restart App");
+                              if (ret.error)
+                                alert("Some error occurred! Restart App");
                               setNewTag("");
                             }}
                           >
@@ -347,7 +356,11 @@ const Search = (props) => {
                       return (
                         <List.Item
                           key={props.files ? option.trackingID : option}
-                          title={props.files ? option.name+', '+option.trackingID : option}
+                          title={
+                            props.files
+                              ? option.name + ", " + option.trackingID
+                              : option
+                          }
                           onPress={() => {
                             if (!props.multiple) {
                               props.setOption(option);
