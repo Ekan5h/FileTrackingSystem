@@ -288,7 +288,7 @@ const NewFile = (props) => {
                     if(transferTo){
                       formData.append('transfer_to', transferTo);
                     }
-                    fetch('http://192.168.1.6:5000/createFile', {
+                    fetch('http://10.10.9.72:5000/createFile', {
                       method:'POST',
                       body:formData,
                       headers: {

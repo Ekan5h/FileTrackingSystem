@@ -61,14 +61,14 @@ const Search = (props) => {
   const [newTag, setNewTag] = useState("");
 
   if (props.searchFor == "offices" && allData.length == 0) {
-    fetch("http://192.168.1.6:5000/getOffices", { method: "GET" }).then(
+    fetch("http://10.10.9.72:5000/getOffices", { method: "GET" }).then(
       async (ret) => {
         ret = await ret.json();
         setAllData(ret.map((x) => x.name));
       }
     );
   } else if (props.searchFor == "users" && allData.length == 0) {
-    fetch("http://192.168.1.6:5000/getUsers", { method: "GET" }).then(
+    fetch("http://10.10.9.72:5000/getUsers", { method: "GET" }).then(
       async (ret) => {
         ret = await ret.json();
         setAllData(ret.map((x) => x.name + ", " + x.email));
@@ -76,7 +76,7 @@ const Search = (props) => {
     );
   } else if (props.searchFor == "tags" && !dataset) {
     setDataset(true);
-    fetch("http://192.168.1.6:5000/showTag", { method: "GET" }).then(
+    fetch("http://10.10.9.72:5000/showTag", { method: "GET" }).then(
       async (ret) => {
         ret = await ret.json();
         setAllData(ret.tags);
@@ -306,7 +306,7 @@ const Search = (props) => {
                               // API CALL TO ADD TAG FOR THIS USER
                               let fd = new FormData();
                               fd.append('tag', newTag);
-                              let ret = await fetch('http://192.168.1.6:5000/addTag',{
+                              let ret = await fetch('http://10.10.9.72:5000/addTag',{
                                 method:'POST',
                                 body:fd,
                                 headers: {

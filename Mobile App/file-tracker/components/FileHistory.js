@@ -33,7 +33,7 @@ const FileHistory = (props) => {
     let fils = {};
     for (let i = 0; i < offices.length; i++) {
       let ret = await fetch(
-        "http://192.168.1.6:5000/showProcessed?office=" + offices[i].office,
+        "http://10.10.9.72:5000/showProcessed?office=" + offices[i].office,
         { method: "GET" }
       );
       ret = await ret.json();

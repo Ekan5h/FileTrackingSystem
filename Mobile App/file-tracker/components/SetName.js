@@ -116,7 +116,7 @@ export default function SetName({ navigation }, prop) {
               }
               let formData = new FormData();
               formData.append("name", name);
-              fetch("http://192.168.1.6:5000/setName", {
+              fetch("http://10.10.9.72:5000/setName", {
                 method: "POST",
                 body: formData,
                 headers: {

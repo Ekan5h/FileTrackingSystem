@@ -261,7 +261,7 @@ const FileAction = (props) => {
                       formData.append('next', next);
                       formData.append('office', props.office);
                       formData.append('remarks', remarks);
-                      fetch('http://192.168.1.6:5000/updateFile',{
+                      fetch('http://10.10.9.72:5000/updateFile',{
                         method:'POST',
                         body:formData,
                         headers: {

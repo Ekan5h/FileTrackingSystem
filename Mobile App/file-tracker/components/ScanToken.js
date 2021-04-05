@@ -80,7 +80,7 @@ export default function ScanToken(props) {
                 name: name,
                 type: "image/jpg",
               });
-              fetch("http://192.168.1.6:5000/scan", {
+              fetch("http://10.10.9.72:5000/scan", {
                 method: "POST",
                 body: formData,
                 headers: {

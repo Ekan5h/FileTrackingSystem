@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "file-tracker",
+    "name": "File Tracker",
     "slug": "file-tracker",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
-      "image": "./assets/main_logo.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#393C42"
     },
@@ -20,9 +20,11 @@
       "supportsTablet": true
     },
     "android": {
+	  "package": "com.iitrpr.filetracker",
+	  "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
+        "backgroundColor": "#808080"
       }
     },
     "web": {

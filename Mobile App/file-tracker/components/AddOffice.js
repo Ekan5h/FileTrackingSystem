@@ -31,7 +31,7 @@ export default function LoginPage({ navigation }) {
     formData.append("email", email);
     let error = null;
     try {
-      error = await fetch("http://192.168.1.6:5000/generateOTP", {
+      error = await fetch("http://10.10.9.72:5000/generateOTP", {
         method: "POST",
         body: formData,
         headers: {
@@ -71,7 +71,7 @@ export default function LoginPage({ navigation }) {
     formData.append("email", email);
     let error = null;
     try {
-      error = await fetch("http://192.168.1.6:5000/generateOTP", {
+      error = await fetch("http://10.10.9.72:5000/generateOTP", {
         method: "POST",
         body: formData,
         headers: {
@@ -97,7 +97,7 @@ export default function LoginPage({ navigation }) {
     formData.append("otp", otp);
     formData.append("addoffice", true);
 
-    let ret = await fetch('http://192.168.1.6:5000/verifyOTP', {
+    let ret = await fetch('http://10.10.9.72:5000/verifyOTP', {
       method:'POST',
       body:formData,
       headers: {
