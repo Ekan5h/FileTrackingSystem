@@ -44,7 +44,7 @@ const Filter = (props) => {
 
   const [showStart, setShowStart] = useState(false);
   const [showEnd, setShowEnd] = useState(false);
-  const [sortAsc, setSortAsc] = useState(false);
+  const [sortAsc, setSortAsc] = useState(true);
 
   const onStartDateChange = (event, selectedDate) => {
     const currentDate = selectedDate;
@@ -178,7 +178,7 @@ const Filter = (props) => {
                       setSortAsc(!sortAsc);
                     }}
                   >
-                    {sortAsc ? "Asc" : "Desc"}
+                    {sortAsc ? "Desc" : "Asc"}
                   </Button>
                 </View>
                 <Pressable onPress={openFileMenu} style={{ width: "70%" }}>

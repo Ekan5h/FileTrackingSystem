@@ -67,6 +67,8 @@ def showFiles():
                 'trackingID':crypt.encrypt(x.id),
                 'type':x.category,
                 'time':x.created_on,
+                'tags':[y.tag for y in Tags.query.filter(Tags.file_id==x.id, Tags.email==current_user.login_email).all()],
+                'handledBy':[y.location for y in FileLogs.query.filter_by(file_id=x.id)],
                 'status':str(str('Currently with ' + x.location) if x.confirmed else str('Sent to ' + x.location)) if x.location else 'File Processed'
                 } for x in fs]
         ret = sorted(ret, key=lambda x: x['time'], reverse=True)
@@ -103,6 +105,8 @@ def showQueue():
                 'trackingID':crypt.encrypt(x.id),
                 'status':x.created_by,
                 'time':x.created_on,
+                'tags':[y.tag for y in Tags.query.filter(Tags.file_id==x.id, Tags.email==current_user.login_email).all()],
+                'handledBy':[y.location for y in FileLogs.query.filter_by(file_id=x.id)],
                 'type':x.category
                 } for x in fs]
         ret = sorted(ret, key=lambda x: x['time'], reverse=True)
@@ -121,6 +125,8 @@ def showReceived():
                 'trackingID':crypt.encrypt(x.id),
                 'status': x.created_by,
                 'time':x.created_on,
+                'tags':[y.tag for y in Tags.query.filter(Tags.file_id==x.id, Tags.email==current_user.login_email).all()],
+                'handledBy':[y.location for y in FileLogs.query.filter_by(file_id=x.id)],
                 'type':x.category
                 } for x in fs]
         ret = sorted(ret, key=lambda x: x['time'], reverse=True)

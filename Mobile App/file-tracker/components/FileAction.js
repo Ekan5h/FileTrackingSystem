@@ -271,12 +271,7 @@ const FileAction = (props) => {
                         async ret => {
                           ret = await ret.json();
                           if(ret.error==false){
-                            props.navigation.reset({
-                              index: 0,
-                              routes: [{
-                                name: "Home",
-                              }],
-                            });
+                            props.onSuccess();
                           }else{
                             alert('Something went wrong!');
                           }

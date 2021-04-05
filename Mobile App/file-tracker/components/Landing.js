@@ -143,7 +143,7 @@ const Landing = ({ navigation, success }) => {
         .then(async (ret) => {
           ret = await ret.json();
           setFiles(ret);
-          setFilteredFiles(filterFiles(ret));
+          setFilteredFiles(ret);
           setLoading(false);
         })
         .catch(() => {
@@ -157,7 +157,7 @@ const Landing = ({ navigation, success }) => {
         .then(async (ret) => {
           ret = await ret.json();
           setFiles(ret);
-          setFilteredFiles(filterFiles(ret));
+          setFilteredFiles(ret);
           setLoading(false);
         })
         .catch(() => {
@@ -171,7 +171,7 @@ const Landing = ({ navigation, success }) => {
         .then(async (ret) => {
           ret = await ret.json();
           setFiles(ret);
-          setFilteredFiles(filterFiles(ret));
+          setFilteredFiles(ret);
           setLoading(false);
         })
         .catch(() => {
@@ -179,9 +179,11 @@ const Landing = ({ navigation, success }) => {
           setLoading(false);
         });
     }
+  }, [tab, office]);
 
+  useEffect(()=>{
     setFilteredFiles(filterFiles(files));
-  }, [tab, office, showSuccess, filterObject, files]);
+  }, [showSuccess, filterObject, files])
 
   return (
     <Provider>
@@ -609,7 +611,7 @@ const Landing = ({ navigation, success }) => {
                   // size={30}
                   style={{
                     position: "absolute",
-                    bottom: "20%",
+                    bottom: "18%",
                     right: "6%",
                     backgroundColor: "black",
                   }}
@@ -681,6 +683,29 @@ const Landing = ({ navigation, success }) => {
           name={fileName}
           navigation={navigation}
           office={office}
+          onSuccess={()=>{
+            setToken(null);
+            setFileAction(false);
+            setRefreshing(true);
+            let url = "http:192.168.1.6:5000/showFiles";
+            if (tab == 1)
+              url =
+                "http:192.168.1.6:5000/showReceived?office=" + office;
+            else if (tab == 2)
+              url =
+                "http:192.168.1.6:5000/showQueue?office=" + office;
+
+            fetch(url, { method: "GET" })
+              .then(async (ret) => {
+                ret = await ret.json();
+                setFiles(ret);
+                setRefreshing(false);
+              })
+              .catch(() => {
+                alert("Could not get files!");
+                setRefreshing(false);
+              });
+          }}
           closeModal={() => {
             setFileAction(false);
             setToken(null);
