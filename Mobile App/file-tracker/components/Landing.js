@@ -6,27 +6,82 @@ import {
   Menu,
   Subheading,
   Paragraph,
-  Caption,
   FAB,
   IconButton,
   Provider,
+  TextInput,
+  Title,
+  List,
 } from "react-native-paper";
 import {
   View,
-  RefreshControl,
-  ScrollView,
   ImageBackground,
   Animated,
   Image,
   StatusBar,
+  Dimensions,
+  Modal,
+  Pressable,
 } from "react-native";
+import { ScrollView as GestureHandlerScrollView } from "react-native-gesture-handler";
 import { AntDesign } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import FileTimeline from "./FileTimeline";
 import FileAction from "./FileAction";
 import ScanToken from "./ScanToken";
-import Filter from "./Filter";
-import Search from "./Search";
+
+// ======================= Parameters =======================
+
+// Column widths for the 3 tabs (add any number of new columns here) (make sure sum = 100%)
+const columns = [
+  { name: "20%", trackingID: "15%", type: "15%", status: "30%", time: "20%" },
+  {
+    confirmReceipt: "13%",
+    name: "22%",
+    trackingID: "20%",
+    type: "20%",
+    time: "25%",
+  },
+  { name: "20%", trackingID: "15%", type: "15%", status: "30%", time: "20%" },
+];
+
+const horizontalScrollWidth = 600; // Horizontal scrollable width (increase if it's too squeezed)
+
+const doNotSortBy = ["status", "confirmReceipt"]; // no sorting will be done when clicking on these
+
+const searchByFields = ["name", "trackingID", "type", "tags", "handledBy"]; // user can search using these fields
+const searchByModalHeight = 0.5; // increase if you add too many fields in the previous array
+
+const displayNames = {
+  // Title to be displayed for each column
+  name: "Name",
+  trackingID: "Tracking ID",
+  type: "Type",
+  status: "Status",
+  time: "Date",
+  confirmReceipt: "",
+  handledBy: "Handled By",
+  tags: "Tags",
+};
+
+// ==============================================================
+
+Date.prototype.convert = function () {
+  var date = this.toDateString().slice(4);
+  return [date.slice(0, 6), ",", date.slice(6)].join("");
+};
+
+Date.prototype.ddmmyyyy = function () {
+  var mm = this.getMonth() + 1;
+  var dd = this.getDate();
+
+  return [
+    (dd > 9 ? "" : "0") + dd,
+    (mm > 9 ? "" : "0") + mm,
+    this.getFullYear(),
+  ].join("/");
+};
 
 const Landing = ({ navigation, success }) => {
   const [refreshing, setRefreshing] = useState(false);
@@ -38,9 +93,8 @@ const Landing = ({ navigation, success }) => {
   const [fileName, setFileName] = useState("");
   const [files, setFiles] = useState([]); // pass filter object as props
   const [filteredFiles, setFilteredFiles] = useState([]);
-  const [filterObject, setFilterObject] = useState(null);
   const [menuVisible, setMenuVisible] = useState(false);
-  const [isOfficeAccount, setIsOfficeAccount] = useState(false);
+  const [isOfficeAccount, setIsOfficeAccount] = useState(true);
   const [office, setOffice] = useState("");
   const [offices, setOffices] = useState(null);
   const [tab, setTab] = useState(0);
@@ -51,16 +105,32 @@ const Landing = ({ navigation, success }) => {
   const [loading, setLoading] = useState(true);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showSuccessInit, setShowSuccessInit] = useState(false);
-  const [searchedFilesMenuVisible, setSearchedFilesMenuVisible] = useState(
-    false
-  );
 
-  const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const [sortBy, setSortBy] = useState("time");
+  const [ascending, setAscending] = useState(false);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [currStartDate, setCurrStartDate] = useState(new Date());
+  const [currEndDate, setCurrEndDate] = useState(new Date());
+  const [showDateFilter, setShowDateFilter] = useState(false);
+  const [showStart, setShowStart] = useState(false);
+  const [showEnd, setShowEnd] = useState(false);
+  const [dateWatcher, setDateWatcher] = useState(true);
+  const [query, setQuery] = useState("");
+  const [searchBy, setSearchBy] = useState("name");
+  const [showSearchByMenu, setShowSearchByMenu] = useState(false);
 
-  const openSearchedFilesMenu = () => setSearchedFilesMenuVisible(true);
-  const closeSearchedFilesMenu = () => setSearchedFilesMenuVisible(false);
-  const openFilterMenu = () => setShowFilterMenu(true);
-  const closeFilterMenu = () => setShowFilterMenu(false);
+  const onStartDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setShowStart(Platform.OS === "ios");
+    setStartDate(currentDate);
+    setCurrStartDate(currentDate);
+  };
+  const onEndDateChange = (event, selectedDate) => {
+    setShowEnd(Platform.OS === "ios");
+    setEndDate(selectedDate);
+    setCurrEndDate(selectedDate);
+  };
 
   const loadOffices = (x) =>
     AsyncStorage.getItem("@offices").then((ret) => {
@@ -87,44 +157,6 @@ const Landing = ({ navigation, success }) => {
       duration: 100,
       useNativeDriver: true,
     }).start();
-  };
-
-  const filterFiles = () => {
-    if (!filterObject) return files;
-    var {
-      startDate,
-      endDate,
-      fileTypes,
-      tags,
-      handledBy,
-      sortAsc,
-    } = filterObject;
-    var filtered = files.filter((file) => {
-      if (startDate && file.time < startDate) return false;
-      if (endDate && file.time > endDate) return false;
-      if (fileTypes.length > 0 && !fileTypes.includes(file.type)) return false;
-      if (
-        tags.length > 0 &&
-        tags.filter((tag) => file.tags.includes(tag)).length == 0
-      )
-        return false;
-      if (
-        handledBy.length > 0 &&
-        handledBy.filter((user) => file.handledBy.includes(user)).length == 0
-      )
-        return false;
-      return true;
-    });
-    filtered.sort((file1, file2) => {
-      if (file1.time < file2.time) {
-        if (sortAsc) return -1;
-        else return 1;
-      } else {
-        if (sortAsc) return 1;
-        else return -1;
-      }
-    });
-    return filtered;
   };
 
   useEffect(() => {
@@ -181,12 +213,46 @@ const Landing = ({ navigation, success }) => {
     }
   }, [tab, office]);
 
-  useEffect(()=>{
-    setFilteredFiles(filterFiles(files));
-  }, [showSuccess, filterObject, files])
+  useEffect(() => {
+    var filtered = files.filter((file) => {
+      if (startDate && file.time < startDate) return false;
+      if (endDate && file.time > endDate) return false;
+      return true;
+    });
+
+    if (query.length > 0 && filtered.length > 0) {
+      var reg = new RegExp(query.split("").join("\\w*").replace(/\W/, ""), "i");
+      if (typeof filtered[0][searchBy] == "string") {
+        filtered = filtered.filter((file) => {
+          if (file[searchBy].match(reg)) return file;
+        });
+      } else {
+        filtered = filtered.filter((file) => {
+          for (const option of file[searchBy]) {
+            if (option.match(reg)) return file;
+          }
+        });
+      }
+    }
+
+    filtered.sort((file1, file2) => {
+      if (sortBy == "time") {
+        if (file1.time < file2.time) return ascending ? -1 : 1;
+        else return ascending ? 1 : -1;
+      } else
+        return (
+          (ascending ? 1 : -1) * file1[sortBy].localeCompare(file2[sortBy])
+        );
+    });
+    setFilteredFiles(filtered);
+  }, [files, sortBy, ascending, dateWatcher, query, showSuccess]);
+
+  useEffect(() => {
+    setQuery("");
+  }, [searchBy]);
 
   return (
-    <Provider>
+    <Provider style={{ height: Dimensions.get("window").height }}>
       {showSuccess && (
         <ImageBackground
           imageStyle={{ opacity: 0.5 }}
@@ -224,8 +290,20 @@ const Landing = ({ navigation, success }) => {
               <Appbar.Content
                 onPress={() => setMenuVisible(true)}
                 style={{
-                  backgroundColor: "rgba(255,255,255,0.1)",
+                  backgroundColor: "rgba(255,255,255,0.08)",
                   padding: 10,
+                  height: "60%",
+                  justifyContent: "center",
+                  paddingTop: "4%",
+                  borderRadius: 15,
+                  overflow: "hidden",
+                }}
+                titleStyle={{
+                  fontWeight: "700",
+                  fontSize: 16,
+                  lineHeight: 16,
+                  textAlignVertical: "center",
+                  fontFamily: "Roboto",
                 }}
                 title={office}
               />
@@ -265,7 +343,7 @@ const Landing = ({ navigation, success }) => {
         <View style={{ flex: 1, backgroundColor: "transparent" }}>
           <View
             style={{
-              height: "25%",
+              height: isOfficeAccount ? "25%" : "18%",
               alignItems: "center",
               justifyContent: "center",
             }}
@@ -278,6 +356,7 @@ const Landing = ({ navigation, success }) => {
                   borderColor: "white",
                   borderWidth: 0.5,
                   width: "65%",
+                  marginTop: "-2%",
                 }}
                 color="white"
                 onPress={() => {
@@ -337,330 +416,640 @@ const Landing = ({ navigation, success }) => {
               paddingTop: "0%",
             }}
           >
-            <View style={{ flex: 1, width: "100%" }}>
-              <ScrollView
-                style={{
-                  width: "100%",
-                }}
-                contentContainerStyle={{
-                  alignItems: "center",
-                  paddingBottom: "15%",
-                }}
-                refreshControl={
-                  <RefreshControl
-                    refreshing={refreshing}
-                    onRefresh={() => {
-                      // dummy logic
-                      setRefreshing(true);
-                      let url = "http:10.10.9.72:5000/showFiles";
-                      if (tab == 1)
-                        url =
-                          "http:10.10.9.72:5000/showReceived?office=" + office;
-                      else if (tab == 2)
-                        url =
-                          "http:10.10.9.72:5000/showQueue?office=" + office;
-
-                      fetch(url, { method: "GET" })
-                        .then(async (ret) => {
-                          ret = await ret.json();
-                          setFiles(ret);
-                          setRefreshing(false);
-                        })
-                        .catch(() => {
-                          alert("Could not get files!");
-                          setRefreshing(false);
-                        });
+            <View style={{ flex: 1, width: "100%", alignItems: "center" }}>
+              {isOfficeAccount && (
+                <View
+                  style={{
+                    marginTop: "3%",
+                    marginBottom: "3%",
+                    alignItems: "center",
+                    width: "90%",
+                    flexDirection: "row",
+                    position: "relative",
+                  }}
+                >
+                  <Animated.View
+                    style={{
+                      position: "absolute",
+                      width: "33%",
+                      height: "100%",
+                      borderBottomColor: "black",
+                      borderBottomWidth: 1,
+                      transform: [{ translateX }],
                     }}
                   />
-                }
-              >
-                {isOfficeAccount && (
-                  <View
+                  <Button
+                    mode="outlined"
                     style={{
-                      marginTop: "3%",
-                      marginBottom: "3%",
-                      alignItems: "center",
-                      width: "90%",
-                      flexDirection: "row",
-                      position: "relative",
+                      borderWidth: 0,
+                      width: "33%",
                     }}
+                    color={tab === 0 ? "black" : "grey"}
+                    onPress={() => {
+                      if (tab === 0) return;
+                      setLoading(true);
+                      handleSlide(x0);
+                      setTab(0);
+                    }}
+                    onLayout={(event) => setX0(event.nativeEvent.layout.x)}
                   >
-                    <Animated.View
-                      style={{
-                        position: "absolute",
-                        width: "33%",
-                        height: "100%",
-                        borderBottomColor: "black",
-                        borderBottomWidth: 1,
-                        transform: [{ translateX }],
-                      }}
-                    />
-                    <Button
-                      mode="outlined"
-                      style={{
-                        borderWidth: 0,
-                        width: "33%",
-                      }}
-                      color={tab === 0 ? "black" : "grey"}
-                      onPress={() => {
-                        if (tab === 0) return;
-                        setLoading(true);
-                        handleSlide(x0);
-                        setTab(0);
-                      }}
-                      onLayout={(event) => setX0(event.nativeEvent.layout.x)}
-                    >
-                      Created
-                    </Button>
-                    <Button
-                      mode="outlined"
-                      style={{
-                        borderWidth: 0,
-                        width: "33%",
-                      }}
-                      color={tab === 1 ? "black" : "grey"}
-                      onPress={() => {
-                        if (tab === 1) return;
-                        setLoading(true);
-                        handleSlide(x1);
-                        setTab(1);
-                      }}
-                      onLayout={(event) => setX1(event.nativeEvent.layout.x)}
-                    >
-                      Received
-                    </Button>
-                    <Button
-                      mode="outlined"
-                      style={{
-                        borderWidth: 0,
-                        width: "33%",
-                      }}
-                      color={tab === 2 ? "black" : "grey"}
-                      onPress={() => {
-                        if (tab === 2) return;
-                        setLoading(true);
-                        handleSlide(x2);
-                        setTab(2);
-                      }}
-                      onLayout={(event) => setX2(event.nativeEvent.layout.x)}
-                    >
-                      Queue
-                    </Button>
-                  </View>
-                )}
-
-                {loading && (
-                  <View
-                    style={{ flex: 1, width: "100%", alignItems: "center" }}
+                    Created
+                  </Button>
+                  <Button
+                    mode="outlined"
+                    style={{
+                      borderWidth: 0,
+                      width: "33%",
+                    }}
+                    color={tab === 1 ? "black" : "grey"}
+                    onPress={() => {
+                      if (tab === 1) return;
+                      setLoading(true);
+                      handleSlide(x1);
+                      setTab(1);
+                    }}
+                    onLayout={(event) => setX1(event.nativeEvent.layout.x)}
                   >
-                    <Image
-                      source={require("../assets/loading.gif")}
-                      style={{ height: 200, width: 200 }}
-                    />
-                  </View>
-                )}
+                    Received
+                  </Button>
+                  <Button
+                    mode="outlined"
+                    style={{
+                      borderWidth: 0,
+                      width: "33%",
+                    }}
+                    color={tab === 2 ? "black" : "grey"}
+                    onPress={() => {
+                      if (tab === 2) return;
+                      setLoading(true);
+                      handleSlide(x2);
+                      setTab(2);
+                    }}
+                    onLayout={(event) => setX2(event.nativeEvent.layout.x)}
+                  >
+                    Queue
+                  </Button>
+                </View>
+              )}
 
-                {!loading && (
-                  <>
-                    {filteredFiles.length === 0 && (
-                      <Subheading
-                        style={{ marginTop: isOfficeAccount ? "4%" : "20%" }}
+              {loading && (
+                <View style={{ flex: 1, width: "100%", alignItems: "center" }}>
+                  <Image
+                    source={require("../assets/loading.gif")}
+                    style={{ height: 200, width: 200 }}
+                  />
+                </View>
+              )}
+
+              {!loading && (
+                <>
+                  <TextInput
+                    placeholder={"Search by " + displayNames[searchBy]}
+                    value={query}
+                    maxLength={20}
+                    onChangeText={(input) => setQuery(input)}
+                    mode="outlined"
+                    selectionColor="rgba(0, 0, 0, 0.2)"
+                    style={{
+                      width: "92%",
+                      marginBottom: "5%",
+                      height: 0.07 * Dimensions.get("window").height,
+                      justifyContent: "center",
+                      fontSize: 14,
+                    }}
+                    theme={{
+                      colors: {
+                        primary: "black",
+                        underlineColor: "transparent",
+                      },
+                    }}
+                    left={
+                      <TextInput.Icon
+                        name={() => (
+                          <AntDesign name="search1" size={16} color="black" />
+                        )}
+                        style={{ marginTop: "50%" }}
+                        onPress={() => {}}
+                      />
+                    }
+                    right={
+                      <TextInput.Icon
+                        name="chevron-down"
+                        style={{ marginTop: "50%" }}
+                        onPress={() => {
+                          setShowSearchByMenu(true);
+                        }}
+                      />
+                    }
+                  />
+                  <Modal
+                    animationType="slide"
+                    visible={showSearchByMenu}
+                    useNativeDriver={true}
+                    animationIn="slideInLeft"
+                    animationOut="slideOutRight"
+                    onRequestClose={() => {
+                      setShowSearchByMenu(false);
+                    }}
+                    transparent={true}
+                    opacity={1}
+                  >
+                    <View
+                      style={{
+                        backgroundColor: "rgba(0,0,0,0.6)",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flex: 1,
+                      }}
+                    >
+                      <View
+                        behavior="padding"
+                        style={{
+                          backgroundColor: "white",
+                          width: 0.85 * Dimensions.get("window").width,
+                          height:
+                            searchByModalHeight *
+                            Dimensions.get("window").height,
+                          justifyContent: "center",
+                          alignItems: "center",
+                          position: "relative",
+                          borderRadius: 10,
+                        }}
                       >
-                        No files to show!
-                      </Subheading>
-                    )}
-
-                    {filteredFiles.map((file, idx) => {
-                      return (
-                        <View
+                        <IconButton
+                          icon="close"
+                          color="black"
                           style={{
-                            width: "85%",
-                            height: 100,
-                            borderColor: "black",
-                            borderWidth: 1,
-                            borderRadius: 10,
-                            marginTop:
-                              idx === 0
-                                ? isOfficeAccount
-                                  ? "1.25%"
-                                  : "10%"
-                                : "4%",
-                            overflow: "hidden",
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
                           }}
-                          key={file.trackingID}
+                          onPress={() => {
+                            setShowSearchByMenu(false);
+                          }}
+                        />
+                        <Title style={{ marginBottom: "10%" }}>Search by</Title>
+                        {searchByFields.map((field, idx) => {
+                          return (
+                            <List.Item
+                              key={field}
+                              title={displayNames[field]}
+                              onPress={() => {
+                                setSearchBy(field);
+                                setShowSearchByMenu(false);
+                              }}
+                              style={{
+                                width: "78%",
+                                borderBottomWidth: 1,
+                                borderTopWidth: idx == 0 ? 1 : 0,
+                                borderColor: "rgba(0, 0, 0, 0.3)",
+                                paddingVertical: "2%",
+                                paddingLeft: "0%",
+                              }}
+                              titleStyle={{ alignSelf: "center" }}
+                            />
+                          );
+                        })}
+                      </View>
+                    </View>
+                  </Modal>
+                  {filteredFiles.length === 0 && (
+                    <Subheading
+                      style={{ marginTop: isOfficeAccount ? "4%" : "20%" }}
+                    >
+                      No files to show!
+                    </Subheading>
+                  )}
+                  {filteredFiles.length > 0 && (
+                    <View
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        paddingBottom: isOfficeAccount ? "20%" : "30%",
+                        paddingHorizontal: "4%",
+                        marginTop: isOfficeAccount ? 0 : "5%",
+                      }}
+                    >
+                      <GestureHandlerScrollView
+                        nestedScrollEnabled
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                        }}
+                      >
+                        <GestureHandlerScrollView
+                          horizontal
+                          nestedScrollEnabled
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                          }}
                         >
-                          <TouchableRipple
-                            onPress={() => {
-                              if (tab == 0) {
-                                setToken(file.trackingID);
-                                setFileName(file.name);
-                                setViewingFile(true);
-                              } else if (tab == 1) {
-                                setToken(file.trackingID);
-                                setFileName(file.name);
-                                setFileAction(true);
-                              }
-                            }}
-                            rippleColor="rgba(0, 0, 0, .15)"
+                          <View
                             style={{
                               width: "100%",
                               height: "100%",
-                              justifyContent: "center",
                             }}
                           >
-                            <View style={{ flexDirection: "row" }}>
-                              <View
-                                style={{
-                                  paddingVertical: "2%",
-                                  paddingLeft: "5%",
-                                }}
-                              >
-                                <Subheading style={{ fontWeight: "bold" }}>
-                                  {file.name}
-                                </Subheading>
-                                <Paragraph style={{ fontStyle: "italic" }}>
-                                  {file.status}
-                                </Paragraph>
-                                <Caption>
-                                  Tracking ID: {file.trackingID}
-                                </Caption>
-                              </View>
-                              <View
-                                style={{
-                                  flex: 1,
-                                  alignItems: "flex-end",
-                                  justifyContent: "center",
-                                  paddingRight: "5%",
-                                }}
-                              >
-                                {tab !== 2 ? (
-                                  <AntDesign
-                                    name="right"
-                                    size={16}
-                                    color="black"
-                                  />
-                                ) : (
-                                  <View
+                            <View
+                              style={{
+                                borderWidth: 1,
+                                borderRightWidth: 0,
+                                width: horizontalScrollWidth,
+                                flexDirection: "row",
+                              }}
+                            >
+                              {Object.keys(columns[tab]).map(function (column) {
+                                return (
+                                  <TouchableRipple
+                                    key={column}
+                                    onPress={() => {
+                                      if (doNotSortBy.includes(column)) return;
+                                      if (sortBy == column)
+                                        setAscending(!ascending);
+                                      else {
+                                        setSortBy(column);
+                                        if (column == "time")
+                                          setAscending(false);
+                                        else setAscending(true);
+                                      }
+                                    }}
+                                    rippleColor="rgba(0, 0, 0, .3)"
                                     style={{
+                                      paddingHorizontal: "2%",
+                                      paddingVertical: "1%",
+                                      width: columns[tab][column],
+                                      borderRightWidth: 1,
+                                      backgroundColor: "rgba(0, 0, 0, 0.15)",
                                       flexDirection: "row",
-                                      marginRight: "-4%",
                                     }}
                                   >
-                                    <IconButton
-                                      icon="check"
-                                      color="green"
-                                      size={22}
-                                      style={{ margin: 0 }}
-                                      onPress={() => {
-                                        let formData = new FormData();
-                                        formData.append("tag", file.trackingID);
-                                        fetch(
-                                          "http://10.10.9.72:5000/confirmFile",
-                                          {
-                                            method: "POST",
-                                            body: formData,
-                                            headers: {
-                                              "content-type":
-                                                "multipart/form-data",
-                                            },
-                                          }
-                                        )
-                                          .then(async (ret) => {
-                                            ret = await ret.json();
-                                            if (ret.error) {
-                                              alert("Some error occurred!");
-                                              return 0;
-                                            } else {
-                                              setFiles((files) => {
-                                                return files.filter(
-                                                  (x) =>
-                                                    x.trackingID !=
-                                                    file.trackingID
-                                                );
-                                              });
+                                    <>
+                                      <Paragraph
+                                        style={{ fontWeight: "bold" }}
+                                        numberOfLines={1}
+                                        ellipsizeMode={
+                                          column == sortBy ? "middle" : null
+                                        }
+                                      >
+                                        {displayNames[column]}
+                                        {column == sortBy && (
+                                          <AntDesign
+                                            name={
+                                              ascending
+                                                ? "arrowdown"
+                                                : "arrowup"
                                             }
-                                          })
-                                          .catch(() =>
-                                            alert("Could not update status!")
-                                          );
-                                      }}
-                                    />
-                                    <IconButton
-                                      icon="close"
-                                      color="red"
-                                      size={22}
-                                      style={{ margin: 0 }}
-                                      onPress={() => {}}
-                                    />
-                                  </View>
-                                )}
-                              </View>
+                                            size={16}
+                                            style={{
+                                              marginTop: "2%",
+                                            }}
+                                            color="black"
+                                          />
+                                        )}
+                                      </Paragraph>
+                                    </>
+                                  </TouchableRipple>
+                                );
+                              })}
                             </View>
-                          </TouchableRipple>
-                        </View>
-                      );
-                    })}
-                  </>
-                )}
-              </ScrollView>
-              {tab != 2 && (
-                <FAB
-                  icon="file-search"
-                  color="white"
-                  // small
-                  // size={30}
-                  style={{
-                    position: "absolute",
-                    bottom: "18%",
-                    right: "6%",
-                    backgroundColor: "black",
-                  }}
-                  onPress={openSearchedFilesMenu}
-                />
+                            {filteredFiles.map((file, idx) => {
+                              return (
+                                <TouchableRipple
+                                  key={file.trackingID}
+                                  onPress={() => {
+                                    if (tab == 0) {
+                                      setToken(file.trackingID);
+                                      setFileName(file.name);
+                                      setViewingFile(true);
+                                    } else if (tab == 1) {
+                                      setToken(file.trackingID);
+                                      setFileName(file.name);
+                                      setFileAction(true);
+                                    }
+                                  }}
+                                  rippleColor="rgba(0, 0, 0, .15)"
+                                >
+                                  <View
+                                    // key={file.trackingID}
+                                    style={{
+                                      borderWidth: 1,
+                                      borderRightWidth: 0,
+                                      borderTopWidth: idx == 0 ? 1 : 0,
+                                      width: horizontalScrollWidth,
+                                      flexDirection: "row",
+                                    }}
+                                  >
+                                    {Object.keys(columns[tab]).map(function (
+                                      column
+                                    ) {
+                                      return (
+                                        <View
+                                          key={column}
+                                          style={{
+                                            paddingHorizontal: "2%",
+                                            paddingVertical:
+                                              column == "confirmReceipt"
+                                                ? "0%"
+                                                : "1%",
+                                            paddingLeft:
+                                              column == "confirmReceipt"
+                                                ? "0.2%"
+                                                : "1%",
+                                            width: columns[tab][column],
+                                            borderRightWidth: 1,
+                                          }}
+                                        >
+                                          {column != "confirmReceipt" && (
+                                            <Paragraph numberOfLines={1}>
+                                              {column == "time" &&
+                                                file[column].ddmmyyyy()}
+
+                                              {column != "time" && file[column]}
+                                            </Paragraph>
+                                          )}
+                                          {column == "confirmReceipt" && (
+                                            <View
+                                              style={{
+                                                flexDirection: "row",
+                                              }}
+                                            >
+                                              <IconButton
+                                                icon="check"
+                                                color="green"
+                                                size={18}
+                                                onPress={() => {
+                                                  let formData = new FormData();
+                                                  formData.append(
+                                                    "tag",
+                                                    file.trackingID
+                                                  );
+                                                  fetch(
+                                                    "http://10.10.9.72:5000/confirmFile",
+                                                    {
+                                                      method: "POST",
+                                                      body: formData,
+                                                      headers: {
+                                                        "content-type":
+                                                          "multipart/form-data",
+                                                      },
+                                                    }
+                                                  )
+                                                    .then(async (ret) => {
+                                                      ret = await ret.json();
+                                                      if (ret.error) {
+                                                        alert(
+                                                          "Some error occurred!"
+                                                        );
+                                                        return 0;
+                                                      } else {
+                                                        setFiles((files) => {
+                                                          return files.filter(
+                                                            (x) =>
+                                                              x.trackingID !=
+                                                              file.trackingID
+                                                          );
+                                                        });
+                                                      }
+                                                    })
+                                                    .catch(() =>
+                                                      alert(
+                                                        "Could not update status!"
+                                                      )
+                                                    );
+                                                }}
+                                              />
+                                              <IconButton
+                                                icon="close"
+                                                color="red"
+                                                size={18}
+                                                style={{
+                                                  marginLeft: "-2%",
+                                                }}
+                                                onPress={() => {}}
+                                              />
+                                            </View>
+                                          )}
+                                        </View>
+                                      );
+                                    })}
+                                  </View>
+                                </TouchableRipple>
+                              );
+                            })}
+                          </View>
+                        </GestureHandlerScrollView>
+                      </GestureHandlerScrollView>
+                    </View>
+                  )}
+                </>
               )}
+
               <FAB
-                icon="filter"
+                icon="calendar"
                 color="white"
-                // small
+                small
                 // size={30}
                 style={{
                   position: "absolute",
-                  bottom: "6%",
+                  bottom: 80,
                   right: "6%",
                   backgroundColor: "black",
+                  // width: "15.5%",
+                  // height: "8.2%",
                 }}
-                onPress={openFilterMenu}
+                onPress={() => setShowDateFilter(true)}
               />
 
-              <Filter
-                showModal={showFilterMenu}
-                closeModal={closeFilterMenu}
-                setFilterObject={setFilterObject}
-                tab={tab}
+              <FAB
+                icon="refresh"
+                color="white"
+                small
+                // size={30}
+                style={{
+                  position: "absolute",
+                  bottom: 32,
+                  right: "6%",
+                  backgroundColor: "black",
+                  // width: "15.5%",
+                  // height: "8.2%",
+                }}
+                onPress={() => {
+                  // dummy logic
+                  setRefreshing(true);
+                  let url = "http:10.10.9.72:5000/showFiles";
+                  if (tab == 1)
+                    url = "http:10.10.9.72:5000/showReceived?office=" + office;
+                  else if (tab == 2)
+                    url = "http:10.10.9.72:5000/showQueue?office=" + office;
+
+                  fetch(url, { method: "GET" })
+                    .then(async (ret) => {
+                      ret = await ret.json();
+                      setFiles(ret);
+                      setRefreshing(false);
+                    })
+                    .catch(() => {
+                      alert("Could not get files!");
+                      setRefreshing(false);
+                    });
+                }}
               />
 
-              {files && searchedFilesMenuVisible && (
-                <Search
-                  searchFor="files"
-                  files={files}
-                  showModal={searchedFilesMenuVisible}
-                  closeModal={closeSearchedFilesMenu}
-                  setOption={(file) => {
-                    if (tab == 0) {
-                      setToken(file.trackingID);
-                      setFileName(file.name);
-                      setViewingFile(true);
-                    } else if (tab == 1) {
-                      setToken(file.trackingID);
-                      setFileName(file.name);
-                      setFileAction(true);
-                    }
+              <Modal
+                animationType="slide"
+                visible={showDateFilter}
+                useNativeDriver={true}
+                animationIn="slideInLeft"
+                animationOut="slideOutRight"
+                onRequestClose={() => {
+                  setShowDateFilter(false);
+                }}
+                transparent={true}
+                opacity={1}
+              >
+                <View
+                  style={{
+                    backgroundColor: "rgba(0,0,0,0.6)",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flex: 1,
                   }}
-                  multiple={false}
-                  checked={[]}
-                  addNew={false}
-                />
-              )}
+                >
+                  <View
+                    behavior="padding"
+                    style={{
+                      backgroundColor: "white",
+                      width: 0.85 * Dimensions.get("window").width,
+                      height: 0.4 * Dimensions.get("window").height,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      position: "relative",
+                      borderRadius: 10,
+                    }}
+                  >
+                    <Pressable
+                      onPress={() => setShowStart(true)}
+                      style={{ width: "70%" }}
+                    >
+                      <TextInput
+                        label="After"
+                        value={startDate ? startDate.convert() : ""}
+                        mode="outlined"
+                        // style={{
+                        //   marginTop: "3%",
+                        // }}
+                        theme={{
+                          colors: {
+                            primary: "black",
+                            underlineColor: "transparent",
+                          },
+                        }}
+                        editable={false}
+                        right={
+                          <TextInput.Icon
+                            name="chevron-right"
+                            onPress={() => setShowStart(true)}
+                          />
+                        }
+                      />
+                    </Pressable>
+                    <Pressable
+                      onPress={() => setShowEnd(true)}
+                      style={{ width: "70%" }}
+                    >
+                      <TextInput
+                        label="Before"
+                        value={endDate ? endDate.convert() : ""}
+                        mode="outlined"
+                        style={{
+                          marginTop: "3%",
+                        }}
+                        theme={{
+                          colors: {
+                            primary: "black",
+                            underlineColor: "transparent",
+                          },
+                        }}
+                        editable={false}
+                        right={
+                          <TextInput.Icon
+                            name="chevron-right"
+                            onPress={() => setShowEnd(true)}
+                          />
+                        }
+                      />
+                    </Pressable>
+                    {showStart && (
+                      <DateTimePicker
+                        testID="startDate"
+                        value={currStartDate}
+                        mode="date"
+                        is24Hour={true}
+                        display="default"
+                        onChange={onStartDateChange}
+                      />
+                    )}
+                    {showEnd && (
+                      <DateTimePicker
+                        testID="endDate"
+                        value={currEndDate}
+                        mode="date"
+                        is24Hour={true}
+                        display="default"
+                        onChange={onEndDateChange}
+                      />
+                    )}
+                    <View style={{ flexDirection: "row", height: "20%" }}>
+                      <Button
+                        icon="eraser"
+                        style={{
+                          width: "34%",
+                          // height: "18%",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          marginTop: "4%",
+                          paddingVertical: "1%",
+                        }}
+                        mode="contained"
+                        color="black"
+                        onPress={() => {
+                          setStartDate(null);
+                          setEndDate(null);
+                          setCurrStartDate(new Date());
+                          setCurrEndDate(new Date());
+                        }}
+                      >
+                        Clear
+                      </Button>
+                      <Button
+                        icon="file-find"
+                        style={{
+                          width: "34%",
+                          // height: "18%",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          marginTop: "4%",
+                          paddingVertical: "1%",
+                          marginLeft: "2%",
+                        }}
+                        mode="contained"
+                        color="black"
+                        onPress={() => {
+                          if (startDate && endDate && startDate > endDate) {
+                            alert("Please check the order of the dates!");
+                            return;
+                          }
+                          setDateWatcher(!dateWatcher);
+                          setShowDateFilter(false);
+                        }}
+                      >
+                        Find
+                      </Button>
+                    </View>
+                  </View>
+                </View>
+              </Modal>
             </View>
           </View>
         </View>
@@ -683,17 +1072,15 @@ const Landing = ({ navigation, success }) => {
           name={fileName}
           navigation={navigation}
           office={office}
-          onSuccess={()=>{
+          onSuccess={() => {
             setToken(null);
             setFileAction(false);
             setRefreshing(true);
             let url = "http:10.10.9.72:5000/showFiles";
             if (tab == 1)
-              url =
-                "http:10.10.9.72:5000/showReceived?office=" + office;
+              url = "http:10.10.9.72:5000/showReceived?office=" + office;
             else if (tab == 2)
-              url =
-                "http:10.10.9.72:5000/showQueue?office=" + office;
+              url = "http:10.10.9.72:5000/showQueue?office=" + office;
 
             fetch(url, { method: "GET" })
               .then(async (ret) => {
