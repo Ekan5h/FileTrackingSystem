@@ -34,7 +34,9 @@ def redirect():
 
 	if response["match"]:
 		if response['name'] != '' and response['office'] != '':
-			context = {"email" : session["email"], "name" : response['name'], "offices" : response["offices"]}
+			session["offices"] = response["offices"]
+			session["name"] = response["name"]
+			context = {"email" : session["email"], "name" : session['name'], "offices" : session["offices"]}
 			return render_template('dashboard.jinja2', context = context)
 		else:
 			return render_template('set_name.jinja2')
@@ -53,7 +55,25 @@ def set_name():
 
 @app.route('/dashboard')
 def dashboard():
-	return render_template('dashboard.jinja2')
+	context = {}
+
+	if session["office"]:
+		show_files = requests.get(url = "http://10.10.9.72:5000/showFiles").json()
+		show_transfers = requests.get(url = "http://10.10.9.72:5000/showTransfers").json()
+		show_queue = requests.get(url = "http://10.10.9.72:5000/showQueue?office=" + session["office"]).json()
+		show_received = requests.get(url = "http://10.10.9.72:5000/showReceived?office=" + session["office"]).json()
+		show_processed = requests.get(url = "http://10.10.9.72:5000/showProcessed?office=" + session["office"]).json()
+
+		context = {"office" : session["office"], 'files' : show_files, 'transfers' : show_transfers,
+				   "queue" : show_queue, "received" : show_received, "processed" : show_processed}
+
+	else:
+		offices = requests.get(url = "http://10.10.9.72:5000/getOffices").json()
+		show_files = requests.get(url = "http://10.10.9.72:5000/showFiles").json()
+		show_transfers = requests.get(url = "http://10.10.9.72:5000/showTransfers").json()
+		context = {'offices' : offices, 'files' : show_files, 'transfers' : show_transfers}
+
+	return render_template('dashboard.jinja2', context = context)
 
 if __name__ == '__main__':
 	app.run(debug = True)
