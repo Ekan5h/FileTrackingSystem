@@ -35,8 +35,16 @@ import ScanToken from "./ScanToken";
 
 // Column widths for the 3 tabs (add any number of new columns here) (make sure sum = 100%)
 const columns = [
-  { name: "21%", trackingID: "15%", type: "15%", status: "29%", time: "20%"},
-  { name: "16.5%", owner: "15.5%", dept:"18.5%", passed_by:"19%", trackingID: "10.5%", type: "9%", time: "11%" },
+  { name: "21%", trackingID: "15%", type: "15%", status: "29%", time: "20%" },
+  {
+    name: "16.5%",
+    owner: "15.5%",
+    dept: "18.5%",
+    passed_by: "19%",
+    trackingID: "10.5%",
+    type: "9%",
+    time: "11%",
+  },
   {
     confirmReceipt: "5%",
     name: "17%",
@@ -53,7 +61,16 @@ const horizontalScrollWidth = 900; // Horizontal scrollable width (increase if i
 
 const doNotSortBy = ["status", "confirmReceipt"]; // no sorting will be done when clicking on these
 
-const searchByFields = ["name", "owner", "dept", "passed_by", "trackingID", "type", "tags", "handledBy"]; // user can search using these fields
+const searchByFields = [
+  "name",
+  "owner",
+  "dept",
+  "passed_by",
+  "trackingID",
+  "type",
+  "tags",
+  "handledBy",
+]; // user can search using these fields
 const searchByModalHeight = 0.6; // increase if you add too many fields in the previous array
 
 const displayNames = {
@@ -220,8 +237,8 @@ const Landing = ({ navigation, success }) => {
 
   useEffect(() => {
     var filtered = files.filter((file) => {
-      if (startDate && (new Date(file.time)) < startDate) return false;
-      if (endDate && (new Date(file.time)) > endDate) return false;
+      if (startDate && new Date(file.time) < startDate) return false;
+      if (endDate && new Date(file.time) > endDate) return false;
       return true;
     });
 
@@ -242,7 +259,8 @@ const Landing = ({ navigation, success }) => {
 
     filtered.sort((file1, file2) => {
       if (sortBy == "time") {
-        if ((new Date(file1.time)) < (new Date(file2.time))) return ascending ? -1 : 1;
+        if (new Date(file1.time) < new Date(file2.time))
+          return ascending ? -1 : 1;
         else return ascending ? 1 : -1;
       } else
         return (
@@ -516,7 +534,7 @@ const Landing = ({ navigation, success }) => {
                     mode="outlined"
                     selectionColor="rgba(0, 0, 0, 0.2)"
                     style={{
-                      marginTop:isOfficeAccount?0:"2%",
+                      marginTop: isOfficeAccount ? 0 : "5%",
                       width: "92%",
                       marginBottom: "5%",
                       height: 0.07 * Dimensions.get("window").height,
@@ -573,9 +591,11 @@ const Landing = ({ navigation, success }) => {
                         style={{
                           backgroundColor: "white",
                           width: 0.85 * Dimensions.get("window").width,
-                          height: tab!=0?
-                            searchByModalHeight *
-                            Dimensions.get("window").height : 0.4 * Dimensions.get("window").height,
+                          height:
+                            tab != 0
+                              ? searchByModalHeight *
+                                Dimensions.get("window").height
+                              : 0.4 * Dimensions.get("window").height,
                           justifyContent: "center",
                           alignItems: "center",
                           position: "relative",
@@ -595,27 +615,32 @@ const Landing = ({ navigation, success }) => {
                           }}
                         />
                         <Title style={{ marginBottom: "10%" }}>Search by</Title>
-                        {searchByFields.filter(x => x == 'handledBy' || columns[tab][x]!=undefined).map((field, idx) => {
-                          return (
-                            <List.Item
-                              key={field}
-                              title={displayNames[field]}
-                              onPress={() => {
-                                setSearchBy(field);
-                                setShowSearchByMenu(false);
-                              }}
-                              style={{
-                                width: "78%",
-                                borderBottomWidth: 1,
-                                borderTopWidth: idx == 0 ? 1 : 0,
-                                borderColor: "rgba(0, 0, 0, 0.3)",
-                                paddingVertical: "2%",
-                                paddingLeft: "0%",
-                              }}
-                              titleStyle={{ alignSelf: "center" }}
-                            />
-                          );
-                        })}
+                        {searchByFields
+                          .filter(
+                            (x) =>
+                              x == "handledBy" || columns[tab][x] != undefined
+                          )
+                          .map((field, idx) => {
+                            return (
+                              <List.Item
+                                key={field}
+                                title={displayNames[field]}
+                                onPress={() => {
+                                  setSearchBy(field);
+                                  setShowSearchByMenu(false);
+                                }}
+                                style={{
+                                  width: "78%",
+                                  borderBottomWidth: 1,
+                                  borderTopWidth: idx == 0 ? 1 : 0,
+                                  borderColor: "rgba(0, 0, 0, 0.3)",
+                                  paddingVertical: "2%",
+                                  paddingLeft: "0%",
+                                }}
+                                titleStyle={{ alignSelf: "center" }}
+                              />
+                            );
+                          })}
                       </View>
                     </View>
                   </Modal>
@@ -633,7 +658,7 @@ const Landing = ({ navigation, success }) => {
                         height: "100%",
                         paddingBottom: isOfficeAccount ? "40%" : "30%",
                         paddingHorizontal: "4%",
-                        marginTop: isOfficeAccount ? 0 : "5%",
+                        marginTop: isOfficeAccount ? 0 : "0%",
                       }}
                     >
                       <GestureHandlerScrollView
@@ -647,7 +672,7 @@ const Landing = ({ navigation, success }) => {
                           horizontal
                           nestedScrollEnabled
                           style={{
-                            width: "100%"
+                            width: "100%",
                           }}
                         >
                           <View
@@ -768,8 +793,10 @@ const Landing = ({ navigation, success }) => {
                                           {column != "confirmReceipt" && (
                                             <Paragraph numberOfLines={1}>
                                               {column == "time" &&
-                                                (new Date(file[column])).ddmmyyyy()}
-                                              
+                                                new Date(
+                                                  file[column]
+                                                ).ddmmyyyy()}
+
                                               {column != "time" && file[column]}
                                             </Paragraph>
                                           )}
@@ -1061,11 +1088,9 @@ const Landing = ({ navigation, success }) => {
             setLoading(true);
             let url = "http:192.168.1.6:5000/showFiles";
             if (tab == 1)
-              url =
-                "http:192.168.1.6:5000/showReceived?office=" + office;
+              url = "http:192.168.1.6:5000/showReceived?office=" + office;
             else if (tab == 2)
-              url =
-                "http:192.168.1.6:5000/showQueue?office=" + office;
+              url = "http:192.168.1.6:5000/showQueue?office=" + office;
 
             fetch(url, { method: "GET" })
               .then(async (ret) => {
