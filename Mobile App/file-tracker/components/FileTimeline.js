@@ -46,7 +46,7 @@ const FileTimeline = (props) => {
     let fd = new FormData();
     fd.append('tags', checked.join('$'));
     fd.append('file_id', props.token);
-    let ret = await fetch('http://10.10.9.72:5000/fileTag',{
+    let ret = await fetch('http://192.168.1.6:5000/fileTag',{
       method:'POST',
       body:fd,
       headers: {
@@ -59,7 +59,7 @@ const FileTimeline = (props) => {
   };
 
   if(file.history[0].date.length == 0){
-    fetch('http://10.10.9.72:5000/fileHistory?tag='+props.token, {method:'GET'}).then(
+    fetch('http://192.168.1.6:5000/fileHistory?tag='+props.token, {method:'GET'}).then(
       async ret => {
         ret = await ret.json();
         setFile(ret);

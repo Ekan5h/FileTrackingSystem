@@ -64,11 +64,13 @@ def showFiles():
     try:
         fs = Files.query.filter_by(created_by=current_user.login_email).all()
         ret = [{'name':x.name, 
+                'owner':Users.query.filter_by(login_email=x.created_by).first().name,
+                'dept':Users.query.filter_by(login_email=x.created_by).first().department,
                 'trackingID':crypt.encrypt(x.id),
                 'type':x.category,
                 'time':x.created_on,
                 'tags':[y.tag for y in Tags.query.filter(Tags.file_id==x.id, Tags.email==current_user.login_email).all()],
-                'handledBy':[y.location for y in FileLogs.query.filter_by(file_id=x.id)],
+                'handledBy':[y.location for y in FileLogs.query.filter_by(file_id=x.id).all()],
                 'status':str(str('Currently with ' + x.location) if x.confirmed else str('Sent to ' + x.location)) if x.location else 'File Processed'
                 } for x in fs]
         ret = sorted(ret, key=lambda x: x['time'], reverse=True)
@@ -84,7 +86,7 @@ def showTransfers():
     try:
         transfers = TransferRequest.query.filter_by(to_id=current_user.login_email).all()
         ret = [{'t_id':x.id,
-                'from':x.from_id,
+                'from':Users.query.filter_by(login_email=x.from_id).first().name + ' ('+x.from_id,+')'
                 'name':x.name, 
                 'trackingID':crypt.encrypt(x.file_id),
                 } for x in transfers]
@@ -94,6 +96,23 @@ def showTransfers():
         print(e)
         return jsonify({'error':True})
 
+def latestUpdate(x):
+    try:
+        return sorted(FileLogs.query.filter(FileLogs.file_id==x.id, FileLogs.outcome!="Ownership transfered").all(), key=lambda x: x.time, reverse=True)[0]
+    except Exception as e:
+        print(e)
+        return None
+def latestLocation(x):
+    y = latestUpdate(x)
+    if y is None:
+        return x.created_by
+    return y.location
+def latestTime(x):
+    y= latestUpdate(x)
+    if y is None:
+        return x.created_on
+    return y.time
+
 # Show Files sent to me but not received
 @file_ops.route('/showQueue', methods=['GET'])
 @login_required
@@ -102,16 +121,20 @@ def showQueue():
         office = request.args['office']
         fs = Files.query.filter(Files.location == office, Files.confirmed == False).all()
         ret = [{'name':x.name, 
+                'owner':Users.query.filter_by(login_email=x.created_by).first().name,
+                'dept':Users.query.filter_by(login_email=x.created_by).first().department,
+                'passed_by':latestLocation(x),
                 'trackingID':crypt.encrypt(x.id),
                 'status':x.created_by,
-                'time':x.created_on,
+                'time':latestTime(x),
                 'tags':[y.tag for y in Tags.query.filter(Tags.file_id==x.id, Tags.email==current_user.login_email).all()],
-                'handledBy':[y.location for y in FileLogs.query.filter_by(file_id=x.id)],
+                'handledBy':[y.location for y in FileLogs.query.filter_by(file_id=x.id).all()],
                 'type':x.category
                 } for x in fs]
         ret = sorted(ret, key=lambda x: x['time'], reverse=True)
         return jsonify(ret)
-    except:
+    except Exception as e:
+        print(e)
         return jsonify({'error':True})
 
 # Show Files sent to me and received
@@ -122,11 +145,14 @@ def showReceived():
         office = request.args['office']
         fs = Files.query.filter(Files.location == office, Files.confirmed == True).all()
         ret = [{'name':x.name, 
+                'owner':Users.query.filter_by(login_email=x.created_by).first().name,
+                'dept':Users.query.filter_by(login_email=x.created_by).first().department,
+                'passed_by':latestLocation(x),
                 'trackingID':crypt.encrypt(x.id),
                 'status': x.created_by,
-                'time':x.created_on,
+                'time':latestTime(x),
                 'tags':[y.tag for y in Tags.query.filter(Tags.file_id==x.id, Tags.email==current_user.login_email).all()],
-                'handledBy':[y.location for y in FileLogs.query.filter_by(file_id=x.id)],
+                'handledBy':[y.location for y in FileLogs.query.filter_by(file_id=x.id).all()],
                 'type':x.category
                 } for x in fs]
         ret = sorted(ret, key=lambda x: x['time'], reverse=True)
@@ -178,7 +204,9 @@ def updateFile():
     try:
         tag, typ, office, next_location, remarks = [request.form[x] for x in ['tag','type', 'office','next','remarks']]
         typ = int(typ)
-        if typ in [1, 3, 4]:
+        if typ == 0:
+            pass
+        elif typ in [1, 3, 4]:
             id = crypt.decrypt(tag)
             f = Files.query.filter_by(id=id).first()
             fl = FileLogs(id, office, 'Passed on' if next_location else ('Approved and Returned' if typ==3 else 'Approved and Kept'), remarks)

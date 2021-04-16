@@ -49,10 +49,12 @@ class Users(UserMixin, db.Model):
     name = db.Column(db.String)
     offices = db.Column(db.String, nullable=True)
     token = db.Column(db.String, unique=True)
+    department = db.Column(db.String)
 
     def __init__(self, login_email):
         self.login_email = login_email
         self.name = ''
+        self.department = ''
         self.offices = ''
         self.token = serializer.dumps([self.login_email])
 
@@ -130,3 +132,12 @@ class TransferRequest(db.Model):
     def __repr__(self):
         return "Transfer from " + self.from_id
 
+class Department(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return self.name

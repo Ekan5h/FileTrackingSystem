@@ -32,7 +32,7 @@ export default function LoginPage({ navigation }) {
     formData.append("email", email);
     let error = null;
     try {
-      error = await fetch("http://10.10.9.72:5000/generateOTP", {
+      error = await fetch("http://192.168.1.6:5000/generateOTP", {
         method: "POST",
         body: formData,
         headers: {
@@ -72,7 +72,7 @@ export default function LoginPage({ navigation }) {
     formData.append("email", email);
     let error = null;
     try {
-      error = await fetch("http://10.10.9.72:5000/generateOTP", {
+      error = await fetch("http://192.168.1.6:5000/generateOTP", {
         method: "POST",
         body: formData,
         headers: {
@@ -100,7 +100,7 @@ export default function LoginPage({ navigation }) {
     formData.append("login", true);
     let match = null;
     try {
-      match = await fetch("http://10.10.9.72:5000/verifyOTP", {
+      match = await fetch("http://192.168.1.6:5000/verifyOTP", {
         method: "POST",
         body: formData,
         headers: {
@@ -139,7 +139,7 @@ export default function LoginPage({ navigation }) {
       } catch (e) {
         alert(e);
         alert("Some error occurred!");
-        await fetch("http://10.10.9.72:5000/logout", { method: "GET" });
+        await fetch("http://192.168.1.6:5000/logout", { method: "GET" });
       }
 
       setTimeout(() => {

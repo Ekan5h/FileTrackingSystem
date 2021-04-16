@@ -1,8 +1,8 @@
-n = 2106833293
-# p = 104729 
-# q = 20117 
-e = 45897
-d = 1043738009
+n = 967*10093
+# p = 104729 / 967
+# q = 20117 / 10093
+e = 54647
+d = 3942935
 import time
 
 def power(x, y):
@@ -13,7 +13,7 @@ def power(x, y):
 
 def encrypt(x):
     y = stringify(power(x, e))
-    y = 'A'*(6-len(y)) + y
+    y = 'A'*(5-len(y)) + y
     y = time.ctime()[-2:] + y
     return y
 

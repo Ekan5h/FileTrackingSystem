@@ -24,7 +24,7 @@ const ShowTransfers = (props) => {
   const reload = async () => {
     // alert(JSON.stringify(offices));
     setRefreshing(true);
-    let ret = await fetch('http://10.10.9.72:5000/showTransfers', {method:'GET'})
+    let ret = await fetch('http://192.168.1.6:5000/showTransfers', {method:'GET'})
     ret = await ret.json()
     if(ret.error){
         setRefreshing(false);
@@ -44,7 +44,7 @@ const ShowTransfers = (props) => {
   const confirmFile = tid => {
     return async () => {
       setRefreshing(true);
-      let ret = await fetch('http://10.10.9.72:5000/confirmTransfer?tid=' + tid, {method:'GET'})
+      let ret = await fetch('http://192.168.1.6:5000/confirmTransfer?tid=' + tid, {method:'GET'})
       ret = await ret.json()
       if(ret.error || ret.error == undefined){
         setRefreshing(false);

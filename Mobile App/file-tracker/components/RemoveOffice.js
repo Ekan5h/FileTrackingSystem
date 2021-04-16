@@ -24,7 +24,7 @@ const RemoveOffice = (props) => {
           load[office] = true;
           return load;
       })
-      let ret = await fetch("http://10.10.9.72:5000/removeOffice?office="+office);
+      let ret = await fetch("http://192.168.1.6:5000/removeOffice?office="+office);
       ret = await ret.json();
       if(ret.error){
           alert("Could not remove office!");

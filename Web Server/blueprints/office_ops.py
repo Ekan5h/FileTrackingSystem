@@ -85,6 +85,17 @@ def getOffices():
     except Exception as e:
         return jsonify({'error':True, 'msg':str(e) + session['name']})
 
+@office_ops.route('/getDepartments' , methods=['GET'])
+@login_required
+def getDepartments():
+    try:
+        depts = Department.query.all()
+        ret = []
+        for dept in depts:
+            ret.append({'name':dept.name})
+        return jsonify(ret)
+    except Exception as e:
+        return jsonify({'error':True, 'msg':str(e) + session['name']})
 
 @office_ops.route('/removeOffice' , methods=['GET'])
 @login_required

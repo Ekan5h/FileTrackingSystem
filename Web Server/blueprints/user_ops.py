@@ -11,8 +11,10 @@ user_ops = Blueprint('user_ops', __name__, template_folder='templates')
 def setName():
     try:
         name = request.form['name']
+        department = request.form['dept']
         if len(name):
             current_user.name = name
+            current_user.department = department
             db.session.commit()
             return jsonify({'error':False})
         else:

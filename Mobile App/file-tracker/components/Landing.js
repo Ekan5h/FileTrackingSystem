@@ -35,27 +35,33 @@ import ScanToken from "./ScanToken";
 
 // Column widths for the 3 tabs (add any number of new columns here) (make sure sum = 100%)
 const columns = [
-  { name: "20%", trackingID: "15%", type: "15%", status: "30%", time: "20%" },
+  { name: "21%", trackingID: "15%", type: "15%", status: "29%", time: "20%"},
+  { name: "16.5%", owner: "15.5%", dept:"18.5%", passed_by:"19%", trackingID: "10.5%", type: "9%", time: "11%" },
   {
-    confirmReceipt: "13%",
-    name: "22%",
-    trackingID: "20%",
-    type: "20%",
-    time: "25%",
+    confirmReceipt: "5%",
+    name: "17%",
+    owner: "12.5%",
+    dept: "17.5%",
+    passed_by: "18%",
+    trackingID: "10%",
+    type: "10%",
+    time: "15%",
   },
-  { name: "20%", trackingID: "15%", type: "15%", status: "30%", time: "20%" },
 ];
 
-const horizontalScrollWidth = 600; // Horizontal scrollable width (increase if it's too squeezed)
+const horizontalScrollWidth = 900; // Horizontal scrollable width (increase if it's too squeezed)
 
 const doNotSortBy = ["status", "confirmReceipt"]; // no sorting will be done when clicking on these
 
-const searchByFields = ["name", "trackingID", "type", "tags", "handledBy"]; // user can search using these fields
-const searchByModalHeight = 0.5; // increase if you add too many fields in the previous array
+const searchByFields = ["name", "owner", "dept", "passed_by", "trackingID", "type", "tags", "handledBy"]; // user can search using these fields
+const searchByModalHeight = 0.6; // increase if you add too many fields in the previous array
 
 const displayNames = {
   // Title to be displayed for each column
   name: "Name",
+  owner: "From",
+  dept: "Department",
+  passed_by: "Sent by",
   trackingID: "Tracking ID",
   type: "Type",
   status: "Status",
@@ -84,7 +90,6 @@ Date.prototype.ddmmyyyy = function () {
 };
 
 const Landing = ({ navigation, success }) => {
-  const [refreshing, setRefreshing] = useState(false);
   const [viewingFile, setViewingFile] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [postScanning, setPostScanning] = useState(null);
@@ -94,7 +99,7 @@ const Landing = ({ navigation, success }) => {
   const [files, setFiles] = useState([]); // pass filter object as props
   const [filteredFiles, setFilteredFiles] = useState([]);
   const [menuVisible, setMenuVisible] = useState(false);
-  const [isOfficeAccount, setIsOfficeAccount] = useState(true);
+  const [isOfficeAccount, setIsOfficeAccount] = useState(false);
   const [office, setOffice] = useState("");
   const [offices, setOffices] = useState(null);
   const [tab, setTab] = useState(0);
@@ -171,7 +176,7 @@ const Landing = ({ navigation, success }) => {
     // Make API call based on value of tab. (1 = queue, 2=received, 3 = sent)
     // Make sure to setLoading to false
     if (tab === 0 && loading) {
-      fetch("http:10.10.9.72:5000/showFiles", { method: "GET" })
+      fetch("http:192.168.1.6:5000/showFiles", { method: "GET" })
         .then(async (ret) => {
           ret = await ret.json();
           setFiles(ret);
@@ -183,7 +188,7 @@ const Landing = ({ navigation, success }) => {
           setLoading(false);
         });
     } else if (tab === 1) {
-      fetch("http:10.10.9.72:5000/showReceived?office=" + office, {
+      fetch("http:192.168.1.6:5000/showReceived?office=" + office, {
         method: "GET",
       })
         .then(async (ret) => {
@@ -197,7 +202,7 @@ const Landing = ({ navigation, success }) => {
           setLoading(false);
         });
     } else if (tab === 2) {
-      fetch("http:10.10.9.72:5000/showQueue?office=" + office, {
+      fetch("http:192.168.1.6:5000/showQueue?office=" + office, {
         method: "GET",
       })
         .then(async (ret) => {
@@ -215,8 +220,8 @@ const Landing = ({ navigation, success }) => {
 
   useEffect(() => {
     var filtered = files.filter((file) => {
-      if (startDate && file.time < startDate) return false;
-      if (endDate && file.time > endDate) return false;
+      if (startDate && (new Date(file.time)) < startDate) return false;
+      if (endDate && (new Date(file.time)) > endDate) return false;
       return true;
     });
 
@@ -237,7 +242,7 @@ const Landing = ({ navigation, success }) => {
 
     filtered.sort((file1, file2) => {
       if (sortBy == "time") {
-        if (file1.time < file2.time) return ascending ? -1 : 1;
+        if ((new Date(file1.time)) < (new Date(file2.time))) return ascending ? -1 : 1;
         else return ascending ? 1 : -1;
       } else
         return (
@@ -291,8 +296,8 @@ const Landing = ({ navigation, success }) => {
                 onPress={() => setMenuVisible(true)}
                 style={{
                   backgroundColor: "rgba(255,255,255,0.08)",
-                  padding: 10,
-                  height: "60%",
+                  padding: "3.5%",
+                  height: "80%",
                   justifyContent: "center",
                   paddingTop: "4%",
                   borderRadius: 15,
@@ -300,8 +305,8 @@ const Landing = ({ navigation, success }) => {
                 }}
                 titleStyle={{
                   fontWeight: "700",
-                  fontSize: 16,
-                  lineHeight: 16,
+                  fontSize: 20,
+                  lineHeight: 20,
                   textAlignVertical: "center",
                   fontFamily: "Roboto",
                 }}
@@ -511,6 +516,7 @@ const Landing = ({ navigation, success }) => {
                     mode="outlined"
                     selectionColor="rgba(0, 0, 0, 0.2)"
                     style={{
+                      marginTop:isOfficeAccount?0:"2%",
                       width: "92%",
                       marginBottom: "5%",
                       height: 0.07 * Dimensions.get("window").height,
@@ -567,9 +573,9 @@ const Landing = ({ navigation, success }) => {
                         style={{
                           backgroundColor: "white",
                           width: 0.85 * Dimensions.get("window").width,
-                          height:
+                          height: tab!=0?
                             searchByModalHeight *
-                            Dimensions.get("window").height,
+                            Dimensions.get("window").height : 0.4 * Dimensions.get("window").height,
                           justifyContent: "center",
                           alignItems: "center",
                           position: "relative",
@@ -589,7 +595,7 @@ const Landing = ({ navigation, success }) => {
                           }}
                         />
                         <Title style={{ marginBottom: "10%" }}>Search by</Title>
-                        {searchByFields.map((field, idx) => {
+                        {searchByFields.filter(x => x == 'handledBy' || columns[tab][x]!=undefined).map((field, idx) => {
                           return (
                             <List.Item
                               key={field}
@@ -625,7 +631,7 @@ const Landing = ({ navigation, success }) => {
                       style={{
                         width: "100%",
                         height: "100%",
-                        paddingBottom: isOfficeAccount ? "20%" : "30%",
+                        paddingBottom: isOfficeAccount ? "40%" : "30%",
                         paddingHorizontal: "4%",
                         marginTop: isOfficeAccount ? 0 : "5%",
                       }}
@@ -641,8 +647,7 @@ const Landing = ({ navigation, success }) => {
                           horizontal
                           nestedScrollEnabled
                           style={{
-                            width: "100%",
-                            height: "100%",
+                            width: "100%"
                           }}
                         >
                           <View
@@ -763,8 +768,8 @@ const Landing = ({ navigation, success }) => {
                                           {column != "confirmReceipt" && (
                                             <Paragraph numberOfLines={1}>
                                               {column == "time" &&
-                                                file[column].ddmmyyyy()}
-
+                                                (new Date(file[column])).ddmmyyyy()}
+                                              
                                               {column != "time" && file[column]}
                                             </Paragraph>
                                           )}
@@ -785,7 +790,7 @@ const Landing = ({ navigation, success }) => {
                                                     file.trackingID
                                                   );
                                                   fetch(
-                                                    "http://10.10.9.72:5000/confirmFile",
+                                                    "http://192.168.1.6:5000/confirmFile",
                                                     {
                                                       method: "POST",
                                                       body: formData,
@@ -818,15 +823,6 @@ const Landing = ({ navigation, success }) => {
                                                       )
                                                     );
                                                 }}
-                                              />
-                                              <IconButton
-                                                icon="close"
-                                                color="red"
-                                                size={18}
-                                                style={{
-                                                  marginLeft: "-2%",
-                                                }}
-                                                onPress={() => {}}
                                               />
                                             </View>
                                           )}
@@ -876,22 +872,22 @@ const Landing = ({ navigation, success }) => {
                 }}
                 onPress={() => {
                   // dummy logic
-                  setRefreshing(true);
-                  let url = "http:10.10.9.72:5000/showFiles";
+                  setLoading(true);
+                  let url = "http:192.168.1.6:5000/showFiles";
                   if (tab == 1)
-                    url = "http:10.10.9.72:5000/showReceived?office=" + office;
+                    url = "http:192.168.1.6:5000/showReceived?office=" + office;
                   else if (tab == 2)
-                    url = "http:10.10.9.72:5000/showQueue?office=" + office;
+                    url = "http:192.168.1.6:5000/showQueue?office=" + office;
 
                   fetch(url, { method: "GET" })
                     .then(async (ret) => {
                       ret = await ret.json();
                       setFiles(ret);
-                      setRefreshing(false);
+                      setLoading(false);
                     })
                     .catch(() => {
                       alert("Could not get files!");
-                      setRefreshing(false);
+                      setLoading(false);
                     });
                 }}
               />
@@ -1062,24 +1058,24 @@ const Landing = ({ navigation, success }) => {
           closeModal={() => {
             setViewingFile(false);
             setToken(null);
-            setRefreshing(true);
-            let url = "http:10.10.9.72:5000/showFiles";
+            setLoading(true);
+            let url = "http:192.168.1.6:5000/showFiles";
             if (tab == 1)
               url =
-                "http:10.10.9.72:5000/showReceived?office=" + office;
+                "http:192.168.1.6:5000/showReceived?office=" + office;
             else if (tab == 2)
               url =
-                "http:10.10.9.72:5000/showQueue?office=" + office;
+                "http:192.168.1.6:5000/showQueue?office=" + office;
 
             fetch(url, { method: "GET" })
               .then(async (ret) => {
                 ret = await ret.json();
                 setFiles(ret);
-                setRefreshing(false);
+                setLoading(false);
               })
               .catch(() => {
                 alert("Could not get files!");
-                setRefreshing(false);
+                setLoading(false);
               });
           }}
         />
@@ -1094,22 +1090,22 @@ const Landing = ({ navigation, success }) => {
           onSuccess={() => {
             setToken(null);
             setFileAction(false);
-            setRefreshing(true);
-            let url = "http:10.10.9.72:5000/showFiles";
+            setLoading(true);
+            let url = "http:192.168.1.6:5000/showFiles";
             if (tab == 1)
-              url = "http:10.10.9.72:5000/showReceived?office=" + office;
+              url = "http:192.168.1.6:5000/showReceived?office=" + office;
             else if (tab == 2)
-              url = "http:10.10.9.72:5000/showQueue?office=" + office;
+              url = "http:192.168.1.6:5000/showQueue?office=" + office;
 
             fetch(url, { method: "GET" })
               .then(async (ret) => {
                 ret = await ret.json();
                 setFiles(ret);
-                setRefreshing(false);
+                setLoading(false);
               })
               .catch(() => {
                 alert("Could not get files!");
-                setRefreshing(false);
+                setLoading(false);
               });
           }}
           closeModal={() => {
@@ -1132,7 +1128,7 @@ const Landing = ({ navigation, success }) => {
               }
             : (tag) => {
                 fetch(
-                  "http://10.10.9.72:5000/confirmed?tag=" +
+                  "http://192.168.1.6:5000/confirmed?tag=" +
                     tag +
                     "&office=" +
                     office,
@@ -1152,7 +1148,7 @@ const Landing = ({ navigation, success }) => {
                     }
                     let formData = new FormData();
                     formData.append("tag", tag);
-                    fetch("http://10.10.9.72:5000/confirmFile", {
+                    fetch("http://192.168.1.6:5000/confirmFile", {
                       method: "POST",
                       body: formData,
                       headers: {

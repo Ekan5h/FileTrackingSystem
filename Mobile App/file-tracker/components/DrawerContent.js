@@ -163,7 +163,7 @@ const DrawerContent = (props) => {
           onPress={async () => {
             console.log("Logout");
             try{
-              await fetch('http://filetracking.azurewebsites.net/logout',{method:"GET"})
+              await fetch('http://192.168.1.6:5000/logout',{method:"GET"})
               await AsyncStorage.removeItem("@email");
               await AsyncStorage.removeItem("@profile");
               await AsyncStorage.removeItem("@offices");

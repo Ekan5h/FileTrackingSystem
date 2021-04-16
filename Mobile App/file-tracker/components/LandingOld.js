@@ -139,7 +139,7 @@ const Landing = ({ navigation, success }) => {
     // Make API call based on value of tab. (1 = queue, 2=received, 3 = sent)
     // Make sure to setLoading to false
     if (tab === 0 && loading) {
-      fetch("http:10.10.9.72:5000/showFiles", { method: "GET" })
+      fetch("http:192.168.1.6:5000/showFiles", { method: "GET" })
         .then(async (ret) => {
           ret = await ret.json();
           setFiles(ret);
@@ -151,7 +151,7 @@ const Landing = ({ navigation, success }) => {
           setLoading(false);
         });
     } else if (tab === 1) {
-      fetch("http:10.10.9.72:5000/showReceived?office=" + office, {
+      fetch("http:192.168.1.6:5000/showReceived?office=" + office, {
         method: "GET",
       })
         .then(async (ret) => {
@@ -165,7 +165,7 @@ const Landing = ({ navigation, success }) => {
           setLoading(false);
         });
     } else if (tab === 2) {
-      fetch("http:10.10.9.72:5000/showQueue?office=" + office, {
+      fetch("http:192.168.1.6:5000/showQueue?office=" + office, {
         method: "GET",
       })
         .then(async (ret) => {
@@ -352,12 +352,12 @@ const Landing = ({ navigation, success }) => {
                     onRefresh={() => {
                       // dummy logic
                       setRefreshing(true);
-                      let url = "http:10.10.9.72:5000/showFiles";
+                      let url = "http:192.168.1.6:5000/showFiles";
                       if (tab == 1)
                         url =
-                          "http:10.10.9.72:5000/showReceived?office=" + office;
+                          "http:192.168.1.6:5000/showReceived?office=" + office;
                       else if (tab == 2)
-                        url = "http:10.10.9.72:5000/showQueue?office=" + office;
+                        url = "http:192.168.1.6:5000/showQueue?office=" + office;
 
                       fetch(url, { method: "GET" })
                         .then(async (ret) => {
@@ -554,7 +554,7 @@ const Landing = ({ navigation, success }) => {
                                         let formData = new FormData();
                                         formData.append("tag", file.trackingID);
                                         fetch(
-                                          "http://10.10.9.72:5000/confirmFile",
+                                          "http://192.168.1.6:5000/confirmFile",
                                           {
                                             method: "POST",
                                             body: formData,
@@ -686,11 +686,11 @@ const Landing = ({ navigation, success }) => {
             setToken(null);
             setFileAction(false);
             setRefreshing(true);
-            let url = "http:10.10.9.72:5000/showFiles";
+            let url = "http:192.168.1.6:5000/showFiles";
             if (tab == 1)
-              url = "http:10.10.9.72:5000/showReceived?office=" + office;
+              url = "http:192.168.1.6:5000/showReceived?office=" + office;
             else if (tab == 2)
-              url = "http:10.10.9.72:5000/showQueue?office=" + office;
+              url = "http:192.168.1.6:5000/showQueue?office=" + office;
 
             fetch(url, { method: "GET" })
               .then(async (ret) => {
@@ -723,7 +723,7 @@ const Landing = ({ navigation, success }) => {
               }
             : (tag) => {
                 fetch(
-                  "http://10.10.9.72:5000/confirmed?tag=" +
+                  "http://192.168.1.6:5000/confirmed?tag=" +
                     tag +
                     "&office=" +
                     office,
@@ -743,7 +743,7 @@ const Landing = ({ navigation, success }) => {
                     }
                     let formData = new FormData();
                     formData.append("tag", tag);
-                    fetch("http://10.10.9.72:5000/confirmFile", {
+                    fetch("http://192.168.1.6:5000/confirmFile", {
                       method: "POST",
                       body: formData,
                       headers: {

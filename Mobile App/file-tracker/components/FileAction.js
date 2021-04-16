@@ -245,6 +245,7 @@ const FileAction = (props) => {
                   onPress={() => {
                     if(validateForm()){
                       let type = -1
+                      if (action == "Processed") type = 0;
                       if (action == "Processed & Forwarded") type = 1;
                       if (action == "Clarifications/Inputs needed") type = 2;
                       if (action == "Approved and Returned Finally") type = 3;
@@ -255,13 +256,13 @@ const FileAction = (props) => {
                       if(type == 1 || type == 2){
                         next = forwardingTo;
                       }
-                      formData = new FormData()
+                      let formData = new FormData()
                       formData.append('tag', props.token);
                       formData.append('type', type);
                       formData.append('next', next);
                       formData.append('office', props.office);
                       formData.append('remarks', remarks);
-                      fetch('http://10.10.9.72:5000/updateFile',{
+                      fetch('http://192.168.1.6:5000/updateFile',{
                         method:'POST',
                         body:formData,
                         headers: {

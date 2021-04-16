@@ -29,6 +29,7 @@ var db = {
   },
   fileActions: {
     options: [
+      "Processed",
       "Processed & Forwarded",
       "Clarifications/Inputs needed",
       "Approved and Returned Finally",
@@ -46,6 +47,10 @@ var db = {
     options: [],
     placeholder: "Search for a file/tracking ID",
   },
+  depts: {
+    options: [],
+    placeholder: "Search for a Department",
+  }
 };
 
 const Search = (props) => {
@@ -61,14 +66,14 @@ const Search = (props) => {
   const [newTag, setNewTag] = useState("");
 
   if (props.searchFor == "offices" && allData.length == 0) {
-    fetch("http://10.10.9.72:5000/getOffices", { method: "GET" }).then(
+    fetch("http://192.168.1.6:5000/getOffices", { method: "GET" }).then(
       async (ret) => {
         ret = await ret.json();
         setAllData(ret.map((x) => x.name));
       }
     );
   } else if (props.searchFor == "users" && allData.length == 0) {
-    fetch("http://10.10.9.72:5000/getUsers", { method: "GET" }).then(
+    fetch("http://192.168.1.6:5000/getUsers", { method: "GET" }).then(
       async (ret) => {
         ret = await ret.json();
         setAllData(ret.map((x) => x.name + ", " + x.email));
@@ -76,10 +81,17 @@ const Search = (props) => {
     );
   } else if (props.searchFor == "tags" && !dataset) {
     setDataset(true);
-    fetch("http://10.10.9.72:5000/showTag", { method: "GET" }).then(
+    fetch("http://192.168.1.6:5000/showTag", { method: "GET" }).then(
       async (ret) => {
         ret = await ret.json();
         setAllData(ret.tags);
+      }
+    );
+  } else if (props.searchFor == "depts" && allData.length == 0) {
+    fetch("http://192.168.1.6:5000/getDepartments", { method: "GET" }).then(
+      async (ret) => {
+        ret = await ret.json();
+        setAllData(ret.map((x) => x.name));
       }
     );
   }
@@ -313,7 +325,7 @@ const Search = (props) => {
                               let fd = new FormData();
                               fd.append("tag", newTag);
                               let ret = await fetch(
-                                "http://10.10.9.72:5000/addTag",
+                                "http://192.168.1.6:5000/addTag",
                                 {
                                   method: "POST",
                                   body: fd,
