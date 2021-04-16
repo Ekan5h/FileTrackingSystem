@@ -1062,6 +1062,25 @@ const Landing = ({ navigation, success }) => {
           closeModal={() => {
             setViewingFile(false);
             setToken(null);
+            setRefreshing(true);
+            let url = "http:10.10.9.72:5000/showFiles";
+            if (tab == 1)
+              url =
+                "http:10.10.9.72:5000/showReceived?office=" + office;
+            else if (tab == 2)
+              url =
+                "http:10.10.9.72:5000/showQueue?office=" + office;
+
+            fetch(url, { method: "GET" })
+              .then(async (ret) => {
+                ret = await ret.json();
+                setFiles(ret);
+                setRefreshing(false);
+              })
+              .catch(() => {
+                alert("Could not get files!");
+                setRefreshing(false);
+              });
           }}
         />
       )}

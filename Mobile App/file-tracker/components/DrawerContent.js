@@ -92,7 +92,7 @@ const DrawerContent = (props) => {
                 props.navigation.navigate("Home");
               }}
             />
-            {user.office!=null && <DrawerItem
+            <DrawerItem
               icon={() => (
                 <FontAwesome name="history" size={24} color="black" />
               )}
@@ -100,7 +100,7 @@ const DrawerContent = (props) => {
               onPress={() => {
                 props.navigation.navigate("FileHistory");
               }}
-            />}
+            />
             <DrawerItem
               icon={() => (
                 <FontAwesome name="exchange" size={24} color="black" />

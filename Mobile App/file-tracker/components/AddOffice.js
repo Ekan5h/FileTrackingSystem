@@ -119,7 +119,6 @@ export default function LoginPage({ navigation }) {
     }
 
     let offices = [];
-    alert(JSON.stringify(ret))
     if (ret.offices.length)
       offices = ret.offices.split("$").map((x) => {
         return { office: x };

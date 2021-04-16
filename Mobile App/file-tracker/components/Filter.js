@@ -106,7 +106,7 @@ const Filter = (props) => {
       setTab(props.tab);
       clearAll();
     }
-  }, [fileTypes, handledBy, props.tab]);
+  }, [fileTypes, handledBy, props.tab, tags]);
 
   return (
     <Provider>
