@@ -25,7 +25,7 @@ import {
 } from "react-native";
 import { ScrollView as GestureHandlerScrollView } from "react-native-gesture-handler";
 import { AntDesign } from "@expo/vector-icons";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DatePicker from "react-native-datepicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import FileTimeline from "./FileTimeline";
 import FileAction from "./FileAction";
@@ -57,7 +57,7 @@ const columns = [
   },
 ];
 
-const horizontalScrollWidth = 900; // Horizontal scrollable width (increase if it's too squeezed)
+const horizontalScrollWidth = 1100; // Horizontal scrollable width (increase if it's too squeezed)
 
 const doNotSortBy = ["status", "confirmReceipt"]; // no sorting will be done when clicking on these
 
@@ -90,12 +90,12 @@ const displayNames = {
 
 // ==============================================================
 
-Date.prototype.convert = function () {
+Date.prototype.displayFormat = function () {
   var date = this.toDateString().slice(4);
   return [date.slice(0, 6), ",", date.slice(6)].join("");
 };
 
-Date.prototype.ddmmyyyy = function () {
+Date.prototype.processingFormat = function () {
   var mm = this.getMonth() + 1;
   var dd = this.getDate();
 
@@ -132,27 +132,13 @@ const Landing = ({ navigation, success }) => {
   const [ascending, setAscending] = useState(false);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const [currStartDate, setCurrStartDate] = useState(new Date());
-  const [currEndDate, setCurrEndDate] = useState(new Date());
   const [showDateFilter, setShowDateFilter] = useState(false);
-  const [showStart, setShowStart] = useState(false);
-  const [showEnd, setShowEnd] = useState(false);
+  const [startDateRef, setStartDateRef] = useState(null);
+  const [endDateRef, setEndDateRef] = useState(null);
   const [dateWatcher, setDateWatcher] = useState(true);
   const [query, setQuery] = useState("");
   const [searchBy, setSearchBy] = useState("name");
   const [showSearchByMenu, setShowSearchByMenu] = useState(false);
-
-  const onStartDateChange = (event, selectedDate) => {
-    const currentDate = selectedDate;
-    setShowStart(Platform.OS === "ios");
-    setStartDate(currentDate);
-    setCurrStartDate(currentDate);
-  };
-  const onEndDateChange = (event, selectedDate) => {
-    setShowEnd(Platform.OS === "ios");
-    setEndDate(selectedDate);
-    setCurrEndDate(selectedDate);
-  };
 
   const loadOffices = (x) =>
     AsyncStorage.getItem("@offices").then((ret) => {
@@ -744,6 +730,7 @@ const Landing = ({ navigation, success }) => {
                               })}
                             </View>
                             {filteredFiles.map((file, idx) => {
+                              // console.log(file);
                               return (
                                 <TouchableRipple
                                   key={file.trackingID}
@@ -795,7 +782,7 @@ const Landing = ({ navigation, success }) => {
                                               {column == "time" &&
                                                 new Date(
                                                   file[column]
-                                                ).ddmmyyyy()}
+                                                ).displayFormat()}
 
                                               {column != "time" && file[column]}
                                             </Paragraph>
@@ -952,16 +939,13 @@ const Landing = ({ navigation, success }) => {
                     }}
                   >
                     <Pressable
-                      onPress={() => setShowStart(true)}
+                      onPress={() => startDateRef.onPressDate()}
                       style={{ width: "70%" }}
                     >
                       <TextInput
                         label="After"
-                        value={startDate ? startDate.convert() : ""}
+                        value={startDate ? startDate.displayFormat() : null}
                         mode="outlined"
-                        // style={{
-                        //   marginTop: "3%",
-                        // }}
                         theme={{
                           colors: {
                             primary: "black",
@@ -972,18 +956,20 @@ const Landing = ({ navigation, success }) => {
                         right={
                           <TextInput.Icon
                             name="chevron-right"
-                            onPress={() => setShowStart(true)}
+                            onPress={() => {
+                              startDateRef.onPressDate();
+                            }}
                           />
                         }
                       />
                     </Pressable>
                     <Pressable
-                      onPress={() => setShowEnd(true)}
+                      onPress={() => endDateRef.onPressDate()}
                       style={{ width: "70%" }}
                     >
                       <TextInput
                         label="Before"
-                        value={endDate ? endDate.convert() : ""}
+                        value={endDate ? endDate.displayFormat() : null}
                         mode="outlined"
                         style={{
                           marginTop: "3%",
@@ -998,31 +984,57 @@ const Landing = ({ navigation, success }) => {
                         right={
                           <TextInput.Icon
                             name="chevron-right"
-                            onPress={() => setShowEnd(true)}
+                            onPress={() => {
+                              endDateRef.onPressDate();
+                            }}
                           />
                         }
                       />
                     </Pressable>
-                    {showStart && (
-                      <DateTimePicker
-                        testID="startDate"
-                        value={currStartDate}
-                        mode="date"
-                        is24Hour={true}
-                        display="default"
-                        onChange={onStartDateChange}
-                      />
-                    )}
-                    {showEnd && (
-                      <DateTimePicker
-                        testID="endDate"
-                        value={currEndDate}
-                        mode="date"
-                        is24Hour={true}
-                        display="default"
-                        onChange={onEndDateChange}
-                      />
-                    )}
+                    <DatePicker
+                      date={
+                        startDate
+                          ? startDate.processingFormat()
+                          : new Date().processingFormat()
+                      }
+                      mode="date"
+                      format="DD/MM/YYYY"
+                      showIcon={false}
+                      hideText={true}
+                      style={{ height: 0, width: 0 }}
+                      onDateChange={(date) => {
+                        var dateParts = date.split("/");
+                        var newDate = new Date(
+                          +dateParts[2],
+                          dateParts[1] - 1,
+                          +dateParts[0]
+                        );
+                        setStartDate(newDate);
+                      }}
+                      ref={(ref) => setStartDateRef(ref)}
+                    />
+                    <DatePicker
+                      date={
+                        endDate
+                          ? endDate.processingFormat()
+                          : new Date().processingFormat()
+                      }
+                      mode="date"
+                      format="DD/MM/YYYY"
+                      showIcon={false}
+                      hideText={true}
+                      style={{ height: 0, width: 0 }}
+                      onDateChange={(date) => {
+                        var dateParts = date.split("/");
+                        var newDate = new Date(
+                          +dateParts[2],
+                          dateParts[1] - 1,
+                          +dateParts[0]
+                        );
+                        setEndDate(newDate);
+                      }}
+                      ref={(ref) => setEndDateRef(ref)}
+                    />
                     <View style={{ flexDirection: "row", height: "20%" }}>
                       <Button
                         icon="eraser"
@@ -1039,8 +1051,6 @@ const Landing = ({ navigation, success }) => {
                         onPress={() => {
                           setStartDate(null);
                           setEndDate(null);
-                          setCurrStartDate(new Date());
-                          setCurrEndDate(new Date());
                         }}
                       >
                         Clear
