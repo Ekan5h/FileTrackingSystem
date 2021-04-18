@@ -141,3 +141,14 @@ class Department(db.Model):
 
     def __repr__(self):
         return self.name
+
+class QRCode(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    authenticated_user = db.Column(db.String)
+    time = db.Column(db.DateTime)
+
+    def __init__(self):
+        self.time = datetime.now()
+
+    def __repr__(self):
+        return self.id

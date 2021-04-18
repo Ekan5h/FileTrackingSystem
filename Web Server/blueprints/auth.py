@@ -10,6 +10,7 @@ auth = Blueprint('auth', __name__, template_folder='templates')
 @auth.route('/generateOTP' , methods=['POST'])
 def generateOTP():
 	try:
+		print(request.form)
 		addr = request.form['email']
 		otp = str(int(random()*1e8)).rjust(8,'0')
 		email.sendMail("Login OTP", addr, 'Hi there\nYour OTP for login is ' + otp)

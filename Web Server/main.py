@@ -7,7 +7,7 @@ from blueprints.scan import scan
 from blueprints.user_ops import user_ops
 from blueprints.office_ops import office_ops
 from blueprints.file_ops import file_ops
-
+from blueprints.webapp import webapp
 
 app = Flask(__name__)
 app.register_blueprint(auth)
@@ -15,6 +15,8 @@ app.register_blueprint(scan)
 app.register_blueprint(user_ops)
 app.register_blueprint(office_ops)
 app.register_blueprint(file_ops)
+app.register_blueprint(webapp)
+
 
 app.secret_key = b'\n\x7f&J\xae\xce&\xea\x05e\xdb\x7f\xd3\xbc\x1a6'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://lgrrdxzb:RK4Wo5k3N6aAiHlKQ5NXKvBFa2-0s1OZ@arjuna.db.elephantsql.com:5432/lgrrdxzb'

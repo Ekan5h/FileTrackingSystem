@@ -1,6 +1,7 @@
 from flask import Flask, render_template , request , jsonify, Blueprint
 from flask_login import login_required, current_user
 from datetime import datetime, timedelta
+import modules.email_client.email as email
 from modules.crypt import crypt
 from random import random
 from models import *
@@ -24,6 +25,7 @@ def createFile():
             newTransferRequest = TransferRequest(new_file.id, name, current_user.login_email, to_id)
             db.session.add(newTransferRequest)
             db.session.commit()
+            email.sendMail('Pending File Transfer Request', to_id, 'A transfer of file has been initiated by '+current_user.name+' of file ['+name+']. \n\nPlease check the app or click the following link to confirm [Must be logged in on the webapp]: http://192.168.1.6:5000/confirmTransfer?tid='+str(newTransferRequest.id))
         return jsonify({'tag':tag})
     except Exception as e:
         return jsonify({'error':True, 'msg':str(e)})
@@ -41,7 +43,7 @@ def confirmTransfer():
         db.session.add(log)
         db.session.delete(transfer)
         db.session.commit()
-        return jsonify({'error':False})
+        return jsonify({'error':False, 'msg':'Transfer successful!'})
     except Exception as e:
         print(e)
         return jsonify({'error':True, 'msg':str(e)})
@@ -105,7 +107,7 @@ def latestUpdate(x):
 def latestLocation(x):
     y = latestUpdate(x)
     if y is None:
-        return x.created_by
+        return "Self"
     return y.location
 def latestTime(x):
     y= latestUpdate(x)
@@ -185,10 +187,14 @@ def showProcessed():
         print(fileids)
         files = [Files.query.filter_by(id=x).first() for x in fileids]
         ret = [{'name':x.name, 
+                'owner':Users.query.filter_by(login_email=x.created_by).first().name,
+                'dept':Users.query.filter_by(login_email=x.created_by).first().department,
                 'trackingID':crypt.encrypt(x.id),
-                'status': x.created_by,
+                'type':x.category,
                 'time':x.created_on,
-                'type':x.category
+                'tags':[y.tag for y in Tags.query.filter(Tags.file_id==x.id, Tags.email==current_user.login_email).all()],
+                'handledBy':[y.location for y in FileLogs.query.filter_by(file_id=x.id).all()],
+                'status':str(str('Currently with ' + x.location) if x.confirmed else str('Sent to ' + x.location)) if x.location else 'File Processed'
                 } for x in files]
         ret = sorted(ret, key=lambda x: x['time'], reverse=True)
         print(ret)

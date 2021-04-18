@@ -604,7 +604,7 @@ const Landing = ({ navigation, success }) => {
                         {searchByFields
                           .filter(
                             (x) =>
-                              x == "handledBy" || columns[tab][x] != undefined
+                              x == "handledBy" || x == "tags" || columns[tab][x] != undefined
                           )
                           .map((field, idx) => {
                             return (
