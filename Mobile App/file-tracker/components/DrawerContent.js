@@ -11,7 +11,6 @@ import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
-import { FontAwesome5 } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const DrawerContent = (props) => {
@@ -20,25 +19,23 @@ const DrawerContent = (props) => {
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRE6XGQ9b93y4-wdN-oXWxQJuvWoLwbx5ChHQ&usqp=CAU",
     name: "",
     email: "",
-    office: ""
+    office: "",
   });
 
-  if(user.email.length==0){
-    AsyncStorage.getItem('@email').then(
-      async ret =>{
-        if(ret == null) return 0;
-        let name = await AsyncStorage.getItem('@name');
-        let office = await AsyncStorage.getItem('@office');
-        setUser(usr => {
+  if (user.email.length == 0) {
+    AsyncStorage.getItem("@email")
+      .then(async (ret) => {
+        if (ret == null) return 0;
+        let name = await AsyncStorage.getItem("@name");
+        let office = await AsyncStorage.getItem("@office");
+        setUser((usr) => {
           usr.email = ret;
           usr.name = name;
           usr.office = office;
           return usr;
-        })
-      }
-    ).catch(
-      () => alert("Some error occurred")
-    )
+        });
+      })
+      .catch(() => alert("Some error occurred"));
   }
 
   return (
@@ -86,7 +83,7 @@ const DrawerContent = (props) => {
           </View>
           <Drawer.Section style={{ marginTop: "4%" }}>
             <DrawerItem
-              icon={() => <Entypo name="home" size={24} color="black" />}
+              icon={() => <Entypo name="home" size={22} color="black" />}
               label="Home"
               onPress={() => {
                 props.navigation.navigate("Home");
@@ -103,7 +100,7 @@ const DrawerContent = (props) => {
             />
             <DrawerItem
               icon={() => (
-                <FontAwesome name="exchange" size={24} color="black" />
+                <FontAwesome name="exchange" size={20} color="black" />
               )}
               label="Pending Transfers"
               onPress={() => {
@@ -111,21 +108,24 @@ const DrawerContent = (props) => {
               }}
             />
             <DrawerItem
-              icon={() => (
-                <FontAwesome name="plus" size={24} color="black" />
-              )}
+              icon={() => <FontAwesome name="plus" size={24} color="black" />}
               label="Add Office"
               onPress={() => {
-                props.navigation.navigate('AddOffice');
+                props.navigation.navigate("AddOffice");
               }}
             />
             <DrawerItem
-              icon={() => (
-                <FontAwesome name="minus" size={24} color="black" />
-              )}
+              icon={() => <FontAwesome name="minus" size={24} color="black" />}
               label="Remove Office"
               onPress={() => {
                 props.navigation.navigate("RemoveOffice");
+              }}
+            />
+            <DrawerItem
+              icon={() => <Entypo name="laptop" size={20} color="black" />}
+              label="Trackify Web"
+              onPress={() => {
+                props.navigation.navigate("WebLogin");
               }}
             />
             {/* <DrawerItem
@@ -162,8 +162,8 @@ const DrawerContent = (props) => {
           label="Sign Out"
           onPress={async () => {
             console.log("Logout");
-            try{
-              await fetch('http://192.168.1.6:5000/logout',{method:"GET"})
+            try {
+              await fetch("http://192.168.1.6:5000/logout", { method: "GET" });
               await AsyncStorage.removeItem("@email");
               await AsyncStorage.removeItem("@profile");
               await AsyncStorage.removeItem("@offices");
@@ -171,12 +171,14 @@ const DrawerContent = (props) => {
               await AsyncStorage.removeItem("@name");
               props.navigation.reset({
                 index: 0,
-                routes: [{
+                routes: [
+                  {
                     name: "LoginPage",
-                  }],
+                  },
+                ],
               });
-            }catch(e){
-              alert(e)
+            } catch (e) {
+              alert(e);
               // alert("Could not signout");
             }
           }}

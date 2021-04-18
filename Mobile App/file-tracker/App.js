@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import LoginPage from "./components/LoginPage.js";
 import Landing from "./components/Landing.js";
 import SetName from "./components/SetName.js";
-import AddOffice from './components/AddOffice';
-import RemoveOffice from './components/RemoveOffice';
+import AddOffice from "./components/AddOffice";
+import RemoveOffice from "./components/RemoveOffice";
 import NewFile from "./components/NewFile";
 import DrawerContent from "./components/DrawerContent";
-import Feedback from "./components/Feedback";
+import WebLogin from "./components/WebLogin";
 import FileHistory from "./components/FileHistory";
 import ShowTransfers from "./components/ShowTransfers";
 import { NavigationContainer } from "@react-navigation/native";
@@ -30,7 +30,7 @@ function MainApp(props) {
       <Drawer.Screen name="NewFile" component={NewFile} />
       <Drawer.Screen name="AddOffice" component={AddOffice} />
       <Drawer.Screen name="RemoveOffice" component={RemoveOffice} />
-      {/* <Drawer.Screen name="Feedback" component={Feedback} /> */}
+      <Drawer.Screen name="WebLogin" component={WebLogin} />
     </Drawer.Navigator>
   );
 }
