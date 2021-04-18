@@ -35,12 +35,20 @@ def disconnect():
     con.quit()
 
 def sendMail(sub, rec, msg):
-    connect()
-    msg = MIMEText(msg)
-    msg['Subject'] = sub
-    msg['From'] = "File Tracker "+address
-    msg['To'] = rec
-    con.sendmail(address, rec, msg.as_string())
-    print("Mail sent successfully!")
-    print(msg)
-    disconnect()
+    try:
+        msg1 = MIMEText(msg)
+        msg1['Subject'] = sub
+        msg1['From'] = "File Tracker "+address
+        msg1['To'] = rec
+        con.sendmail(address, rec, msg1.as_string())
+        print("Mail sent successfully!")
+        print(msg1)
+    except:
+        connect()
+        msg = MIMEText(msg)
+        msg['Subject'] = sub
+        msg['From'] = "File Tracker "+address
+        msg['To'] = rec
+        con.sendmail(address, rec, msg.as_string())
+        print("Mail sent successfully!")
+        print(msg)
