@@ -19,6 +19,8 @@ def dash():
 @webapp.route('/webapp/profile' , methods=['GET'])
 def profile():
     if current_user.is_authenticated:
+        if current_user.name:
+            return redirect("/webapp", code=302)
         return webapp.send_static_file('profile.html')
     return redirect("/webapp/login", code=302)
 

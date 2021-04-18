@@ -307,7 +307,7 @@
                     </td>
                 </tr>
             </table>
-            <button onclick="createFile()">CREATE</button><button onclick="closeDialogs()">CANCEL</button>
+            <button id="createbtn" onclick="createFile()">CREATE</button><button onclick="closeDialogs()">CANCEL</button>
         </div>
         <div class="floating" style="display: none;" id="timeline">
             <h2 id="filename">Budget Approval</h2>
@@ -368,7 +368,7 @@
                     <td><input type="text" id="remarks" autocomplete="off"></td>
                 </tr>
             </table>
-            <button onclick="takeAction();">UPDATE</button><button onclick="closeDialogs()">CANCEL</button>
+            <button id="actionbtn" onclick="takeAction();">UPDATE</button><button onclick="closeDialogs()">CANCEL</button>
         </div>
         <div class="left">
             <center>
@@ -864,6 +864,8 @@
                 let next = document.getElementById('fto').value;
                 let office = document.getElementsByTagName('select')[2].value;
                 let remarks = document.getElementById('remarks').value;
+                document.getElementById('actionbtn').disabled = true;
+                document.getElementById('action').style.pointerEvents = 'none';
                 formData.append('tag', tag);
                 formData.append('type', type);
                 formData.append('next', next);
@@ -873,6 +875,8 @@
                 request.onreadystatechange = function() {
                     if (request.readyState == XMLHttpRequest.DONE) {
                         document.getElementById('overlay').style.display="none";
+                        document.getElementById('actionbtn').disabled = false;
+                        document.getElementById('action').style.pointerEvents = 'auto';
                         let error = JSON.parse(request.responseText);
                         if (error.error) {
                             alert("Some error occurred!");
@@ -896,6 +900,8 @@
                     alert("Fill the required fields!");
                     return;
                 }
+                document.getElementById('createbtn').disabled=true;
+                document.getElementById('create new').style.pointerEvents = 'none';
                 let formData = new FormData();
                 formData.append('name', name);
                 formData.append('type', fileType);
@@ -907,6 +913,8 @@
                 request.onreadystatechange = function() {
                     if (request.readyState == XMLHttpRequest.DONE) {
                         document.getElementById('overlay').style.display="none";
+                        document.getElementById('create new').style.pointerEvents = 'auto';
+                        document.getElementById('createbtn').disabled=false;
                         let error = JSON.parse(request.responseText);
                         if (error.error) {
                             alert("Some error occurred!");
