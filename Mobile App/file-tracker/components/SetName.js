@@ -4,11 +4,12 @@ import {
   View,
   ImageBackground,
   TouchableWithoutFeedback,
-  Pressable
+  Pressable,
 } from "react-native";
-import Search from './Search';
+import Search from "./Search";
 import { Button, TextInput, Title, Text } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import config from "../config";
 
 export default function SetName({ navigation }, prop) {
   const [name, setName] = useState("");
@@ -89,7 +90,10 @@ export default function SetName({ navigation }, prop) {
             selectionColor="rgba(0, 0, 0, 0.2)"
             maxLength={30}
           />
-          <Pressable onPress={()=>setMenuVisible(true)} style={{ width: "70%" }}>
+          <Pressable
+            onPress={() => setMenuVisible(true)}
+            style={{ width: "70%" }}
+          >
             <TextInput
               value={dept}
               mode="outlined"
@@ -109,7 +113,7 @@ export default function SetName({ navigation }, prop) {
               right={
                 <TextInput.Icon
                   name="chevron-down"
-                  onPress={()=>setMenuVisible(true)}
+                  onPress={() => setMenuVisible(true)}
                 />
               }
             />
@@ -117,7 +121,7 @@ export default function SetName({ navigation }, prop) {
           <Search
             searchFor="depts"
             showModal={menuVisible}
-            closeModal={()=>setMenuVisible(false)}
+            closeModal={() => setMenuVisible(false)}
             setOption={setDept}
           />
           {error && (
@@ -148,14 +152,14 @@ export default function SetName({ navigation }, prop) {
                 setError("Please enter your name");
                 return;
               }
-              if(dept.length == 0) {
+              if (dept.length == 0) {
                 setError("Please select a department");
                 return;
               }
               let formData = new FormData();
               formData.append("name", name);
               formData.append("dept", dept);
-              fetch("http://192.168.1.6:5000/setName", {
+              fetch(config.ip + "/setName", {
                 method: "POST",
                 body: formData,
                 headers: {
@@ -171,7 +175,7 @@ export default function SetName({ navigation }, prop) {
                   });
                 })
                 .catch((e) => {
-                  alert("Error")
+                  alert("Error");
                 });
             }}
           >

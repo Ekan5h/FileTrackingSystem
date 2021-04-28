@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
+import config from "../config";
 
 var db = {
   offices: {
@@ -50,7 +51,7 @@ var db = {
   depts: {
     options: [],
     placeholder: "Search for a Department",
-  }
+  },
 };
 
 const Search = (props) => {
@@ -66,29 +67,23 @@ const Search = (props) => {
   const [newTag, setNewTag] = useState("");
 
   if (props.searchFor == "offices" && allData.length == 0) {
-    fetch("http://192.168.1.6:5000/getOffices", { method: "GET" }).then(
-      async (ret) => {
-        ret = await ret.json();
-        setAllData(ret.map((x) => x.name));
-      }
-    );
+    fetch(config.ip + "/getOffices", { method: "GET" }).then(async (ret) => {
+      ret = await ret.json();
+      setAllData(ret.map((x) => x.name));
+    });
   } else if (props.searchFor == "users" && allData.length == 0) {
-    fetch("http://192.168.1.6:5000/getUsers", { method: "GET" }).then(
-      async (ret) => {
-        ret = await ret.json();
-        setAllData(ret.map((x) => x.name + ", " + x.email));
-      }
-    );
+    fetch(config.ip + "/getUsers", { method: "GET" }).then(async (ret) => {
+      ret = await ret.json();
+      setAllData(ret.map((x) => x.name + ", " + x.email));
+    });
   } else if (props.searchFor == "tags" && !dataset) {
     setDataset(true);
-    fetch("http://192.168.1.6:5000/showTag", { method: "GET" }).then(
-      async (ret) => {
-        ret = await ret.json();
-        setAllData(ret.tags);
-      }
-    );
+    fetch(config.ip + "/showTag", { method: "GET" }).then(async (ret) => {
+      ret = await ret.json();
+      setAllData(ret.tags);
+    });
   } else if (props.searchFor == "depts" && allData.length == 0) {
-    fetch("http://192.168.1.6:5000/getDepartments", { method: "GET" }).then(
+    fetch(config.ip + "/getDepartments", { method: "GET" }).then(
       async (ret) => {
         ret = await ret.json();
         setAllData(ret.map((x) => x.name));
@@ -324,16 +319,13 @@ const Search = (props) => {
                               // API CALL TO ADD TAG FOR THIS USER
                               let fd = new FormData();
                               fd.append("tag", newTag);
-                              let ret = await fetch(
-                                "http://192.168.1.6:5000/addTag",
-                                {
-                                  method: "POST",
-                                  body: fd,
-                                  headers: {
-                                    "content-type": "multipart/form-data",
-                                  },
-                                }
-                              );
+                              let ret = await fetch(config.ip + "/addTag", {
+                                method: "POST",
+                                body: fd,
+                                headers: {
+                                  "content-type": "multipart/form-data",
+                                },
+                              });
                               ret = await ret.json();
                               if (ret.error)
                                 alert("Some error occurred! Restart App");

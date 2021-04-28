@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { IconButton, Subheading, Button } from "react-native-paper";
 import { View, ImageBackground, StatusBar, StyleSheet } from "react-native";
-
 import { BarCodeScanner } from "expo-barcode-scanner";
+import config from "../config";
 
 export default function WebLogin(props) {
   const [hasPermission, setHasPermission] = useState(null);
@@ -17,7 +17,7 @@ export default function WebLogin(props) {
 
   const handleBarCodeScanned = ({ type, data }) => {
     setScanned(true);
-    let url = "http://192.168.1.6:5000/webapp/login/scan?qr=" + data;
+    let url = config.ip + "/webapp/login/scan?qr=" + data;
     fetch(url, { method: "GET" })
       .then((response) => response.json())
       .then(({ success }) => {

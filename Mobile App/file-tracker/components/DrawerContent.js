@@ -12,6 +12,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import config from "../config";
 
 const DrawerContent = (props) => {
   const [user, setUser] = useState({
@@ -163,7 +164,7 @@ const DrawerContent = (props) => {
           onPress={async () => {
             console.log("Logout");
             try {
-              await fetch("http://192.168.1.6:5000/logout", { method: "GET" });
+              await fetch(config.ip + "/logout", { method: "GET" });
               await AsyncStorage.removeItem("@email");
               await AsyncStorage.removeItem("@profile");
               await AsyncStorage.removeItem("@offices");

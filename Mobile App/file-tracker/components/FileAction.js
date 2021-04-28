@@ -18,6 +18,7 @@ import {
   Modal,
 } from "react-native";
 import Search from "./Search";
+import config from "../config";
 
 const FileAction = (props) => {
   const [remarks, setRemarks] = useState("");
@@ -39,13 +40,13 @@ const FileAction = (props) => {
   const validateForm = () => {
     var newErrors = [undefined, undefined, undefined];
     let ret = true;
-    if (action === ""){
+    if (action === "") {
       ret = false;
       newErrors[0] = "Please select an action";
     }
-    if (action === "Processed & Forwarded" && forwardingTo === ""){
+    if (action === "Processed & Forwarded" && forwardingTo === "") {
       ret = false;
-      newErrors[1] = "Please select who you are forwarding to"
+      newErrors[1] = "Please select who you are forwarding to";
     }
     setErrors(newErrors);
     return ret;
@@ -186,11 +187,21 @@ const FileAction = (props) => {
                       },
                     }}
                     editable={false}
-                    disabled={action == "Processed & Forwarded" || action == "Clarifications/Inputs needed" ? false : true}
+                    disabled={
+                      action == "Processed & Forwarded" ||
+                      action == "Clarifications/Inputs needed"
+                        ? false
+                        : true
+                    }
                     right={
                       <TextInput.Icon
                         name="chevron-right"
-                        onPress={ action == "Processed & Forwarded" || action == "Clarifications/Inputs needed" ? openOfficeMenu : null }
+                        onPress={
+                          action == "Processed & Forwarded" ||
+                          action == "Clarifications/Inputs needed"
+                            ? openOfficeMenu
+                            : null
+                        }
                       />
                     }
                   />
@@ -243,43 +254,42 @@ const FileAction = (props) => {
                   mode="contained"
                   color="black"
                   onPress={() => {
-                    if(validateForm()){
-                      let type = -1
+                    if (validateForm()) {
+                      let type = -1;
                       if (action == "Processed") type = 0;
                       if (action == "Processed & Forwarded") type = 1;
                       if (action == "Clarifications/Inputs needed") type = 2;
                       if (action == "Approved and Returned Finally") type = 3;
                       if (action == "Approved and Kept Finally") type = 4;
-                      if (action == "Not Approved and Returned Finally") type = 5;
+                      if (action == "Not Approved and Returned Finally")
+                        type = 5;
                       if (action == "Not Approved and Kept Finally") type = 6;
                       let next = "";
-                      if(type == 1 || type == 2){
+                      if (type == 1 || type == 2) {
                         next = forwardingTo;
                       }
-                      let formData = new FormData()
-                      formData.append('tag', props.token);
-                      formData.append('type', type);
-                      formData.append('next', next);
-                      formData.append('office', props.office);
-                      formData.append('remarks', remarks);
-                      fetch('http://192.168.1.6:5000/updateFile',{
-                        method:'POST',
-                        body:formData,
+                      let formData = new FormData();
+                      formData.append("tag", props.token);
+                      formData.append("type", type);
+                      formData.append("next", next);
+                      formData.append("office", props.office);
+                      formData.append("remarks", remarks);
+                      fetch(config.ip + "/updateFile", {
+                        method: "POST",
+                        body: formData,
                         headers: {
                           "content-type": "multipart/form-data",
                         },
-                      }).then(
-                        async ret => {
+                      })
+                        .then(async (ret) => {
                           ret = await ret.json();
-                          if(ret.error==false){
+                          if (ret.error == false) {
                             props.onSuccess();
-                          }else{
-                            alert('Something went wrong!');
+                          } else {
+                            alert("Something went wrong!");
                           }
-                        }
-                      ).catch(
-                        () => alert("Could not update file!")
-                      )
+                        })
+                        .catch(() => alert("Could not update file!"));
                     }
                   }}
                 >

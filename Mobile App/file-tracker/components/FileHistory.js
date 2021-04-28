@@ -17,13 +17,14 @@ import {
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import config from "../config";
 
 const FileHistory = (props) => {
   const [files, setFiles] = useState([]);
   const [token, setToken] = useState(null);
   const [fileName, setFileName] = useState(null);
   const [viewingFile, setViewingFile] = useState(false);
-  
+
   const [offices, setOffices] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -33,7 +34,7 @@ const FileHistory = (props) => {
     let fils = {};
     for (let i = 0; i < offices.length; i++) {
       let ret = await fetch(
-        "http://192.168.1.6:5000/showProcessed?office=" + offices[i].office,
+        config.ip + "/showProcessed?office=" + offices[i].office,
         { method: "GET" }
       );
       ret = await ret.json();
@@ -85,7 +86,14 @@ const FileHistory = (props) => {
             marginTop: 3.5 * StatusBar.currentHeight,
           }}
         >
-          <Title style={{ marginLeft: "1%", fontSize: 30, flexWrap: "wrap", paddingLeft:"8%" }}>
+          <Title
+            style={{
+              marginLeft: "1%",
+              fontSize: 30,
+              flexWrap: "wrap",
+              paddingLeft: "8%",
+            }}
+          >
             File history
           </Title>
           <ScrollView
@@ -104,7 +112,7 @@ const FileHistory = (props) => {
               />
             }
           >
-            <View style={{ width: "100%", alignItems:"center" }}>
+            <View style={{ width: "100%", alignItems: "center" }}>
               {files.length === 0 && (
                 <Subheading style={{ marginTop: "4%", paddingLeft: "2%" }}>
                   No files to show!

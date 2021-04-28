@@ -17,6 +17,7 @@ import {
   Keyboard,
   StatusBar,
 } from "react-native";
+import config from "../config";
 
 const NewFile = (props) => {
   const [name, setName] = useState("");
@@ -45,15 +46,15 @@ const NewFile = (props) => {
   const validateForm = () => {
     var newErrors = [undefined, undefined, undefined];
     ret = true;
-    if (name === ""){
+    if (name === "") {
       newErrors[0] = "Please enter a file name";
       ret = false;
     }
-    if (fileType === ""){
+    if (fileType === "") {
       newErrors[1] = "Please select a file type";
       ret = false;
     }
-    if (submittedTo === ""){
+    if (submittedTo === "") {
       newErrors[2] = "Please select an office";
       ret = false;
     }
@@ -280,35 +281,32 @@ const NewFile = (props) => {
                 mode="contained"
                 color="black"
                 onPress={() => {
-                  if(validateForm()){
+                  if (validateForm()) {
                     formData = new FormData();
-                    formData.append('name', name);
-                    formData.append('type', fileType);
-                    formData.append('submitted_to', submittedTo);
-                    if(transferTo){
-                      formData.append('transfer_to', transferTo);
+                    formData.append("name", name);
+                    formData.append("type", fileType);
+                    formData.append("submitted_to", submittedTo);
+                    if (transferTo) {
+                      formData.append("transfer_to", transferTo);
                     }
-                    fetch('http://192.168.1.6:5000/createFile', {
-                      method:'POST',
-                      body:formData,
+                    fetch(config.ip + "/createFile", {
+                      method: "POST",
+                      body: formData,
                       headers: {
                         "content-type": "multipart/form-data",
-                      }
-                    }).then(
-                      async (ret) => {
-                        ret = await ret.json()
-                        if(!ret.tag){
+                      },
+                    })
+                      .then(async (ret) => {
+                        ret = await ret.json();
+                        if (!ret.tag) {
                           alert("Could not create file!");
                           return 0;
-                        }else{
+                        } else {
                           setTag(ret.tag);
                         }
-                      }
-                    ).catch(
-                      () => alert("Check Network Connection!")
-                    )
+                      })
+                      .catch(() => alert("Check Network Connection!"));
                   }
-
                 }}
               >
                 Confirm
@@ -317,11 +315,13 @@ const NewFile = (props) => {
           </View>
         </TouchableWithoutFeedback>
       </ImageBackground>
-      <WriteToken 
-        showModal = {tag!=null}
-        token = {tag}
-        navigation = {props.navigation}
-        closeModal = {()=>{setTag(null)}}
+      <WriteToken
+        showModal={tag != null}
+        token={tag}
+        navigation={props.navigation}
+        closeModal={() => {
+          setTag(null);
+        }}
       />
     </Provider>
   );

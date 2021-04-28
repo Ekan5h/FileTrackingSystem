@@ -14,51 +14,52 @@ import {
   StatusBar,
   ScrollView,
 } from "react-native";
+import config from "../config";
 
 const ShowTransfers = (props) => {
   const [files, setFiles] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-
   const reload = async () => {
     // alert(JSON.stringify(offices));
     setRefreshing(true);
-    let ret = await fetch('http://192.168.1.6:5000/showTransfers', {method:'GET'})
-    ret = await ret.json()
-    if(ret.error){
-        setRefreshing(false);
-        alert("Could not get files!");
-        return 0;
+    let ret = await fetch(config.ip + "/showTransfers", { method: "GET" });
+    ret = await ret.json();
+    if (ret.error) {
+      setRefreshing(false);
+      alert("Could not get files!");
+      return 0;
     }
 
     setFiles(ret);
     setRefreshing(false);
   };
 
-  if(!loaded){
+  if (!loaded) {
     setLoaded(true);
     reload();
   }
 
-  const confirmFile = tid => {
+  const confirmFile = (tid) => {
     return async () => {
       setRefreshing(true);
-      let ret = await fetch('http://192.168.1.6:5000/confirmTransfer?tid=' + tid, {method:'GET'})
-      ret = await ret.json()
-      if(ret.error || ret.error == undefined){
+      let ret = await fetch(config.ip + "/confirmTransfer?tid=" + tid, {
+        method: "GET",
+      });
+      ret = await ret.json();
+      if (ret.error || ret.error == undefined) {
         setRefreshing(false);
-        alert("Could not confirm tranfer!")
+        alert("Could not confirm tranfer!");
         return 0;
       }
       setRefreshing(false);
-      setFiles(file => {
-        file = JSON.parse(JSON.stringify(file))
-        return file.filter(f => f.t_id!=tid)
-      })
-    }
-  }
-
+      setFiles((file) => {
+        file = JSON.parse(JSON.stringify(file));
+        return file.filter((f) => f.t_id != tid);
+      });
+    };
+  };
 
   return (
     <ImageBackground
@@ -89,7 +90,14 @@ const ShowTransfers = (props) => {
             marginTop: 3.5 * StatusBar.currentHeight,
           }}
         >
-          <Title style={{ marginLeft: "1%", fontSize: 30, flexWrap: "wrap", paddingLeft:"8%" }}>
+          <Title
+            style={{
+              marginLeft: "1%",
+              fontSize: 30,
+              flexWrap: "wrap",
+              paddingLeft: "8%",
+            }}
+          >
             Pending Transfers
           </Title>
           <ScrollView
@@ -108,7 +116,7 @@ const ShowTransfers = (props) => {
               />
             }
           >
-            <View style={{ width: "100%", alignItems:"center" }}>
+            <View style={{ width: "100%", alignItems: "center" }}>
               {files.length === 0 && (
                 <Subheading style={{ marginTop: "4%", paddingLeft: "2%" }}>
                   No files to show!
@@ -161,7 +169,12 @@ const ShowTransfers = (props) => {
                             paddingRight: "5%",
                           }}
                         >
-                          <IconButton icon="check" size={26} color="green" onPress={confirmFile(file.t_id)} />
+                          <IconButton
+                            icon="check"
+                            size={26}
+                            color="green"
+                            onPress={confirmFile(file.t_id)}
+                          />
                         </View>
                       </View>
                     </TouchableRipple>

@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { Button, TextInput, IconButton } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import config from "../config";
 
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
@@ -24,7 +25,7 @@ export default function LoginPage({ navigation }) {
 
   const generateOTP = async () => {
     if (!/^[a-zA-Z0-9+_\.-]+@[a-zA-Z0-9\.-]+\.[a-zA-Z]+$/.test(email)) {
-      alert("Enter Valid Email")
+      alert("Enter Valid Email");
       return 0;
     }
     setLoading(true);
@@ -32,7 +33,7 @@ export default function LoginPage({ navigation }) {
     formData.append("email", email);
     let error = null;
     try {
-      error = await fetch("http://192.168.1.6:5000/generateOTP", {
+      error = await fetch(config.ip + "/generateOTP", {
         method: "POST",
         body: formData,
         headers: {
@@ -72,7 +73,7 @@ export default function LoginPage({ navigation }) {
     formData.append("email", email);
     let error = null;
     try {
-      error = await fetch("http://192.168.1.6:5000/generateOTP", {
+      error = await fetch(config.ip + "/generateOTP", {
         method: "POST",
         body: formData,
         headers: {
@@ -100,7 +101,7 @@ export default function LoginPage({ navigation }) {
     formData.append("login", true);
     let match = null;
     try {
-      match = await fetch("http://192.168.1.6:5000/verifyOTP", {
+      match = await fetch(config.ip + "/verifyOTP", {
         method: "POST",
         body: formData,
         headers: {
@@ -139,7 +140,7 @@ export default function LoginPage({ navigation }) {
       } catch (e) {
         alert(e);
         alert("Some error occurred!");
-        await fetch("http://192.168.1.6:5000/logout", { method: "GET" });
+        await fetch(config.ip + "/logout", { method: "GET" });
       }
 
       setTimeout(() => {
@@ -203,8 +204,9 @@ export default function LoginPage({ navigation }) {
         >
           <Image
             style={{
-              height: 0.5 * windowHeight,
-              width: 0.5 * windowHeight,
+              height: 0.4 * windowHeight,
+              width: 0.2 * windowHeight,
+              marginBottom: 0.08 * windowHeight
             }}
             source={require("../assets/main_logo.png")}
           />

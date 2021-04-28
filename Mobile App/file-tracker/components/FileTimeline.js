@@ -5,17 +5,12 @@ import {
   StatusBar,
   ScrollView,
   RefreshControl,
-  Modal
+  Modal,
 } from "react-native";
-import {
-  Text,
-  Title,
-  IconButton,
-  Caption,
-  Chip,
-} from "react-native-paper";
+import { Text, Title, IconButton, Caption, Chip } from "react-native-paper";
 import Search from "./Search";
 import { FontAwesome } from "@expo/vector-icons";
+import config from "../config";
 
 const FileTimeline = (props) => {
   const [refreshing, setRefreshing] = useState(false);
@@ -42,43 +37,39 @@ const FileTimeline = (props) => {
     setFile(newFile);
     setShowTags(newFile.tags.slice(0, 2));
     // API CALL TO CHANGE TAGS
-    console.log(checked.join('$'));
+    console.log(checked.join("$"));
     let fd = new FormData();
-    fd.append('tags', checked.join('$'));
-    fd.append('file_id', props.token);
-    let ret = await fetch('http://192.168.1.6:5000/fileTag',{
-      method:'POST',
-      body:fd,
+    fd.append("tags", checked.join("$"));
+    fd.append("file_id", props.token);
+    let ret = await fetch(config.ip + "/fileTag", {
+      method: "POST",
+      body: fd,
       headers: {
-        "content-type":
-          "multipart/form-data",
+        "content-type": "multipart/form-data",
       },
     });
     ret = await ret.json();
-    if(ret.error) alert("Some error occurred! Restart App");
+    if (ret.error) alert("Some error occurred! Restart App");
   };
 
-  if(file.history[0].date.length == 0){
-    fetch('http://192.168.1.6:5000/fileHistory?tag='+props.token, {method:'GET'}).then(
-      async ret => {
+  if (file.history[0].date.length == 0) {
+    fetch(config.ip + "/fileHistory?tag=" + props.token, { method: "GET" })
+      .then(async (ret) => {
         ret = await ret.json();
         setFile(ret);
-        setShowTags(ret.tags.slice(0,2));
-      }
-    ).catch(
-      () => alert("Could not get details!")
-    )
+        setShowTags(ret.tags.slice(0, 2));
+      })
+      .catch(() => alert("Could not get details!"));
   }
-
 
   return (
     <Modal
-        animationType="slide"
-        visible={props.showModal}
-        useNativeDriver={true}
-        animationIn="slideInLeft"
-        animationOut="slideOutRight"
-        onRequestClose={props.closeModal}
+      animationType="slide"
+      visible={props.showModal}
+      useNativeDriver={true}
+      animationIn="slideInLeft"
+      animationOut="slideOutRight"
+      onRequestClose={props.closeModal}
     >
       <ImageBackground
         style={{ flex: 1, resizeMode: "cover" }}
@@ -174,8 +165,7 @@ const FileTimeline = (props) => {
                   alignItems: "flex-start",
                   height: "auto",
                 }}
-              >
-              </View>
+              ></View>
             </View>
 
             <View
