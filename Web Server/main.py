@@ -1,4 +1,4 @@
-from flask import Flask, render_template , request , jsonify
+from flask import Flask, render_template , request , jsonify, redirect
 from flask_login import LoginManager, login_required, logout_user, current_user
 from models import *
 
@@ -38,7 +38,8 @@ def home():
 
 @app.route('/')
 def root():
-	return "<font face='comic sans ms'><center><br><br><h1>File Tracking System</h1><br><h3>Project currently under development!</h3><img src='https://i.pinimg.com/originals/ef/03/f8/ef03f898ffa6f5eac9a37622cd73cd4b.gif'>"
+    return redirect("/webapp", code=302)
+    return "<font face='comic sans ms'><center><br><br><h1>File Tracking System</h1><br><h3>Project currently under development!</h3><img src='https://i.pinimg.com/originals/ef/03/f8/ef03f898ffa6f5eac9a37622cd73cd4b.gif'>"
 
 @app.after_request
 def after_request(response):
@@ -48,4 +49,4 @@ def after_request(response):
     return response
 
 if __name__ == '__main__':
-	app.run(debug = True, host='0.0.0.0')
+	app.run(debug = True, host='0.0.0.0', port=5027)

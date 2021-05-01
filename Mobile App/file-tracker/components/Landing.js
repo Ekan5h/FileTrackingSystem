@@ -22,8 +22,9 @@ import {
   Dimensions,
   Modal,
   Pressable,
+  ScrollView
 } from "react-native";
-import { ScrollView as GestureHandlerScrollView } from "react-native-gesture-handler";
+// import { ScrollView as GestureHandlerScrollView } from "react-native-gesture-handler";
 import { AntDesign } from "@expo/vector-icons";
 import DatePicker from "react-native-datepicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -650,14 +651,14 @@ const Landing = ({ navigation, success }) => {
                         marginTop: isOfficeAccount ? 0 : "0%",
                       }}
                     >
-                      <GestureHandlerScrollView
+                      <ScrollView
                         nestedScrollEnabled
                         style={{
                           width: "100%",
                           height: "100%",
                         }}
                       >
-                        <GestureHandlerScrollView
+                        <ScrollView
                           horizontal
                           nestedScrollEnabled
                           style={{
@@ -748,7 +749,7 @@ const Landing = ({ navigation, success }) => {
                                       setFileAction(true);
                                     }
                                   }}
-                                  rippleColor="rgba(0, 0, 0, .15)"
+                                  rippleColor="rgba(0, 0, 0, .05)"
                                 >
                                   <View
                                     // key={file.trackingID}
@@ -851,8 +852,8 @@ const Landing = ({ navigation, success }) => {
                               );
                             })}
                           </View>
-                        </GestureHandlerScrollView>
-                      </GestureHandlerScrollView>
+                        </ScrollView>
+                      </ScrollView>
                     </View>
                   )}
                 </>

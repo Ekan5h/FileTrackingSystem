@@ -8,6 +8,11 @@ from models import *
 
 webapp = Blueprint('webapp', __name__, template_folder='../templates', static_folder='../static')
 
+@webapp.route('/favicon.ico')
+def favicon():
+    return webapp.send_static_file('favicon.ico')
+    
+
 @webapp.route('/webapp' , methods=['GET'])
 def dash():
     if current_user.is_authenticated:
@@ -50,13 +55,15 @@ def generateqr():
 @webapp.route('/webapp/login/scan' , methods=['GET'])
 @login_required
 def webappLoginScan():
-    code = request.args['qr']
-    id = crypt.decrypt(code)
-    obj = QRCode.query.filter_by(id=id).first()
-    obj.authenticated_user = current_user.login_email
-    db.session.commit()
-    return jsonify({'done':True})
-
+    try:
+        code = request.args['qr']
+        id = crypt.decrypt(code)
+        obj = QRCode.query.filter_by(id=id).first()
+        obj.authenticated_user = current_user.login_email
+        db.session.commit()
+        return jsonify({'success':True})
+    except:
+        return jsonify({'success':False})
 
 
 @webapp.route('/webapp/login/read' , methods=['GET'])

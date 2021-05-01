@@ -13,6 +13,7 @@ import { Entypo } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import config from "../config";
+import WebLogin from './WebLogin';
 
 const DrawerContent = (props) => {
   const [user, setUser] = useState({
@@ -22,6 +23,7 @@ const DrawerContent = (props) => {
     email: "",
     office: "",
   });
+  const [login, setLogin] = useState(false);
 
   if (user.email.length == 0) {
     AsyncStorage.getItem("@email")
@@ -126,7 +128,8 @@ const DrawerContent = (props) => {
               icon={() => <Entypo name="laptop" size={20} color="black" />}
               label="Trackify Web"
               onPress={() => {
-                props.navigation.navigate("WebLogin");
+                // props.navigation.navigate("WebLogin");
+                setLogin(true);
               }}
             />
             {/* <DrawerItem
@@ -185,6 +188,7 @@ const DrawerContent = (props) => {
           }}
         />
       </Drawer.Section>
+      {login && <WebLogin closeModal={() => setLogin(false) } />}
     </View>
   );
 };

@@ -30,7 +30,7 @@ function MainApp(props) {
       <Drawer.Screen name="NewFile" component={NewFile} />
       <Drawer.Screen name="AddOffice" component={AddOffice} />
       <Drawer.Screen name="RemoveOffice" component={RemoveOffice} />
-      <Drawer.Screen name="WebLogin" component={WebLogin} />
+      {/* <Drawer.Screen name="WebLogin" component={WebLogin} /> */}
     </Drawer.Navigator>
   );
 }
