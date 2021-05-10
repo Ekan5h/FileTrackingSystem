@@ -49,10 +49,13 @@ def verifyOTP():
 					else:
 						return jsonify({'match':True, 'name':'', 'profile':False, 'name':'', 'offices':user.offices})
 				user = Users(addr)
+				office = OfficeEmails.query.filter_by(email=addr).first()
+				if office:
+					user.offices = office.name
 				db.session.add(user)
 				db.session.commit()
 				login_user(user, remember=True)
-				return jsonify({'match':True, 'name':'', 'profile':False, 'offices':''})
+				return jsonify({'match':True, 'name':'', 'profile':False, 'offices':user.offices})
 			elif 'addoffice' in request.form.keys() and request.form['addoffice']:
 				account = OfficeEmails.query.filter_by(email=addr).first()
 				user = current_user
