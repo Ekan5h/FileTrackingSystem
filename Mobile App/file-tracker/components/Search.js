@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { TextInput, IconButton, List, Button } from "react-native-paper";
+import {
+  TextInput,
+  IconButton,
+  List,
+  Button,
+  Subheading,
+} from "react-native-paper";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   View,
   KeyboardAvoidingView,
@@ -17,7 +24,7 @@ import config from "../config";
 
 var db = {
   offices: {
-    options: [],
+    options: ["office0", "office1"],
     placeholder: "Search for an office",
   },
   users: {
@@ -65,31 +72,44 @@ const Search = (props) => {
   const [checked, setChecked] = useState(props.checked ? props.checked : []);
   const [showAddNew, setShowAddNew] = useState(false);
   const [newTag, setNewTag] = useState("");
+  const [tab, setTab] = useState("Recent");
+  // const [autoSwitch, setAutoSwitch] = useState(true);
 
-  if (props.searchFor == "offices" && allData.length == 0) {
-    fetch(config.ip + "/getOffices", { method: "GET" }).then(async (ret) => {
-      ret = await ret.json();
-      setAllData(ret.map((x) => x.name));
-    });
-  } else if (props.searchFor == "users" && allData.length == 0) {
-    fetch(config.ip + "/getUsers", { method: "GET" }).then(async (ret) => {
-      ret = await ret.json();
-      setAllData(ret.map((x) => x.name + ", " + x.email));
-    });
-  } else if (props.searchFor == "tags" && !dataset) {
-    setDataset(true);
-    fetch(config.ip + "/showTag", { method: "GET" }).then(async (ret) => {
-      ret = await ret.json();
-      setAllData(ret.tags);
-    });
-  } else if (props.searchFor == "depts" && allData.length == 0) {
-    fetch(config.ip + "/getDepartments", { method: "GET" }).then(
-      async (ret) => {
-        ret = await ret.json();
-        setAllData(ret.map((x) => x.name));
-      }
-    );
+  async function getRecents() {
+    let recents = await AsyncStorage.getItem("recentSearch");
+    recents = JSON.parse(recents);
+    return recents;
   }
+
+  useEffect(() => {
+    console.log(props.searchFor);
+    if (props.searchFor == "offices" && allData.length == 0) {
+      // return;
+      setAllData(["Loading offices..."]);
+      // fetch(config.ip + "/getOffices", { method: "GET" }).then(async (ret) => {
+      //   ret = await ret.json();
+      //   setAllData(ret.map((x) => x.name));
+      // });
+    } else if (props.searchFor == "users" && allData.length == 0) {
+      fetch(config.ip + "/getUsers", { method: "GET" }).then(async (ret) => {
+        ret = await ret.json();
+        setAllData(ret.map((x) => x.name + ", " + x.email));
+      });
+    } else if (props.searchFor == "tags" && !dataset) {
+      setDataset(true);
+      fetch(config.ip + "/showTag", { method: "GET" }).then(async (ret) => {
+        ret = await ret.json();
+        setAllData(ret.tags);
+      });
+    } else if (props.searchFor == "depts" && allData.length == 0) {
+      fetch(config.ip + "/getDepartments", { method: "GET" }).then(
+        async (ret) => {
+          ret = await ret.json();
+          setAllData(ret.map((x) => x.name));
+        }
+      );
+    }
+  }, [props.searchFor]);
 
   useEffect(() => {
     if (props.searchFor === "files") {
@@ -117,6 +137,21 @@ const Search = (props) => {
     });
     setCurrData(newData);
   }, [query, allData, props.files]);
+
+  useEffect(() => {
+    if (props.searchFor !== "offices") return;
+    if (tab == "Recent") {
+      async function setRecents() {
+        let recents = await getRecents();
+        setAllData(recents);
+      }
+      setRecents();
+    } else {
+      setAllData(db["offices"]["options"]);
+      // API call to get a class of offices (tab = Offices/Dept/Faculty)
+      return;
+    }
+  }, [tab, props.searchFor]);
 
   return (
     <Modal
@@ -166,6 +201,7 @@ const Search = (props) => {
             <View
               style={{
                 flex: 1,
+                // width: "100%",
                 backgroundColor: "transparent",
                 justifyContent: "flex-start",
                 paddingLeft: "10%",
@@ -181,7 +217,7 @@ const Search = (props) => {
                   mode="outlined"
                   selectionColor="rgba(0, 0, 0, 0.2)"
                   style={{
-                    width: "80%",
+                    width: "90%",
                     marginBottom: "5%",
                   }}
                   theme={{
@@ -199,6 +235,40 @@ const Search = (props) => {
                     />
                   }
                 />
+                {props.searchFor === "offices" && (
+                  <View
+                    style={{
+                      width: "100%",
+                      flexDirection: "row",
+                      marginTop: "-2%",
+                      marginBottom: "0%",
+                      marginLeft: "-1%",
+                    }}
+                  >
+                    {["Recent", "Offices", "Dept", "Faculty"].map((option) => {
+                      return (
+                        <Button
+                          uppercase={false}
+                          compact
+                          mode="outlined"
+                          style={{
+                            borderWidth: 0,
+                            width: "23%",
+                          }}
+                          labelStyle={{
+                            fontSize: 12,
+                          }}
+                          color={tab === option ? "black" : "grey"}
+                          onPress={() => {
+                            setTab(option);
+                          }}
+                        >
+                          {option}
+                        </Button>
+                      );
+                    })}
+                  </View>
+                )}
                 {props.searchFor === "tags" && props.addNew && (
                   <>
                     <View>
@@ -208,11 +278,12 @@ const Search = (props) => {
                           setShowAddNew(true);
                         }}
                         style={{
-                          width: "78%",
+                          width: "85%",
+                          marginLeft: "1%",
                           borderBottomWidth: 1,
                           borderBottomColor: "black",
                           paddingVertical: "2%",
-                          paddingLeft: "0%",
+                          paddingLeft: "1%",
                         }}
                         left={() => (
                           <Feather
@@ -339,6 +410,27 @@ const Search = (props) => {
                     </Modal>
                   </>
                 )}
+                {props.searchFor === "offices" && allData.length === 0 && (
+                  <View
+                    style={{
+                      width: "100%",
+                      height: "50%",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Subheading
+                      style={{
+                        padding: "1%",
+                        paddingRight: "15%",
+                        textAlign: "center",
+                      }}
+                    >
+                      Your recently accessed offices will be listed here - use
+                      the app some more!
+                    </Subheading>
+                  </View>
+                )}
                 <ScrollView
                   style={{
                     width: "100%",
@@ -382,7 +474,8 @@ const Search = (props) => {
                             }
                           }}
                           style={{
-                            width: "78%",
+                            width: "85%",
+                            marginLeft: "1%",
                             borderBottomWidth: 0.2,
                             borderBottomColor: "black",
                             paddingVertical: "2%",

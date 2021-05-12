@@ -39,12 +39,11 @@ async function readLocal(setEmail, setProfile) {
   try {
     let email = await AsyncStorage.getItem("@email");
     let profile = await AsyncStorage.getItem("@profile");
-
     if (email == null) setEmail(false);
     else setEmail(email);
     if (profile == null) setProfile(false);
     else setProfile(profile);
-  } catch {
+  } catch (e) {
     alert("Could not open app ;(");
   }
 }

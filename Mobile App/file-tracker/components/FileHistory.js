@@ -114,7 +114,7 @@ const FileHistory = (props) => {
           >
             <View style={{ width: "100%", alignItems: "center" }}>
               {files.length === 0 && (
-                <Subheading style={{ marginTop: "4%", paddingLeft: "2%" }}>
+                <Subheading style={{ marginTop: "50%", paddingLeft: "2%" }}>
                   No files to show!
                 </Subheading>
               )}

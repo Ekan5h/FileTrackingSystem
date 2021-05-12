@@ -131,6 +131,7 @@ export default function LoginPage({ navigation }) {
         await AsyncStorage.setItem("@email", email);
         await AsyncStorage.setItem("@name", match.name);
         await AsyncStorage.setItem("@offices", JSON.stringify(offices));
+        await AsyncStorage.setItem("recentSearches", JSON.stringify([]));
         if (offices.length) {
           await AsyncStorage.setItem("@office", offices[0].office);
         } else {
@@ -206,7 +207,7 @@ export default function LoginPage({ navigation }) {
             style={{
               height: 0.4 * windowHeight,
               width: 0.2 * windowHeight,
-              marginBottom: 0.08 * windowHeight
+              marginBottom: 0.08 * windowHeight,
             }}
             source={require("../assets/main_logo.png")}
           />

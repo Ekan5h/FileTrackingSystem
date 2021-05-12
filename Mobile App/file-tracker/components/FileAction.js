@@ -17,6 +17,7 @@ import {
   StatusBar,
   Modal,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Search from "./Search";
 import config from "../config";
 
@@ -253,8 +254,23 @@ const FileAction = (props) => {
                   }}
                   mode="contained"
                   color="black"
-                  onPress={() => {
+                  onPress={async () => {
                     if (validateForm()) {
+                      try {
+                        let recents = await AsyncStorage.getItem(
+                          "recentSearch"
+                        );
+                        recents = JSON.parse(recents);
+                        recents.push(props.office);
+                        recents = recents.slice(-10);
+                        AsyncStorage.setItem(
+                          "recentSearch",
+                          JSON.stringify(recents)
+                        );
+                      } catch (e) {
+                        alert("Local storage error!");
+                      }
+
                       let type = -1;
                       if (action == "Processed") type = 0;
                       if (action == "Processed & Forwarded") type = 1;

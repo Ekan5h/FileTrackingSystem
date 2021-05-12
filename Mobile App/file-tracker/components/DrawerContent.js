@@ -12,8 +12,9 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { BarCodeScanner } from "expo-barcode-scanner";
 import config from "../config";
-import WebLogin from './WebLogin';
+import WebLogin from "./WebLogin";
 
 const DrawerContent = (props) => {
   const [user, setUser] = useState({
@@ -127,9 +128,12 @@ const DrawerContent = (props) => {
             <DrawerItem
               icon={() => <Entypo name="laptop" size={20} color="black" />}
               label="Trackify Web"
-              onPress={() => {
+              onPress={async () => {
                 // props.navigation.navigate("WebLogin");
-                setLogin(true);
+                const {
+                  status,
+                } = await BarCodeScanner.requestPermissionsAsync();
+                setLogin(status === "granted");
               }}
             />
             {/* <DrawerItem
@@ -188,7 +192,7 @@ const DrawerContent = (props) => {
           }}
         />
       </Drawer.Section>
-      {login && <WebLogin closeModal={() => setLogin(false) } />}
+      {login && <WebLogin closeModal={() => setLogin(false)} />}
     </View>
   );
 };

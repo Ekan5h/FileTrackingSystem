@@ -5,15 +5,16 @@ import { BarCodeScanner } from "expo-barcode-scanner";
 import config from "../config";
 
 export default function WebLogin(props) {
-  const [hasPermission, setHasPermission] = useState(null);
+  // const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
+  // BarCodeScanner.requestPermissionsAsync();
 
-  useEffect(() => {
-    (async () => {
-      const { status } = await BarCodeScanner.requestPermissionsAsync();
-      setHasPermission(status === "granted");
-    })();
-  }, []);
+  // useEffect(() => {
+  //   (async () => {
+  //     const { status } = await BarCodeScanner.requestPermissionsAsync();
+  //     setHasPermission(status === "granted");
+  //   })();
+  // }, []);
 
   const handleBarCodeScanned = ({ type, data }) => {
     setScanned(true);
@@ -21,11 +22,10 @@ export default function WebLogin(props) {
     fetch(url, { method: "GET" })
       .then((response) => response.json())
       .then(({ success }) => {
-        if (success){
+        if (success) {
           alert("Logged in!");
           props.closeModal();
-        }
-        else alert("Error! Please try again.");
+        } else alert("Error! Please try again.");
       })
       .catch(() => alert("Error! Please try again."));
   };
@@ -52,7 +52,8 @@ export default function WebLogin(props) {
             justifyContent: "center",
             alignItems: "center",
             backgroundColor: "transparent",
-            // paddingTop: "5%",
+            paddingTop: "15%",
+            paddingHorizontal: "5%",
           }}
         >
           {/* <IconButton
@@ -67,41 +68,42 @@ export default function WebLogin(props) {
             onPress={props.navigation.openDrawer}
           /> */}
 
-          {!hasPermission && (
+          {/* {!hasPermission && (
             <Subheading style={{ color: "rgb(176, 1, 1)" }}>
               Camera permission not granted!
             </Subheading>
-          )}
-          {hasPermission && (
-            <>
-              <Subheading>Scan the QR code to login</Subheading>
-              <BarCodeScanner
-                barCodeTypes={[BarCodeScanner.Constants.BarCodeType.qr]}
-                onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+          )} */}
+          {/* {hasPermission && ( */}
+          <>
+            <Subheading>Scan the QR code to login</Subheading>
+            <BarCodeScanner
+              barCodeTypes={[BarCodeScanner.Constants.BarCodeType.qr]}
+              onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+              style={{
+                width: "100%",
+                height: "80%",
+                marginTop: "-10%",
+              }}
+            />
+            {scanned && (
+              <Button
+                icon="replay"
                 style={{
-                  width: "100%",
-                  height: "80%",
+                  width: "50%",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginTop: "4%",
+                  paddingVertical: "1%",
                 }}
-              />
-              {scanned && (
-                <Button
-                  icon="replay"
-                  style={{
-                    width: "50%",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginTop: "4%",
-                    paddingVertical: "1%",
-                  }}
-                  mode="contained"
-                  color="black"
-                  onPress={() => setScanned(false)}
-                >
-                  Scan again
-                </Button>
-              )}
-            </>
-          )}
+                mode="contained"
+                color="black"
+                onPress={() => setScanned(false)}
+              >
+                Scan again
+              </Button>
+            )}
+          </>
+          {/* )} */}
         </View>
       </ImageBackground>
     </Modal>

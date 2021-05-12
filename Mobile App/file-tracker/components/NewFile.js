@@ -17,6 +17,7 @@ import {
   Keyboard,
   StatusBar,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import config from "../config";
 
 const NewFile = (props) => {
@@ -45,7 +46,7 @@ const NewFile = (props) => {
   const closeTypeMenu = () => setTypeMenuVisible(false);
   const validateForm = () => {
     var newErrors = [undefined, undefined, undefined];
-    ret = true;
+    let ret = true;
     if (name === "") {
       newErrors[0] = "Please enter a file name";
       ret = false;
@@ -280,8 +281,22 @@ const NewFile = (props) => {
                 }}
                 mode="contained"
                 color="black"
-                onPress={() => {
+                onPress={async () => {
                   if (validateForm()) {
+                    try {
+                      let recents = await AsyncStorage.getItem("recentSearch");
+                      recents = JSON.parse(recents);
+                      recents.push(submittedTo);
+                      if (transferTo !== "") recents.push(transferTo);
+                      recents = recents.slice(-10);
+                      AsyncStorage.setItem(
+                        "recentSearch",
+                        JSON.stringify(recents)
+                      );
+                    } catch (e) {
+                      alert("Local storage error!");
+                    }
+                    // return;
                     formData = new FormData();
                     formData.append("name", name);
                     formData.append("type", fileType);

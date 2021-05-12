@@ -22,8 +22,9 @@ import {
   Dimensions,
   Modal,
   Pressable,
-  ScrollView
+  ScrollView,
 } from "react-native";
+import { Camera } from "expo-camera";
 // import { ScrollView as GestureHandlerScrollView } from "react-native-gesture-handler";
 import { AntDesign } from "@expo/vector-icons";
 import DatePicker from "react-native-datepicker";
@@ -371,8 +372,11 @@ const Landing = ({ navigation, success }) => {
                 }}
                 color="white"
                 onPress={() => {
-                  setPostScanning("scan");
-                  setScanning(true);
+                  const { status } = Camera.requestPermissionsAsync();
+                  if (status === "granted") {
+                    setPostScanning("scan");
+                    setScanning(true);
+                  }
                 }}
               >
                 <AntDesign name="scan1" size={14} color="white" />
