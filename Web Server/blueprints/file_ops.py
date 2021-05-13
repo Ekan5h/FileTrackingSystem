@@ -181,28 +181,25 @@ def Confirmed():
 @login_required
 def showProcessed():
     try:
-        return_object = {}
-        offices = current_user.offices.split('$')
-        for office in offices:
-            fs = FileLogs.query.filter_by(location=office).all()
-            fileids = list(set([x.file_id for x in fs]))
-            print(fileids)
-            files = [Files.query.filter_by(id=x).first() for x in fileids]
-            ret = [{'name':x.name, 
-                    'owner':Users.query.filter_by(login_email=x.created_by).first().name,
-                    'dept':Users.query.filter_by(login_email=x.created_by).first().department,
-                    'trackingID':crypt.encrypt(x.id),
-                    'type':x.category,
-                    'time':x.created_on,
-                    'tags':[y.tag for y in Tags.query.filter(Tags.file_id==x.id, Tags.email==current_user.login_email).all()],
-                    'handledBy':[y.location for y in FileLogs.query.filter_by(file_id=x.id).all()],
-                    'status':str(str('Currently with ' + x.location) if x.confirmed else str('Sent to ' + x.location)) if x.location else 'File Processed'
-                    } for x in files]
-            ret = sorted(ret, key=lambda x: x['time'], reverse=True)
-            print(ret)
-            return_object[office] = ret
+        office = request.args['office']
+        fs = FileLogs.query.filter_by(location=office).all()
+        fileids = list(set([x.file_id for x in fs]))
+        print(fileids)
+        files = [Files.query.filter_by(id=x).first() for x in fileids]
+        ret = [{'name':x.name, 
+                'owner':Users.query.filter_by(login_email=x.created_by).first().name,
+                'dept':Users.query.filter_by(login_email=x.created_by).first().department,
+                'trackingID':crypt.encrypt(x.id),
+                'type':x.category,
+                'time':x.created_on,
+                'tags':[y.tag for y in Tags.query.filter(Tags.file_id==x.id, Tags.email==current_user.login_email).all()],
+                'handledBy':[y.location for y in FileLogs.query.filter_by(file_id=x.id).all()],
+                'status':str(str('Currently with ' + x.location) if x.confirmed else str('Sent to ' + x.location)) if x.location else 'File Processed'
+                } for x in files]
+        ret = sorted(ret, key=lambda x: x['time'], reverse=True)
+        print(ret)
 
-        return jsonify(return_object)
+        return jsonify(ret)
         
     except Exception as e:
         print(e)

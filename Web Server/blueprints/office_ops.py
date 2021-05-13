@@ -80,7 +80,7 @@ def getOffices():
         offices = OfficeEmails.query.all()
         ret = []
         for office in offices:
-            ret.append({'name':office.name})
+            ret.append({'name':office.name, 'category':office.category})
         return jsonify(ret)
     except Exception as e:
         return jsonify({'error':True, 'msg':str(e) + session['name']})

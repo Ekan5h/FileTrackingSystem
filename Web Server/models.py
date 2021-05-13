@@ -35,14 +35,16 @@ class OfficeEmails(db.Model):
     email = db.Column(db.String, primary_key=True)
     name = db.Column(db.String, unique=True)
     institution = db.Column(db.String)
+    category = db.Column(db.string)
 
-    def __init__(self, email, name, institution):
+    def __init__(self, email, name, institution, category):
         self.email = email
         self.name = name
         self.institution = institution
+        self.category = category
 
     def __repr__(self):
-        return self.name + ', ' + self.institution
+        return self.name + ', ' + self.institution + ', ' + self.category
 
 class Users(UserMixin, db.Model):
     login_email = db.Column(db.String, primary_key=True)
