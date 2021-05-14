@@ -209,6 +209,7 @@ const Filter = (props) => {
                   />
                 </Pressable>
                 <Search
+                  key="fileTypes"
                   searchFor="fileTypes"
                   showModal={fileMenuVisible}
                   closeModal={closeFileMenu}
@@ -240,6 +241,7 @@ const Filter = (props) => {
                   />
                 </Pressable>
                 <Search
+                  key="offices"
                   searchFor="offices"
                   showModal={officeMenuVisible}
                   closeModal={closeOfficeMenu}
@@ -271,6 +273,7 @@ const Filter = (props) => {
                   />
                 </Pressable>
                 <Search
+                  key="tags"
                   searchFor="tags"
                   showModal={tagsMenuVisible}
                   closeModal={closeTagsMenu}

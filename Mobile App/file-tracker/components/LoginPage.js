@@ -131,7 +131,7 @@ export default function LoginPage({ navigation }) {
         await AsyncStorage.setItem("@email", email);
         await AsyncStorage.setItem("@name", match.name);
         await AsyncStorage.setItem("@offices", JSON.stringify(offices));
-        await AsyncStorage.setItem("recentSearches", JSON.stringify([]));
+        await AsyncStorage.setItem("recentSearch", JSON.stringify([]));
         if (offices.length) {
           await AsyncStorage.setItem("@office", offices[0].office);
         } else {

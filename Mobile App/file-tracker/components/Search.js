@@ -73,7 +73,7 @@ const Search = (props) => {
   const [showAddNew, setShowAddNew] = useState(false);
   const [newTag, setNewTag] = useState("");
   const [tab, setTab] = useState("Recent");
-  // const [autoSwitch, setAutoSwitch] = useState(true);
+  const [autoSwitch, setAutoSwitch] = useState(true);
 
   async function getRecents() {
     let recents = await AsyncStorage.getItem("recentSearch");
@@ -82,10 +82,10 @@ const Search = (props) => {
   }
 
   useEffect(() => {
-    console.log(props.searchFor);
+    // console.log(props.searchFor);
     if (props.searchFor == "offices" && allData.length == 0) {
       // return;
-      setAllData(["Loading offices..."]);
+      setAllData([]);
       // fetch(config.ip + "/getOffices", { method: "GET" }).then(async (ret) => {
       //   ret = await ret.json();
       //   setAllData(ret.map((x) => x.name));
@@ -140,12 +140,18 @@ const Search = (props) => {
 
   useEffect(() => {
     if (props.searchFor !== "offices") return;
-    if (tab == "Recent") {
+    if (!autoSwitch && tab === "Recent") {
       async function setRecents() {
         let recents = await getRecents();
+        // console.log(recents);
+        recents.reverse();
         setAllData(recents);
       }
       setRecents();
+    } else if (autoSwitch && tab === "Recent") {
+      setAutoSwitch(false);
+      setTab("Offices");
+      setAllData(db["offices"]["options"]);
     } else {
       setAllData(db["offices"]["options"]);
       // API call to get a class of offices (tab = Offices/Dept/Faculty)
@@ -248,6 +254,7 @@ const Search = (props) => {
                     {["Recent", "Offices", "Dept", "Faculty"].map((option) => {
                       return (
                         <Button
+                          key={option}
                           uppercase={false}
                           compact
                           mode="outlined"
@@ -431,90 +438,100 @@ const Search = (props) => {
                     </Subheading>
                   </View>
                 )}
-                <ScrollView
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                  }}
-                  contentContainerStyle={{
-                    alignItems: "center",
-                    paddingBottom: "15%",
-                  }}
-                  keyboardShouldPersistTaps={"handled"}
-                >
-                  <View
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                    }}
-                  >
-                    {currData.map((option) => {
-                      return (
-                        <List.Item
-                          key={props.files ? option.trackingID : option}
-                          title={
-                            props.files
-                              ? option.name + ", " + option.trackingID
-                              : option
-                          }
-                          onPress={() => {
-                            if (!props.multiple) {
-                              props.setOption(option);
-                              props.closeModal();
-                            }
-                            var idx = checked.indexOf(option);
-                            if (idx == -1) {
-                              var newChecked = checked.concat([option]);
-                              setChecked(newChecked);
-                            } else {
-                              var newChecked = checked.filter(
-                                (c) => c !== option
-                              );
-                              setChecked(newChecked);
-                            }
-                          }}
-                          style={{
-                            width: "85%",
-                            marginLeft: "1%",
-                            borderBottomWidth: 0.2,
-                            borderBottomColor: "black",
-                            paddingVertical: "2%",
-                            paddingLeft: "0%",
-                            // justifyContent: "center",
-                          }}
-                          right={() =>
-                            checked.indexOf(option) !== -1 &&
-                            props.multiple && (
-                              <Feather
-                                name="check"
-                                size={18}
-                                color="black"
-                                style={{ marginTop: "4%", marginRight: "1%" }}
-                              />
-                            )
-                          }
-                        />
-                      );
-                    })}
-                  </View>
-                </ScrollView>
-                <View
-                  style={{
-                    alignItems: "flex-end",
-                    marginRight: "20.5%",
-                    marginTop: "4%",
-                    marginBottom: "10%",
-                  }}
-                >
-                  <Button
-                    color="black"
-                    labelStyle={{ fontSize: 14 }}
-                    compact={true}
-                    onPress={() => setChecked([])}
-                  >
-                    Clear all
-                  </Button>
-                </View>
+                {!(props.searchFor === "offices" && allData.length === 0) && (
+                  <>
+                    <ScrollView
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                      }}
+                      contentContainerStyle={{
+                        alignItems: "center",
+                        paddingBottom: "15%",
+                      }}
+                      keyboardShouldPersistTaps={"handled"}
+                    >
+                      <View
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                        }}
+                      >
+                        {currData.map((option) => {
+                          return (
+                            <List.Item
+                              key={props.files ? option.trackingID : option}
+                              title={
+                                props.files
+                                  ? option.name + ", " + option.trackingID
+                                  : option
+                              }
+                              onPress={() => {
+                                if (!props.multiple) {
+                                  props.setOption(option);
+                                  props.closeModal();
+                                }
+                                var idx = checked.indexOf(option);
+                                if (idx == -1) {
+                                  var newChecked = checked.concat([option]);
+                                  setChecked(newChecked);
+                                } else {
+                                  var newChecked = checked.filter(
+                                    (c) => c !== option
+                                  );
+                                  setChecked(newChecked);
+                                }
+                              }}
+                              style={{
+                                width: "85%",
+                                marginLeft: "1%",
+                                borderBottomWidth: 0.2,
+                                borderBottomColor: "black",
+                                paddingVertical: "2%",
+                                paddingLeft: "0%",
+                                // justifyContent: "center",
+                              }}
+                              right={() =>
+                                checked.indexOf(option) !== -1 &&
+                                props.multiple && (
+                                  <Feather
+                                    name="check"
+                                    size={18}
+                                    color="black"
+                                    style={{
+                                      marginTop: "4%",
+                                      marginRight: "1%",
+                                    }}
+                                  />
+                                )
+                              }
+                            />
+                          );
+                        })}
+                      </View>
+                    </ScrollView>
+
+                    <View
+                      style={{
+                        alignItems: "flex-end",
+                        marginRight: "20.5%",
+                        marginTop: "4%",
+                        marginBottom: "10%",
+                      }}
+                    >
+                      {props.multiple && (
+                        <Button
+                          color="black"
+                          labelStyle={{ fontSize: 14 }}
+                          compact={true}
+                          onPress={() => setChecked([])}
+                        >
+                          Clear all
+                        </Button>
+                      )}
+                    </View>
+                  </>
+                )}
               </View>
             </View>
           </View>
