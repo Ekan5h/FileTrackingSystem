@@ -371,8 +371,8 @@ const Landing = ({ navigation, success }) => {
                   marginTop: "-2%",
                 }}
                 color="white"
-                onPress={() => {
-                  const { status } = Camera.requestPermissionsAsync();
+                onPress={async () => {
+                  const { status } = await Camera.requestPermissionsAsync();
                   if (status === "granted") {
                     setPostScanning("scan");
                     setScanning(true);
@@ -411,9 +411,12 @@ const Landing = ({ navigation, success }) => {
                 width: "65%",
               }}
               color="white"
-              onPress={() => {
-                setPostScanning("track");
-                setScanning(true);
+              onPress={async () => {
+                const { status } = await Camera.requestPermissionsAsync();
+                if (status === "granted") {
+                  setPostScanning("track");
+                  setScanning(true);
+                }
               }}
             >
               <AntDesign name="search1" size={14} color="white" />

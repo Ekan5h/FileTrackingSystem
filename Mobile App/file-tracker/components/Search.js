@@ -189,20 +189,20 @@ const Search = (props) => {
           accessible={false}
         >
           <View style={{ backgroundColor: "transparent", height: "100%" }}>
-            <IconButton
-              icon="chevron-down"
+            {/* <IconButton
+              icon="arrow-left"
               color="black"
-              size={30}
+              size={28}
               style={{
                 position: "absolute",
-                top: 1 * StatusBar.currentHeight,
-                left: 4,
+                top: 0.8 * StatusBar.currentHeight,
+                left: 5,
               }}
               onPress={() => {
                 if (props.multiple) props.setOption(checked);
                 props.closeModal();
               }}
-            />
+            /> */}
 
             <View
               style={{
@@ -210,37 +210,53 @@ const Search = (props) => {
                 // width: "100%",
                 backgroundColor: "transparent",
                 justifyContent: "flex-start",
-                paddingLeft: "10%",
-                marginTop: 3.2 * StatusBar.currentHeight,
+                paddingLeft: "6%",
+                marginTop: "10%",
+                // marginTop: 2 * StatusBar.currentHeight,
               }}
             >
               <View style={{ width: "100%", height: "100%" }}>
-                <TextInput
-                  placeholder={placeholder}
-                  value={query}
-                  maxLength={20}
-                  onChangeText={(input) => setQuery(input)}
-                  mode="outlined"
-                  selectionColor="rgba(0, 0, 0, 0.2)"
-                  style={{
-                    width: "90%",
-                    marginBottom: "5%",
-                  }}
-                  theme={{
-                    colors: {
-                      primary: "black",
-                      underlineColor: "transparent",
-                    },
-                  }}
-                  left={
-                    <TextInput.Icon
-                      name={() => (
-                        <AntDesign name="search1" size={19} color="black" />
-                      )}
-                      onPress={() => {}}
-                    />
-                  }
-                />
+                <View style={{ flexDirection: "row" }}>
+                  {/* <IconButton
+                    icon="arrow-left"
+                    color="black"
+                    size={30}
+                    style={{
+                      marginLeft: "-5%",
+                    }}
+                    onPress={() => {
+                      if (props.multiple) props.setOption(checked);
+                      props.closeModal();
+                    }}
+                  /> */}
+                  <TextInput
+                    placeholder={placeholder}
+                    value={query}
+                    maxLength={20}
+                    onChangeText={(input) => setQuery(input)}
+                    mode="outlined"
+                    selectionColor="rgba(0, 0, 0, 0.2)"
+                    style={{
+                      width: "86%",
+                      marginBottom: "5%",
+                      marginLeft: "2%",
+                    }}
+                    theme={{
+                      colors: {
+                        primary: "black",
+                        underlineColor: "transparent",
+                      },
+                    }}
+                    left={
+                      <TextInput.Icon
+                        name={() => (
+                          <AntDesign name="search1" size={19} color="black" />
+                        )}
+                        onPress={() => {}}
+                      />
+                    }
+                  />
+                </View>
                 {props.searchFor === "offices" && (
                   <View
                     style={{

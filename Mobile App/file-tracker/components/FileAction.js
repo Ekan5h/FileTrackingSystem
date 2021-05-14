@@ -112,7 +112,7 @@ const FileAction = (props) => {
               >
                 {!isKeyboardVisible && (
                   <IconButton
-                    icon="chevron-down"
+                    icon="arrow-left"
                     color="black"
                     size={30}
                     style={{
