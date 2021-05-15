@@ -34,7 +34,7 @@ const FileHistory = (props) => {
     let fils = {};
     for (let i = 0; i < offices.length; i++) {
       let ret = await fetch(
-        config.ip + "/showProcessed?office=" + offices[i].office,
+        config.ip + "/showProcessed?office=" + offices[i],
         { method: "GET" }
       );
       ret = await ret.json();
@@ -49,10 +49,10 @@ const FileHistory = (props) => {
   };
 
   if (offices.length == 0) {
-    AsyncStorage.getItem("@offices")
+    AsyncStorage.getItem("@office")
       .then((ret) => {
-        setOffices(JSON.parse(ret));
-        reload(JSON.parse(ret));
+        setOffices([ret]);
+        reload([ret]);
       })
       .catch(() => alert("Something went wrong!"));
   }
