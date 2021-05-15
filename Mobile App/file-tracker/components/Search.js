@@ -24,7 +24,7 @@ import config from "../config";
 
 var db = {
   offices: {
-    options: ["office0", "office1"],
+    options: [],
     placeholder: "Search for an office",
   },
   users: {
@@ -73,7 +73,8 @@ const Search = (props) => {
   const [showAddNew, setShowAddNew] = useState(false);
   const [newTag, setNewTag] = useState("");
   const [tab, setTab] = useState("Recent");
-  const [autoSwitch, setAutoSwitch] = useState(true);
+  // const [autoSwitch, setAutoSwitch] = useState(true);
+  const [allOffices, setAllOffices] = useState(null);
 
   async function getRecents() {
     let recents = await AsyncStorage.getItem("recentSearch");
@@ -81,35 +82,57 @@ const Search = (props) => {
     return recents;
   }
 
-  useEffect(() => {
-    // console.log(props.searchFor);
-    if (props.searchFor == "offices" && allData.length == 0) {
-      // return;
-      setAllData([]);
-      // fetch(config.ip + "/getOffices", { method: "GET" }).then(async (ret) => {
-      //   ret = await ret.json();
-      //   setAllData(ret.map((x) => x.name));
-      // });
-    } else if (props.searchFor == "users" && allData.length == 0) {
-      fetch(config.ip + "/getUsers", { method: "GET" }).then(async (ret) => {
+  async function fetchAndSetOffices(choice) {
+    let entireList = allOffices;
+    if (entireList == null) {
+      // console.log("call");
+      fetch(config.ip + "/getOffices", { method: "GET" }).then(async (ret) => {
         ret = await ret.json();
-        setAllData(ret.map((x) => x.name + ", " + x.email));
+        entireList = ret;
+        setAllOffices(ret);
       });
-    } else if (props.searchFor == "tags" && !dataset) {
-      setDataset(true);
-      fetch(config.ip + "/showTag", { method: "GET" }).then(async (ret) => {
-        ret = await ret.json();
-        setAllData(ret.tags);
-      });
-    } else if (props.searchFor == "depts" && allData.length == 0) {
-      fetch(config.ip + "/getDepartments", { method: "GET" }).then(
-        async (ret) => {
-          ret = await ret.json();
-          setAllData(ret.map((x) => x.name));
-        }
-      );
+    } else {
+      // console.log("notcall");
     }
-  }, [props.searchFor]);
+
+    if (!choice || choice === "Recent") return;
+
+    var filtered = entireList.filter((x) => {
+      if (choice === "Faculty" && x.category === "Faculty") return x;
+      else if (choice === "Dept" && x.category === "Department") return x;
+      else if (choice === "Offices" && x.category === "Office") return x;
+    });
+
+    setAllData(filtered.map((x) => x.name));
+  }
+
+  if (props.searchFor == "offices" && allData.length == 0) {
+    // return;
+    // console.log("in");
+    fetchAndSetOffices(null);
+    // fetch(config.ip + "/getOffices", { method: "GET" }).then(async (ret) => {
+    //   ret = await ret.json();
+    //   setAllData(ret.map((x) => x.name));
+    // });
+  } else if (props.searchFor == "users" && allData.length == 0) {
+    fetch(config.ip + "/getUsers", { method: "GET" }).then(async (ret) => {
+      ret = await ret.json();
+      setAllData(ret.map((x) => x.name + ", " + x.email));
+    });
+  } else if (props.searchFor == "tags" && !dataset) {
+    setDataset(true);
+    fetch(config.ip + "/showTag", { method: "GET" }).then(async (ret) => {
+      ret = await ret.json();
+      setAllData(ret.tags);
+    });
+  } else if (props.searchFor == "depts" && allData.length == 0) {
+    fetch(config.ip + "/getDepartments", { method: "GET" }).then(
+      async (ret) => {
+        ret = await ret.json();
+        setAllData(ret.map((x) => x.name));
+      }
+    );
+  }
 
   useEffect(() => {
     if (props.searchFor === "files") {
@@ -140,22 +163,26 @@ const Search = (props) => {
 
   useEffect(() => {
     if (props.searchFor !== "offices") return;
-    if (!autoSwitch && tab === "Recent") {
-      async function setRecents() {
-        let recents = await getRecents();
-        // console.log(recents);
-        recents.reverse();
-        setAllData(recents);
+
+    try {
+      if (tab === "Recent") {
+        async function setRecents() {
+          let recents = await getRecents();
+          // console.log(recents);
+          recents.reverse();
+          setAllData(recents);
+        }
+        setRecents();
+        // } else if (autoSwitch && tab === "Recent") {
+        //   setAutoSwitch(false);
+        //   setTab("Offices");
+        //   fetchAndSetOffices("Offices");
+      } else {
+        fetchAndSetOffices(tab);
       }
-      setRecents();
-    } else if (autoSwitch && tab === "Recent") {
-      setAutoSwitch(false);
-      setTab("Offices");
-      setAllData(db["offices"]["options"]);
-    } else {
-      setAllData(db["offices"]["options"]);
-      // API call to get a class of offices (tab = Offices/Dept/Faculty)
-      return;
+    } catch (e) {
+      console.log(e);
+      alert("Network error!");
     }
   }, [tab, props.searchFor]);
 
@@ -444,8 +471,8 @@ const Search = (props) => {
                   >
                     <Subheading
                       style={{
-                        padding: "1%",
-                        paddingRight: "15%",
+                        padding: "10%",
+                        paddingRight: "22%",
                         textAlign: "center",
                       }}
                     >
