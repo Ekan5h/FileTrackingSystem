@@ -48,3 +48,8 @@ def amiloggedin():
 def logout():
     logout_user()
     return 'Successful'
+
+@user_ops.route('/getMyOffices' , methods=['GET'])
+@login_required
+def getMyOffices():
+    return jsonify({'offices': current_user.offices})
