@@ -14,7 +14,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import * as SplashScreen from "expo-splash-screen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import config from 'config';
+import config from './config';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -40,28 +40,32 @@ async function readLocal(setEmail, setProfile) {
   try {
     let email = await AsyncStorage.getItem("@email");
     let profile = await AsyncStorage.getItem("@profile");
-    let ret = await fetch(
-      config.ip + "/getMyOffices",
-      { method: "GET" }
-    );
-    ret = await ret.json();
+    try{
+      let ret = await fetch(
+        config.ip + "/getMyOffices",
+        { method: "GET" }
+      );
+      ret = await ret.json();
 
-    let offices = [];
-    if (ret.offices.length)
-      offices = match.offices.split("$").map((x) => {
-        return { office: x };
-      });
+      let offices = [];
+      if (ret.offices.length)
+        offices = ret.offices.split("$").map((x) => {
+          return { office: x };
+        });
 
-    await AsyncStorage.setItem("@offices", JSON.stringify(offices));
-    
-    let office = await AsyncStorage.getItem("@office");
+      await AsyncStorage.setItem("@offices", JSON.stringify(offices));
+      
+      let office = await AsyncStorage.getItem("@office");
 
-    if(!offices.includes(office)){
-      if (offices.length) {
-        await AsyncStorage.setItem("@office", offices[0].office);
-      } else {
-        await AsyncStorage.setItem("@office", "");
+      if(!offices.includes(office)){
+        if (offices.length) {
+          await AsyncStorage.setItem("@office", offices[0].office);
+        } else {
+          await AsyncStorage.setItem("@office", "");
+        }
       }
+    }catch(e){
+      console.log(e);
     }
 
     if (email == null) setEmail(false);

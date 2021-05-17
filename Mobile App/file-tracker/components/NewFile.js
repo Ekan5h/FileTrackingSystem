@@ -287,13 +287,14 @@ const NewFile = (props) => {
                       let recents = await AsyncStorage.getItem("recentSearch");
                       recents = JSON.parse(recents);
                       recents.push(submittedTo);
-                      if (transferTo !== "") recents.push(transferTo);
+                      // if (transferTo !== "") recents.push(transferTo);
                       recents = recents.slice(-10);
                       AsyncStorage.setItem(
                         "recentSearch",
                         JSON.stringify(recents)
                       );
                     } catch (e) {
+                      console.log(e);
                       alert("Local storage error!");
                     }
                     // return;
