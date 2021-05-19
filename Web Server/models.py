@@ -35,7 +35,7 @@ class OfficeEmails(db.Model):
     email = db.Column(db.String, primary_key=True)
     name = db.Column(db.String, unique=True)
     institution = db.Column(db.String)
-    category = db.Column(db.string)
+    category = db.Column(db.String)
 
     def __init__(self, email, name, institution, category):
         self.email = email

@@ -22,7 +22,8 @@ departments = [
 with app.app_context():
     OfficeEmails.query.delete()
 
-    for name, _, email, category in offices:
+    for office in offices:
+        name = office[0]; email = office[2]; category = office[3]
         obj = OfficeEmails(email, name, 'IITRPR', category)
         db.session.add(obj)
         print("Office: {} added!".format(name))
