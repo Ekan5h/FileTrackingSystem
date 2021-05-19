@@ -261,7 +261,8 @@ const FileAction = (props) => {
                           "recentSearch"
                         );
                         recents = JSON.parse(recents);
-                        recents.push(props.office);
+                        if (!recents.includes(props.office))
+                          recents.push(props.office);
                         recents = recents.slice(-10);
                         AsyncStorage.setItem(
                           "recentSearch",

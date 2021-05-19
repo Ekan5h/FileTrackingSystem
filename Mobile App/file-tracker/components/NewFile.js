@@ -286,7 +286,8 @@ const NewFile = (props) => {
                     try {
                       let recents = await AsyncStorage.getItem("recentSearch");
                       recents = JSON.parse(recents);
-                      recents.push(submittedTo);
+                      if (!recents.includes(submittedTo))
+                        recents.push(submittedTo);
                       // if (transferTo !== "") recents.push(transferTo);
                       recents = recents.slice(-10);
                       AsyncStorage.setItem(

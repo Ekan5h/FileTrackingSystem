@@ -91,8 +91,6 @@ const Search = (props) => {
         entireList = ret;
         setAllOffices(ret);
       });
-    } else {
-      // console.log("notcall");
     }
 
     if (!choice || choice === "Recent") return;
