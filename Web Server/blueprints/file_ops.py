@@ -88,7 +88,7 @@ def showTransfers():
     try:
         transfers = TransferRequest.query.filter_by(to_id=current_user.login_email).all()
         ret = [{'t_id':x.id,
-                'from':Users.query.filter_by(login_email=x.from_id).first().name + ' ('+x.from_id,+')'
+                'from':Users.query.filter_by(login_email=x.from_id).first().name + ' (' + x.from_id + ')',
                 'name':x.name, 
                 'trackingID':crypt.encrypt(x.file_id),
                 } for x in transfers]
