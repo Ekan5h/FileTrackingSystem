@@ -121,14 +121,6 @@
                 color:gray;
                 {% endif %}
             }
-            .iitrprlogo{
-                display: block;
-                position: fixed;
-                opacity: 13%;
-                left: 5%;
-                top: 10%;
-                width: 16%;
-            }
             {% if offices|length != 0 %}
             .navbtn:hover{
                 background-color: rgba(255,255,255,0.2);
@@ -380,7 +372,6 @@
         </div>
         <div class="left">
             <center>
-                <img class="iitrprlogo" src="/static/iitrpr_logo.png">
                 <select onchange="loadData()">
                     {% if offices|length == 0 %}
                     <option>Personal Account</option>
