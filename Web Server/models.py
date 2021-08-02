@@ -33,7 +33,7 @@ class Institutions(db.Model):
 
 class OfficeEmails(db.Model):
     email = db.Column(db.String, primary_key=True)
-    name = db.Column(db.String, unique=True)
+    name = db.Column(db.String)
     institution = db.Column(db.String)
     category = db.Column(db.String)
 

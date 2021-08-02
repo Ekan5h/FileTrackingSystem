@@ -211,6 +211,7 @@ def showProcessed():
 def updateFile():
     try:
         tag, typ, office, next_location, remarks = [request.form[x] for x in ['tag','type', 'office','next','remarks']]
+        remarks = current_user.name + ': ' + remarks
         typ = int(typ)
         if typ == 0:
             pass

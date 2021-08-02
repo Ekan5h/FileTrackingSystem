@@ -11,7 +11,7 @@ auth = Blueprint('auth', __name__, template_folder='templates')
 def generateOTP():
 	try:
 		print(request.form)
-		addr = request.form['email']
+		addr = request.form['email'].lower()
 		otp = str(int(random()*1e8)).rjust(8,'0')
 		email.sendMail("Login OTP", addr, 'Hi there\nYour OTP for login is ' + otp)
 		otp_obj = OTP.query.filter( OTP.email == addr ).first()
@@ -31,7 +31,7 @@ def generateOTP():
 @auth.route('/verifyOTP' , methods=['POST'])
 def verifyOTP():
 	try:
-		addr = request.form['email']
+		addr = request.form['email'].lower()
 		otp = request.form['otp']
 		real_otp_obj = OTP.query.filter(OTP.email == addr, OTP.created_on > (datetime.now()-timedelta(minutes=10))).first()
 		if not real_otp_obj:

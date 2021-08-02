@@ -50,14 +50,14 @@ def generateqr():
     qr = QRCode()
     db.session.add(qr)
     db.session.commit()
-    return jsonify({'code':crypt.encrypt(qr.id)})
+    return jsonify({'code':qr.id})
 
 @webapp.route('/webapp/login/scan' , methods=['GET'])
 @login_required
 def webappLoginScan():
     try:
         code = request.args['qr']
-        id = crypt.decrypt(code)
+        id = code
         obj = QRCode.query.filter_by(id=id).first()
         obj.authenticated_user = current_user.login_email
         db.session.commit()
@@ -69,7 +69,7 @@ def webappLoginScan():
 @webapp.route('/webapp/login/read' , methods=['GET'])
 def webappLoginRead():
     code = request.args['qr']
-    id = crypt.decrypt(code)
+    id = code
     obj = QRCode.query.filter_by(id=id).first()
     if(obj.authenticated_user):
         usr = Users.query.filter_by(login_email=obj.authenticated_user).first()

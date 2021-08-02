@@ -79,7 +79,11 @@ def getOffices():
     try:
         offices = OfficeEmails.query.all()
         ret = []
+        seen = {}
         for office in offices:
+            if office.name in seen:
+                continue
+            seen[office.name] = 1
             ret.append({'name':office.name, 'category':office.category})
         return jsonify(ret)
     except Exception as e:
