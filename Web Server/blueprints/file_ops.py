@@ -275,7 +275,7 @@ def fileHistory():
         if (f.location and not f.confirmed):
             ret['history'].append({'location':f.location, 'date':datetime.now(), 'action':'Sent to ' + f.location, 'remarks':''})
         elif (f.location):
-            ret['history'].append({'location':f.location, 'date':datetime.now(), 'action':'Received by ' + f.location, 'remarks':''})
+            ret['history'].append({'location':f.location, 'date':datetime.now(), 'action':'Currently at ' + f.location, 'remarks':''})
         
         ret['history'] = sorted(ret['history'], key=lambda x: x['date'], reverse=True)
         return jsonify(ret)
