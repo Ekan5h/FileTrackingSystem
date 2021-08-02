@@ -214,7 +214,13 @@ def updateFile():
         remarks = current_user.name + ': ' + remarks
         typ = int(typ)
         if typ == 0:
-            pass
+            id = crypt.decrypt(tag)
+            f = Files.query.filter_by(id=id).first()
+            fl = FileLogs(id, office, 'Processed internally', remarks)
+            f.location = office
+            f.confirmed = True
+            db.session.add(fl)
+            db.session.commit()
         elif typ in [1, 3, 4]:
             id = crypt.decrypt(tag)
             f = Files.query.filter_by(id=id).first()
